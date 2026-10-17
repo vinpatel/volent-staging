@@ -16,7 +16,7 @@
 <meta property="og:url" content="https://vinpatel.github.io/volent/benchmarks/">
 <meta name="twitter:card" content="summary_large_image">
 <style>
-@font-face{font-family:"Display";src:url("../assets/fonts/display.woff2") format("woff2");font-weight:500 700;font-display:swap}
+@font-face{font-family:"Display";src:url("../assets/fonts/display.woff2") format("woff2");font-weight:400 700;font-display:swap}
 @property --te{syntax:"<number>";inherits:true;initial-value:7}
 @property --tr{syntax:"<number>";inherits:true;initial-value:10}
 @property --tb{syntax:"<number>";inherits:true;initial-value:3.49}
@@ -33,8 +33,8 @@
   --verify:#3DDCC4; --seal:#F2B138; --warn:#F2803B;
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
   --wrap:1200px; --gutter:24px;
-  --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
-  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --mono:"Mono",ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --display:"Display",var(--sans);
   /* timeline clocks: the final frame is the default, so no-JS and reduced motion show finished states */
   --te:7; --tr:10; --tb:3.49; --tc:6; --tt:6; --tk:8; --tm:10;
@@ -822,6 +822,9 @@ td.out{background:rgba(242,128,59,.14);box-shadow:inset 0 0 0 1.5px var(--warn);
         </tbody>
       </table>
     </div>
+    <h3 id="idle-100k">100,000 idle agents in one computer.</h3>
+    <p class="bench-label">Measured 2026-10-17 on the image built from tag phase-7, median of 3 runs, 4 GB / 2 vCPU guest, 2013 Intel i7-4770 under KVM.</p>
+    <p class="plain">Total runtime memory 446 MB for 100,000 idle agents, about 4.5 KB each, with the three runs within 0.15% of each other. In every run, 99 of 100 control requests were answered in under 0.1 ms. A 250,000-agent run did not finish within two hours, so we publish no number for it. Raw files: bench/archive/2026-10-17-acer-idle-100k.</p>
   </div>
 </section>
 
