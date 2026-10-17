@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; font-src 'self'; script-src 'sha256-ddku31XlVFbJEcqyZiKWwxZMBy2SEVj6DVdUotmis1E='; base-uri 'none'; form-action 'none'">
+<title>VOLENT use cases — AI agents in regulated work</title>
+<meta name="description" content="Payment operations, insurance claims, patient records, public-sector case work and platform teams: where a sealed room for AI agents pays off, and what your auditor sees.">
+<link rel="canonical" href="https://vinpatel.github.io/volent/use-cases/">
+<link rel="icon" href="../assets/favicon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VOLENT use cases — AI agents in regulated work">
+<meta property="og:description" content="Payment operations, insurance claims, patient records, public-sector case work and platform teams: where a sealed room for AI agents pays off, and what your auditor sees.">
+<meta property="og:image" content="https://vinpatel.github.io/volent/assets/logo-1024.png">
+<meta property="og:url" content="https://vinpatel.github.io/volent/use-cases/">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+@font-face{font-family:"Display";src:url("../assets/fonts/display.woff2") format("woff2");font-weight:500 700;font-display:swap}
+@property --te{syntax:"<number>";inherits:true;initial-value:7}
+@property --tr{syntax:"<number>";inherits:true;initial-value:10}
+@property --tb{syntax:"<number>";inherits:true;initial-value:3.49}
+@property --tc{syntax:"<number>";inherits:true;initial-value:6}
+@property --tt{syntax:"<number>";inherits:true;initial-value:6}
+@property --tk{syntax:"<number>";inherits:true;initial-value:8}
+@property --tm{syntax:"<number>";inherits:true;initial-value:10}
+:root{
+  --ink:#0B0E17; --ink-2:#111626; --ink-3:#161D31;
+  --line:#232C44; --line-2:#344060;
+  --text:#EEF2FA; --muted:#B4BED3; --dim:#8F9CB8;
+  --paper:#F3EEE2; --paper-ink:#14171F; --paper-muted:#3E4250; --paper-dim:#5A5E6B; --paper-line:#C9C0AA;
+  --paper-ok:#065348; --paper-bad:#B02E14; --paper-seal:#7A5200;
+  --verify:#3DDCC4; --seal:#F2B138; --warn:#F2803B;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --wrap:1200px; --gutter:24px;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --display:"Display",var(--sans);
+  /* timeline clocks: the final frame is the default, so no-JS and reduced motion show finished states */
+  --te:7; --tr:10; --tb:3.49; --tc:6; --tt:6; --tk:8; --tm:10;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:96px}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;overflow-x:hidden}
+a{color:var(--verify);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--verify);outline-offset:3px;border-radius:4px}
+.skip{position:absolute;left:12px;top:-60px;z-index:50;background:var(--verify);color:#06231F;padding:10px 16px;border-radius:8px;font-weight:600}
+.skip:focus{top:12px;text-decoration:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gutter)}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gutter)}
+.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:1/-1}
+h1,h2,h3{font-family:var(--display);margin:0;font-weight:700}
+h1{font-size:clamp(2.7rem,1.5rem + 4vw,4.6rem);letter-spacing:-.02em;line-height:1.04}
+h2{font-size:clamp(2.25rem,1.4rem + 2.6vw,3.5rem);letter-spacing:-.02em;line-height:1.08;margin:0 0 .4em}
+h3{font-size:1.18rem;line-height:1.25;font-weight:600}
+p{margin:0 0 1em}
+code,.mono{font-family:var(--mono);font-size:.88em}
+.ic{width:1.1em;height:1.1em;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.2em}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--verify);margin:0 0 var(--s4);font-weight:600}
+.eyebrow::before{content:"";width:24px;height:2px;background:currentColor}
+.plain{font-size:clamp(1.1rem,1rem + .5vw,1.3rem);line-height:1.5;color:var(--muted);max-width:36em;margin:0 0 1em}
+.lede{font-size:clamp(1.15rem,1.05rem + .6vw,1.4rem);color:var(--text);max-width:30em;margin:0 0 .8em;line-height:1.4;font-weight:500}
+.fine{font-size:.88rem;color:var(--dim);margin-top:var(--s4);max-width:84ch}
+
+/* ---- ink and paper bands ---- */
+section,.hero{position:relative;padding-block:clamp(72px,9vw,128px)}
+.ink{background:var(--ink);color:var(--text);--surface:rgba(22,29,49,.8);--btn-on:#06231F}
+.paper{
+  --text:var(--paper-ink);--muted:var(--paper-muted);--dim:var(--paper-dim);--line:var(--paper-line);--line-2:#A99E84;
+  --verify:var(--paper-ok);--warn:var(--paper-bad);--seal:var(--paper-seal);--surface:#FBF8F0;--btn-on:#fff;
+  background-color:var(--paper);color:var(--text);
+  background-image:repeating-linear-gradient(180deg,transparent 0 31px,rgba(20,23,31,.05) 31px 32px);
+}
+.paper::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;pointer-events:none;
+  background:radial-gradient(circle at 9px 0,var(--ink) 6px,transparent 6.6px) 0 0/18px 10px repeat-x}
+.ink + .paper::before,.paper::before{display:block}
+.paper + .paper::before{display:none}
+
+/* ---- announcement bar and nav ---- */
+.announce{background:var(--paper);color:var(--paper-ink);text-align:center;font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;padding:9px 16px;line-height:1.4}
+.announce a{color:var(--paper-ok);font-weight:700;text-decoration:underline;text-underline-offset:3px;margin-left:10px}
+.topnav{position:sticky;top:0;z-index:20;background:rgba(11,14,23,.86);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
+.topnav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;letter-spacing:.08em;flex:none;color:var(--text)}
+.brand:hover{text-decoration:none}
+.brand img{width:26px;height:26px;display:block}
+.navlinks{margin-left:auto;display:flex;gap:4px;font-size:.9rem;min-width:0;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{color:var(--muted);padding:8px 10px;border-radius:8px;flex:none}
+.navlinks a:hover{color:var(--text);text-decoration:none;background:rgba(147,160,189,.12)}
+.navlinks a.rep{color:var(--verify);border:1px solid rgba(61,220,196,.4)}
+.navlinks a[aria-current]{color:var(--text)}
+.navlinks a.apply{background:var(--verify);color:#06231F;font-weight:700}
+.navlinks a.apply:hover{filter:brightness(1.08)}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:12px;font-size:.98rem;font-weight:600;border:1.5px solid var(--line-2);color:var(--text);background:transparent;font-family:inherit;cursor:pointer;transition:border-color .15s,transform .15s}
+.btn:hover{border-color:var(--verify);text-decoration:none;transform:translateY(-1px)}
+.btn-primary{background:var(--verify);border-color:var(--verify);color:var(--btn-on)}
+.btn-primary:hover{filter:brightness(1.07)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.cta .btn{padding:14px 24px;font-size:1.02rem}
+.textlink{color:var(--text);font-weight:600;border-bottom:2px solid var(--verify);padding-bottom:1px}
+.textlink:hover{text-decoration:none;color:var(--verify)}
+.replay{display:inline-flex;visibility:hidden;padding:6px 14px;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono)}
+.contact{display:flex;align-items:center;min-height:54px;margin:0}
+
+/* ---- hero ---- */
+.hero{padding-top:clamp(28px,3vw,40px);padding-bottom:clamp(56px,6vw,88px);overflow:hidden}
+.hero-grid{align-items:start;row-gap:var(--s7)}
+.hero h1 .accent{color:var(--verify)}
+.hero .eyebrow{margin-bottom:var(--s4)}
+.hero .lede{margin-top:var(--s5)}
+.support{color:var(--muted);max-width:30em;margin:0 0 var(--s5);font-size:1.05rem}
+.hero .cta{margin-bottom:var(--s5)}
+.links{display:flex;flex-wrap:wrap;gap:12px 28px;margin:0}
+.maturity{margin:var(--s5) 0 0;font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:10px}
+.maturity::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--seal);flex:none}
+.hero-vis{display:grid;gap:var(--s3);min-width:0}
+
+/* ---- cards and visuals ---- */
+.vis{margin:0;padding:var(--s4) var(--s5);border:1px solid var(--line);border-radius:16px;min-width:0;background:var(--surface)}
+.vis figcaption{margin-top:var(--s3)}
+.vis svg{display:block;width:100%;height:auto}
+.vis svg text{font-family:var(--mono);fill:var(--text)}
+.vis-t{min-height:48px;font-family:var(--mono);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 2px 14px}
+figcaption,.alt{font-size:.86rem;color:var(--dim);line-height:1.55}
+.scrollx{overflow-x:auto}
+.card{position:relative;border:1px solid var(--line);border-radius:14px;padding:var(--s5);min-width:0;background:var(--surface)}
+.card h3{margin-bottom:.5em}
+.card p{margin:0;color:var(--muted);font-size:1rem;line-height:1.55}
+.cards{display:grid;gap:var(--gutter);margin-top:var(--s7)}
+.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.sec-head{margin-bottom:var(--s5);row-gap:var(--s3);align-items:end}
+.more{margin:var(--s6) 0 0}
+.more a{font-weight:600}
+
+/* ---- proof strip ---- */
+.facts-strip{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+.facts-strip li{padding:var(--s5);border-left:1px solid var(--line);min-width:0}
+.facts-strip li:first-child{border-left:0;padding-left:0}
+.fig{display:block;font-family:var(--display);font-weight:700;font-size:clamp(2rem,1.5rem + 1.2vw,2.8rem);letter-spacing:-.03em;line-height:1;color:var(--text);margin-bottom:var(--s3)}
+.facts-strip .what{display:block;font-weight:600;line-height:1.35;margin-bottom:var(--s3)}
+.facts-strip small{display:block;font-family:var(--mono);font-size:.74rem;line-height:1.55;color:var(--dim);margin-bottom:var(--s3)}
+.facts-strip a{font-weight:600;font-size:.92rem}
+
+/* ---- promises, risks ---- */
+.risk .n{display:block;font-family:var(--mono);font-size:.76rem;letter-spacing:.16em;color:var(--warn);margin-bottom:var(--s3)}
+.risk{border-top:3px solid var(--warn)}
+.outcome{padding:var(--s6) var(--s5) var(--s5)}
+.outcome .n{display:block;font-family:var(--display);font-size:3.4rem;font-weight:700;letter-spacing:-.04em;line-height:1;color:var(--verify);margin-bottom:var(--s4)}
+.outcome h3{font-size:1.5rem;line-height:1.15;letter-spacing:-.01em;margin-bottom:.6em}
+.proofline{margin-top:var(--s5)!important;padding-top:var(--s4);border-top:1px dashed var(--line-2);font-family:var(--mono);font-size:.82rem!important;line-height:1.55;color:var(--verify)!important;font-weight:600}
+
+.bench-label{margin:var(--s5) 0 0;padding:8px 0 8px 14px;border-left:3px solid var(--seal);font-family:var(--mono);font-size:.78rem;line-height:1.6;color:var(--muted);max-width:76ch}
+/* ---- tables ---- */
+.tablewrap{overflow-x:auto;margin-top:var(--s6);border-top:2px solid var(--text);border-bottom:2px solid var(--text)}
+table{width:100%;border-collapse:collapse;font-size:.95rem;min-width:620px}
+th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+thead th{color:var(--dim);font-weight:600;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;font-family:var(--mono)}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:600;color:var(--text)}
+td.num{font-family:var(--mono);white-space:nowrap}
+.cmp th[scope=row]{min-width:190px}
+.cmp td{white-space:nowrap}
+.cmp td.t{white-space:normal;color:var(--muted);font-size:.9rem;min-width:130px}
+.cmp .us{background:rgba(11,107,94,.08)}
+.cmp thead th.us{color:var(--verify);box-shadow:inset 0 3px 0 var(--verify)}
+.m{display:inline-flex;align-items:center;gap:8px;font-size:.9rem}
+.m.y{color:var(--verify);font-weight:700}
+.m.n{color:var(--dim)}
+.m.p{color:var(--seal);font-weight:600}
+
+/* ---- ciso, partners, faq ---- */
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gutter);margin-top:var(--s7)}
+.fact{border:1px solid var(--line);border-radius:14px;padding:var(--s5) var(--s5) var(--s3);background:var(--surface)}
+.fact h3{font-family:var(--mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:1em}
+.fact.yes h3{color:var(--verify)}
+.fact.no h3{color:var(--seal)}
+.fact ul{list-style:none;margin:0;padding:0}
+.fact li{position:relative;padding:0 0 14px 22px;color:var(--muted);font-size:.98rem;line-height:1.55}
+.fact li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:8px;border-radius:50%}
+.fact.yes li::before{background:var(--verify)}
+.fact.no li::before{background:var(--seal)}
+.fact li b{color:var(--text)}
+.pcols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s6);margin:var(--s6) 0}
+.pcols h3{font-family:var(--mono);font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--seal);margin-bottom:.9em}
+.pcols ul,.pcols ol{margin:0;padding:0 0 0 1.1em;color:var(--muted);font-size:.98rem}
+.pcols li{margin-bottom:.5em}
+.sigline{margin-top:var(--s6);border-top:1px solid var(--text);padding-top:var(--s2);font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);max-width:340px}
+.stamp{display:inline-grid;place-items:center;width:104px;height:104px;border-radius:50%;border:3px double var(--paper-ok);color:var(--paper-ok);font-family:var(--display);font-weight:700;letter-spacing:.06em;transform:rotate(-8deg);text-align:center;line-height:1.2;font-size:.9rem}
+.stamp span{display:block;font-family:var(--mono);font-size:.5rem;letter-spacing:.14em;margin-top:3px}
+.pstamp{position:absolute;right:var(--gutter);top:0}
+.faq{display:grid;gap:12px;margin-top:var(--s6);max-width:860px}
+details.q{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+details.q summary{padding:16px 20px;font-weight:600;cursor:pointer}
+details.q[open]{border-color:var(--line-2)}
+.q-in{padding:0 20px 18px;color:var(--muted);font-size:1rem}
+.q-in p{margin:0 0 .7em}
+.q-in b{color:var(--text)}
+.final{text-align:center}
+.final h2{max-width:16em;margin:0 auto .5em}
+.final .cta{justify-content:center}
+.final .lede{margin:0 auto 1.4em;text-align:center}
+.final .sigline{margin:var(--s7) auto 0}
+footer{background:var(--ink);border-top:1px solid var(--line);padding:var(--s7) 0 var(--s8);color:var(--dim);font-size:.9rem}
+footer .wrap{display:grid;gap:14px}
+footer p{margin:0;max-width:86ch}
+footer .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.footnav{display:flex;flex-wrap:wrap;gap:6px 22px}
+.footnav a{color:var(--muted)}
+
+/* ---- responsive ---- */
+@media(max-width:1060px){
+  .c4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bcards{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5)}
+  .facts-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facts-strip li:nth-child(3){border-left:0;padding-left:0}
+  .cbody{grid-template-columns:1fr}
+  .cagents{border-right:0;border-bottom:1px solid var(--line)}
+  .vmteaser .vmgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .swipe{display:block}
+  .rm-wrap{min-width:560px}
+  .s4,.s5,.s6,.s7,.s8{grid-column:1/-1}
+  .c3,.facts,.pcols{grid-template-columns:1fr}
+  .try .vis{max-width:none}
+  .cl{grid-template-columns:70px minmax(0,1fr) 100px}
+  .cl .d,.cl .why{grid-column:2/-1}
+}
+@media(max-width:620px){
+  :root{--gutter:18px}
+  .navlinks a.hm,.navlinks a.rp{display:none}
+  .brand span{display:none}
+  .cta .btn{flex:1 1 100%}
+  .sl-foot{flex-direction:column;align-items:stretch}
+  .rc-zone{min-height:210px}
+  .rstamp{justify-self:center}
+  .sl-rows{grid-template-columns:1fr}
+  .facts-strip{grid-template-columns:1fr}
+  .facts-strip li{border-left:0;border-top:1px solid var(--line);padding:var(--s5) 0}
+  .facts-strip li:first-child{border-top:0}
+  .steps{grid-template-columns:1fr}
+  .bars li{grid-template-columns:5.6em minmax(0,1fr) 4em}
+  .stats{gap:12px}
+  .stat{padding:var(--s4)}
+  .vis{padding:var(--s4) 14px}
+  .bs,.rw{padding:10px 11px;gap:10px}
+  .vmteaser .vmgrid{grid-template-columns:1fr 1fr}
+  th,td{padding:12px 12px}
+}
+@media(max-width:380px){.stats,.c4{grid-template-columns:1fr}}
+
+
+/* ---- sales pages (site v5) ---- */
+.phero{padding-top:clamp(40px,5vw,72px);padding-bottom:clamp(64px,7vw,104px);overflow:hidden}
+.phero .grid{align-items:center;row-gap:var(--s7)}
+.phero h1{font-size:clamp(2.5rem,1.4rem + 3.4vw,4.1rem)}
+.phero .lede{margin-top:var(--s5)}
+.phero .cta{margin-top:var(--s6)}
+.art{margin:0;border:1px solid var(--line);border-radius:20px;padding:var(--s5);background:radial-gradient(120% 90% at 85% 0%,rgba(61,220,196,.14),transparent 60%),var(--ink-2)}
+.art svg{display:block;width:100%;height:auto}
+.art svg text{font-family:var(--mono);fill:var(--text)}
+.art .a-room{fill:rgba(61,220,196,.06);stroke:var(--verify);stroke-width:2}
+.art .a-box{fill:var(--ink-3);stroke:var(--line-2);stroke-width:1.5}
+.art .a-ok{fill:none;stroke:var(--verify);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.art .a-no{fill:none;stroke:var(--warn);stroke-width:2.5;stroke-linecap:round}
+.art .a-lane{stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:3 6;fill:none}
+.art .a-seal{fill:none;stroke:var(--seal);stroke-width:2.5}
+.art .a-dim{fill:var(--dim)}
+.art .a-ver{fill:var(--verify)}
+.art .a-warn{fill:var(--warn)}
+.art figcaption{margin:var(--s3) 0 0}
+.ucs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gutter);margin-top:var(--s7)}
+.usecase{border:1px solid var(--line);border-radius:18px;padding:var(--s6) var(--s6) var(--s5);background:var(--surface);min-width:0}
+.usecase .tag{display:inline-block;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--verify);margin-bottom:var(--s3)}
+.usecase h3{font-size:1.45rem;letter-spacing:-.01em;margin-bottom:.35em}
+.usecase .one{color:var(--muted);margin:0 0 var(--s5);font-size:1.02rem}
+.usecase dl{margin:0;display:grid;gap:var(--s4)}
+.usecase dt{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.usecase dd{margin:0;color:var(--text);font-size:.98rem;line-height:1.55}
+.usecase dd.see{border-left:3px solid var(--verify);padding-left:12px}
+.steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gutter);margin-top:var(--s7);counter-reset:st}
+.steps3 .card{padding:var(--s6) var(--s5) var(--s5)}
+.steps3 .card::before{counter-increment:st;content:"0" counter(st);display:block;font-family:var(--display);font-weight:700;font-size:2.6rem;letter-spacing:-.04em;line-height:1;color:var(--verify);margin-bottom:var(--s4)}
+.qa td,.qa th{vertical-align:top}
+.qa th[scope=row]{min-width:220px;font-family:var(--display);font-size:1.02rem;line-height:1.35}
+.qa td{color:var(--muted);line-height:1.55}
+.qa td.basis{font-family:var(--mono);font-size:.82rem;color:var(--verify);min-width:180px}
+.qa td.not{color:var(--seal)}
+.vsteps{list-style:none;margin:var(--s7) 0 0;padding:0;display:grid;gap:var(--s4);max-width:860px;counter-reset:v}
+.vsteps li{position:relative;padding:var(--s4) var(--s5) var(--s4) 72px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--muted)}
+.vsteps li::before{counter-increment:v;content:counter(v);position:absolute;left:20px;top:var(--s4);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--verify);color:var(--btn-on);font-family:var(--display);font-weight:700}
+.vsteps li b{color:var(--text)}
+.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kind h3{font-size:1.3rem}
+.kind .k{display:block;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:var(--s3)}
+.kind.us{border-color:var(--verify);box-shadow:inset 0 3px 0 var(--verify)}
+.kind.us .k{color:var(--verify)}
+.pgrid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--s7);margin-top:var(--s7);align-items:start}
+.plan,.offer{border:2px solid var(--verify);border-radius:22px;padding:var(--s6);background:var(--surface);position:relative}
+.plan .pname,.offer .pname{font-family:var(--mono);font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--verify);margin:0 0 var(--s3)}
+.plan .price,.offer .price{display:inline-block;font-family:var(--display);font-weight:700;font-size:clamp(3.4rem,2.6rem + 2.4vw,4.8rem);letter-spacing:-.04em;line-height:1;color:var(--text)}
+.plan .per,.offer .per{font-size:1.05rem;color:var(--muted);margin-left:.4em}
+.plan ul,.offer ul{list-style:none;margin:var(--s5) 0 var(--s6);padding:0;display:grid;gap:12px}
+.plan li,.offer li{position:relative;padding-left:30px;color:var(--text)}
+.plan li::before,.offer li::before{content:"";position:absolute;left:2px;top:.45em;width:14px;height:8px;border-left:2.5px solid var(--verify);border-bottom:2.5px solid var(--verify);transform:rotate(-45deg)}
+.plan .cta .btn,.offer .cta .btn{flex:1 1 auto}
+.ask h3{font-family:var(--mono);font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--seal);margin:0 0 .9em}
+.ask ul{margin:0 0 var(--s6);padding:0 0 0 1.1em;color:var(--muted)}
+.ask li{margin-bottom:.5em}
+.ptile{display:flex;gap:var(--s5);align-items:baseline;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:var(--s5);margin-top:var(--s5)}
+.ptile .fig{margin:0}
+.ptile span{color:var(--muted)}
+.final .plain{margin:0 auto 1.4em;text-align:center}
+@media(max-width:900px){.ucs,.steps3,.c2,.pgrid{grid-template-columns:1fr}}
+@media(max-width:620px){.usecase{padding:var(--s5)}.vsteps li{padding-left:64px}.qa th[scope=row]{min-width:160px}}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+@media print{
+  body,.ink{background:#fff;color:#000}
+  .topnav,.skip{display:none}
+  *{animation:none!important;transition:none!important;box-shadow:none!important;filter:none!important}
+  .slip{-webkit-mask:none;mask:none;background:#f2f2f2;color:#000}
+  .stat,.vis,.card,.bcard,.fact,details.q{background:#fff!important;border-color:#bbb}
+  a{color:#000;text-decoration:underline}
+  section{padding:28px 0;break-inside:avoid-page}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" hidden aria-hidden="true" focusable="false"><symbol id="i-ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol><symbol id="i-no" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h6M10 16h6"/></symbol></svg>
+<div class="announce">Pre-1.0 · accepting a small number of design partners <a href="../#partners">Apply</a></div>
+<nav class="topnav" aria-label="Primary">
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../assets/logo-256.png" alt=""><span>VOLENT</span></a>
+    <div class="navlinks">
+      <a class="hm" href="../how-it-works/">How it works</a>
+      <a class="hm" href="./" aria-current="page">Use cases</a>
+      <a class="hm" href="../security/">Security</a>
+      <a class="hm" href="../compare/">Compare</a>
+      <a href="../pricing/">Pricing</a>
+      <a class="hm" href="../benchmarks/">Benchmarks</a>
+      <a class="apply" href="../#partners">Book a demo</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+<header class="phero ink" id="top">
+  <div class="wrap">
+    <div class="grid">
+      <div class="s6">
+        <p class="eyebrow">Use cases</p>
+        <h1>Where a sealed room for AI agents pays off.</h1>
+        <p class="lede">Anywhere an agent can move money, read records or send data, and someone will later ask you to prove what it did.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="../#partners" data-contact data-subject="30-minute demo" data-body="Name and role:&#10;What you would like to see:&#10;">Book a demo</a>
+          <a class="btn" href="../#partners" data-contact data-subject="Design partner application" data-body="Sector:&#10;Regulator:&#10;Where it would run:&#10;One agent workflow:&#10;">Become a design partner</a>
+        </div>
+      </div>
+      <div class="s6">
+        <figure class="art">
+<svg viewBox="0 0 560 380" aria-hidden="true" focusable="false">
+  <rect class="a-room" x="16" y="16" width="360" height="348" rx="18"/>
+  <text x="36" y="46" font-size="14" font-weight="700" letter-spacing="3" class="a-ver">ONE SEALED ROOM</text>
+  <rect class="a-box" x="36" y="66" width="152" height="74" rx="10"/><text x="52" y="96" font-size="14">payments</text><text x="52" y="120" font-size="12" class="a-dim">bank operations</text>
+  <rect class="a-box" x="204" y="66" width="152" height="74" rx="10"/><text x="220" y="96" font-size="14">claims</text><text x="220" y="120" font-size="12" class="a-dim">insurance</text>
+  <rect class="a-box" x="36" y="156" width="152" height="74" rx="10"/><text x="52" y="186" font-size="14">records</text><text x="52" y="210" font-size="12" class="a-dim">healthcare</text>
+  <rect class="a-box" x="204" y="156" width="152" height="74" rx="10"/><text x="220" y="186" font-size="14">case files</text><text x="220" y="210" font-size="12" class="a-dim">public sector</text>
+  <rect class="a-box" x="36" y="246" width="320" height="98" rx="10"/><text x="52" y="274" font-size="12" letter-spacing="2" class="a-dim">LOGBOOK, WRITTEN FIRST</text>
+  <text x="52" y="300" font-size="13">payments  erp.internal   allowed</text><text x="52" y="324" font-size="13">claims    files.example  <tspan class="a-warn">blocked</tspan></text>
+  <rect x="368" y="160" width="20" height="64" rx="6" fill="#0F1B26" stroke="var(--verify)" stroke-width="2.5"/>
+  <path class="a-lane" d="M388 192H420"/>
+  <rect class="a-box" x="420" y="90" width="124" height="56" rx="10"/><text x="436" y="124" font-size="13">approved</text>
+  <path class="a-ok" d="M512 112l6 6 12-14"/>
+  <rect class="a-box" x="420" y="236" width="124" height="96" rx="10"/><text x="436" y="266" font-size="12" letter-spacing="2" class="a-dim">YOUR AUDITOR</text>
+  <text x="436" y="292" font-size="13">checks the</text><text x="436" y="312" font-size="13">proof</text>
+  <circle class="a-seal" cx="514" cy="306" r="16"/>
+</svg>
+<figcaption>A made-up example. Different kinds of work share one sealed room, one guarded door and one logbook.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</header>
+<section id="pilots" class="paper">
+  <div class="wrap">
+    <p class="eyebrow">Pick yours</p>
+    <h2>Six kinds of work, one sealed room.</h2>
+    <p class="plain">Each one is a workflow we are piloting or scoping with design partners. Find the one closest to yours.</p>
+    <p class="fine">These are the workflows we are piloting with design partners, not customer results.</p>
+    <div class="ucs">
+      <article class="usecase">
+        <span class="tag">Banks and payments</span>
+        <h3>Payment operations</h3>
+        <p class="one">Agents that match payments, chase missing files and line up transfers.</p>
+        <dl>
+          <div><dt>The work</dt><dd>Read invoices and bank files, match them, and queue each payment for a person to approve.</dd></div>
+          <div><dt>The risk</dt><dd>A payment sent twice after a crash, or account data sent to a service nobody approved.</dd></div>
+          <div><dt>What your auditor sees</dt><dd class="see">Every step in the logbook, a restart that repeated nothing, and a signed record of what ran and where it connected.</dd></div>
+        </dl>
+      </article>
+      <article class="usecase">
+        <span class="tag">Insurance</span>
+        <h3>Claims handling</h3>
+        <p class="one">Agents that read claim files, check them against the policy and draft a decision.</p>
+        <dl>
+          <div><dt>The work</dt><dd>Pull the claim, the policy and the photos, check them against the rules, and draft a decision for a handler.</dd></div>
+          <div><dt>The risk</dt><dd>Customer data reaching a model or a site that you did not choose.</dd></div>
+          <div><dt>What your auditor sees</dt><dd class="see">The list of places each agent could reach, every call it made, and every call that was turned back.</dd></div>
+        </dl>
+      </article>
+      <article class="usecase">
+        <span class="tag">Healthcare</span>
+        <h3>Patient records</h3>
+        <p class="one">Agents that summarise records and prepare referrals inside the hospital network.</p>
+        <dl>
+          <div><dt>The work</dt><dd>Read records on your own network and write short summaries for doctors and nurses.</dd></div>
+          <div><dt>The risk</dt><dd>Patient data leaving the network on its way to an outside service.</dd></div>
+          <div><dt>What your auditor sees</dt><dd class="see">Patient data could reach only the systems you named. Every try to go somewhere else was blocked and written down.</dd></div>
+        </dl>
+      </article>
+      <article class="usecase">
+        <span class="tag">Public sector</span>
+        <h3>Case work</h3>
+        <p class="one">Agents that sort cases and prepare files on your own hardware.</p>
+        <dl>
+          <div><dt>The work</dt><dd>Sort new cases, gather the papers and prepare a file for an officer to decide.</dd></div>
+          <div><dt>The risk</dt><dd>Calls to outside services on a network that must stay sovereign, or offline.</dd></div>
+          <div><dt>What your auditor sees</dt><dd class="see">The machine runs on your own hardware, with no outside calls unless you approve them.</dd></div>
+        </dl>
+      </article>
+      <article class="usecase">
+        <span class="tag">Platform teams</span>
+        <h3>One way to run agents</h3>
+        <p class="one">Give every business unit one approved place to run agents.</p>
+        <dl>
+          <div><dt>The work</dt><dd>Offer teams a ready, approved way to run agents, so each new agent does not start a new security review.</dd></div>
+          <div><dt>The risk</dt><dd>Ten teams, ten setups, and no common evidence when the auditor asks.</dd></div>
+          <div><dt>What your auditor sees</dt><dd class="see">One sealed image, one approved list per agent, and the same kind of record for all of them.</dd></div>
+        </dl>
+      </article>
+      <article class="usecase">
+        <span class="tag">Software companies</span>
+        <h3>Selling agents to regulated buyers</h3>
+        <p class="one">Run your product's agents inside your customer's own cloud.</p>
+        <dl>
+          <div><dt>The work</dt><dd>Ship your agent product into a bank, insurer or hospital, running in their account.</dd></div>
+          <div><dt>The risk</dt><dd>Their risk team will not take your word for what your agent does.</dd></div>
+          <div><dt>What your auditor sees</dt><dd class="see">Proof from the machine itself, which their auditor checks without having to trust you.</dd></div>
+        </dl>
+      </article>
+    </div>
+  </div>
+</section>
+<section id="flow" class="ink">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>The same three steps, every time.</h2>
+    <p class="plain">You approve where data may go, the agents work in the room, and your auditor checks the proof.</p>
+    <div class="steps3">
+      <div class="card"><h3>Approve the places</h3><p>List the systems and models each agent may reach. Everything else is turned back at the one door.</p></div>
+      <div class="card"><h3>Run the agents</h3><p>Each agent is one simple file. Every action goes in the logbook before it happens, so a crash does not repeat it.</p></div>
+      <div class="card"><h3>Hand over the proof</h3><p>The machine signs what it started with and where it connected. Your auditor checks it on their own computer.</p></div>
+    </div>
+    <div class="ptile"><span class="fig">0 duplicates</span><span>and 0 lost across 5 forced-crash tests. <a href="../benchmarks/#baseline">See the test</a></span></div>
+    <p class="bench-label">Measured 2026-10-14 on the image built from tag phase-7, median of 3 runs where run three times, 2013 Intel i7-4770 under KVM.</p>
+  </div>
+</section>
+<section id="cta" class="paper final">
+  <div class="wrap">
+    <h2>Is your workflow on this list?</h2>
+    <p class="plain">Tell us about it. Design partners use it free through 1.0 and help decide what the proof must show.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="../#partners" data-contact data-subject="30-minute demo" data-body="Name and role:&#10;What you would like to see:&#10;">Book a demo</a>
+      <a class="btn" href="../#partners" data-contact data-subject="Design partner application" data-body="Sector:&#10;Regulator:&#10;Where it would run:&#10;One agent workflow:&#10;">Become a design partner</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav class="footnav" aria-label="Site">
+      <a href="../">Home</a><a href="../how-it-works/">How it works</a><a href="./">Use cases</a><a href="../security/">Security</a><a href="../compare/">Compare</a><a href="../pricing/">Pricing</a><a href="../benchmarks/">Benchmarks</a><a href="../report/">Test report</a>
+    </nav>
+    <p>This site loads nothing from anyone else: no outside fonts, scripts, analytics or trackers. Its Content-Security-Policy enforces that; view source.</p>
+    <div class="row">
+      <span>VOLENT — pre-1.0, working with a small group of design partners.</span>
+      <span class="mono">Runs on the major hypervisors and clouds.</span>
+    </div>
+  </div>
+</footer>
+<noscript><p class="fine wrap">To write to us without JavaScript: bhavin500 [at] yahoo [dot] com</p></noscript>
+
+<script>
+(function(){var p=["bhavin500","yahoo.com"],e=p[0]+"@"+p[1];[].forEach.call(document.querySelectorAll("a[data-contact]"),function(a){var b=a.getAttribute("data-body");a.href="mailto:"+e+"?subject="+encodeURIComponent(a.getAttribute("data-subject"))+(b?"&body="+encodeURIComponent(b):"")});var c=document.getElementById("contact");if(c){c.textContent=e;c.hidden=false}})();
+</script>
+</body>
+</html>

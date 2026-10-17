@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; font-src 'self'; script-src 'sha256-FuCWBWFjcJ3+V/5edxcqshnDHnSwtAX8AVApyWons00=' 'sha256-Fr9uUPe5r/rYjZbubpe9IRmauKfvSDfu8U/2tzD/weQ='; base-uri 'none'; form-action 'none'">
+<title>How VOLENT works — prove what your agents ran</title>
+<meta name="description" content="A self-hosted, sealed VM image that runs AI agent fleets, signs a receipt of exactly what booted, lets nothing out except where you said, and journals every side effect. Built for regulated and sovereign teams.">
+<link rel="canonical" href="https://vinpatel.github.io/volent/how-it-works/">
+<link rel="icon" href="../assets/favicon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VOLENT — prove what your AI agents did">
+<meta property="og:description" content="Prove what your agents ran, and where the data went. A sealed, self-hosted VM image for regulated and sovereign teams: signed attestation, deny-by-default egress, journaled side effects.">
+<meta property="og:image" content="https://vinpatel.github.io/volent/assets/logo-1024.png">
+<meta property="og:url" content="https://vinpatel.github.io/volent/how-it-works/">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+@property --te{syntax:"<number>";inherits:true;initial-value:7}
+@property --tr{syntax:"<number>";inherits:true;initial-value:10}
+@property --tb{syntax:"<number>";inherits:true;initial-value:3.49}
+@property --tc{syntax:"<number>";inherits:true;initial-value:6}
+@font-face{font-family:"Display";src:url("../assets/fonts/display.woff2") format("woff2");font-weight:500 700;font-display:swap}
+:root{
+  --ink:#0B0E17; --ink-2:#111626; --ink-3:#161D31;
+  --line:#232C44; --line-2:#344060;
+  --text:#EEF2FA; --muted:#B4BED3; --dim:#8F9CB8;
+  --paper:#F3EEE2; --paper-ink:#14171F; --paper-muted:#3E4250; --paper-dim:#5A5E6B; --paper-line:#C9C0AA;
+  --paper-ok:#065348; --paper-bad:#B02E14; --paper-seal:#7A5200;
+  --verify:#3DDCC4; --seal:#F2B138; --warn:#F2803B;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --wrap:1200px; --gutter:24px;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --display:"Display",var(--sans);
+  /* timeline clocks: the final frame is the default, so no-JS and reduced motion show finished states */
+  --te:7; --tr:10; --tb:3.49; --tc:6; --tt:6; --tk:8; --tm:10;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:150px}
+[hidden]{display:none!important}
+body{
+  margin:0;background:var(--ink);color:var(--text);position:relative;
+  font-family:var(--sans);font-size:16.5px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(147,160,189,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(147,160,189,.055) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:linear-gradient(#000 0,#000 760px,transparent 1500px);
+  mask-image:linear-gradient(#000 0,#000 760px,transparent 1500px);
+}
+body::after{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+a{color:var(--verify);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--verify);outline-offset:3px;border-radius:4px}
+.skip{position:absolute;left:12px;top:-60px;z-index:50;background:var(--verify);color:#06231F;padding:10px 16px;border-radius:8px;font-weight:600}
+.skip:focus{top:12px;text-decoration:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+h1,h2,h3{line-height:1.14;letter-spacing:-.025em;margin:0}
+h2{font-size:clamp(1.7rem,3.4vw,2.35rem);font-weight:680;margin:0 0 .5em}
+h3{font-size:1.06rem;letter-spacing:-.01em;font-weight:620}
+p{margin:0 0 1em}
+code,.mono{font-family:var(--mono);font-size:.88em}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--verify);margin:0 0 1.3em;
+}
+.eyebrow::before{content:"";width:22px;height:1px;background:linear-gradient(90deg,transparent,var(--verify))}
+.plain{font-size:clamp(1.1rem,2vw,1.28rem);line-height:1.5;color:var(--text);max-width:34em;margin:0 0 1.2em}
+.lede{font-size:clamp(1.08rem,1.9vw,1.24rem);color:var(--muted);max-width:34em;margin:0 0 1.5em;line-height:1.5}
+section{padding:88px 0;position:relative}
+section + section::before{
+  content:"";position:absolute;left:50%;top:0;width:min(1072px,calc(100% - 48px));height:1px;transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,var(--line-2) 20%,var(--line-2) 80%,transparent);
+}
+
+/* ---- nav ---- */
+.topnav{
+  position:sticky;top:0;z-index:20;background:rgba(11,14,23,.78);
+  -webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);
+  border-bottom:1px solid rgba(46,57,86,.7);
+}
+.topnav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.06em;flex:none;color:var(--text)}
+.brand:hover{text-decoration:none}
+.brand img{width:26px;height:26px;display:block}
+.navlinks{
+  margin-left:auto;display:flex;gap:4px;font-size:.88rem;min-width:0;
+  overflow-x:auto;white-space:nowrap;scrollbar-width:none;
+}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{color:var(--muted);padding:8px 10px;border-radius:8px;flex:none}
+.navlinks a:hover{color:var(--text);text-decoration:none;background:rgba(147,160,189,.1)}
+.navlinks a.rep{color:var(--verify);border:1px solid rgba(61,220,196,.35)}
+.navlinks a[aria-current]{color:var(--text)}
+.navlinks a.apply{background:var(--verify);color:#06231F;font-weight:600}
+.navlinks a.apply:hover{background:var(--verify);filter:brightness(1.08)}
+.footnav{display:flex;flex-wrap:wrap;gap:6px 22px}
+.footnav a{color:var(--muted)}
+
+/* ---- hero ---- */
+.hero{padding:84px 0 66px;position:relative;overflow:hidden}
+.hero::before,.hero::after{content:"";position:absolute;pointer-events:none;border-radius:50%}
+.hero::before{left:-12%;top:-30%;width:760px;height:620px;background:radial-gradient(closest-side,rgba(61,220,196,.16),transparent 72%)}
+.hero::after{right:-14%;bottom:-34%;width:700px;height:560px;background:radial-gradient(closest-side,rgba(242,177,56,.11),transparent 72%)}
+.hero-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:56px;align-items:center;position:relative;z-index:1}
+.hero h1{font-size:clamp(2.2rem,4.7vw,3.5rem);font-weight:720;letter-spacing:-.032em;margin:0 0 .5em}
+.hero h1 .accent{
+  background:linear-gradient(95deg,var(--verify) 10%,#9CF3E6 60%,var(--seal) 120%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:10px;font-size:.95rem;font-weight:600;
+  border:1px solid var(--line-2);color:var(--text);background:rgba(22,29,49,.6);font-family:inherit;cursor:pointer;
+  transition:border-color .15s,transform .15s,box-shadow .15s;
+}
+.btn:hover{border-color:var(--verify);text-decoration:none;transform:translateY(-1px)}
+.btn-primary{background:var(--verify);border-color:var(--verify);color:#06231F;box-shadow:0 8px 30px -8px rgba(61,220,196,.55)}
+.btn-primary:hover{filter:brightness(1.07)}
+
+/* ---- attestation receipt (figure data-anim=receipt) ---- */
+.receipt-fig{margin:0}
+.receipt-wrap{filter:drop-shadow(0 30px 50px rgba(0,0,0,.55)) drop-shadow(0 0 40px rgba(61,220,196,.1))}
+.receipt{
+  position:relative;padding:30px 24px 84px;color:#CBD5EA;
+  font-family:var(--mono);font-size:.8rem;line-height:1.75;
+  background:linear-gradient(180deg,#151C30,#10162A);border:0;
+  -webkit-mask:radial-gradient(circle at 8px 0,#0000 5px,#000 5.6px) top/16px 51% repeat-x,radial-gradient(circle at 8px 100%,#0000 5px,#000 5.6px) bottom/16px 51% repeat-x;
+  mask:radial-gradient(circle at 8px 0,#0000 5px,#000 5.6px) top/16px 51% repeat-x,radial-gradient(circle at 8px 100%,#0000 5px,#000 5.6px) bottom/16px 51% repeat-x;
+}
+.rc-head{display:flex;justify-content:space-between;gap:12px;color:var(--text);font-weight:700;letter-spacing:.14em;font-size:.72rem;padding-bottom:12px;border-bottom:1px dashed var(--line-2);margin-bottom:12px}
+.rc-head span:last-child{color:var(--dim);font-weight:500}
+.rc-lines{list-style:none;margin:0;padding:0}
+.pr{--lp:clamp(0,calc((var(--tc) - var(--s))/.35),1);clip-path:inset(0 calc((1 - var(--lp))*100%) 0 0)}
+.rc-lines li{display:flex;justify-content:space-between;gap:16px}
+.rc-lines .k{color:var(--dim);flex:none}
+.rc-lines .v{color:var(--text);text-align:right;overflow-wrap:anywhere}
+.rc-lines .v.w{color:var(--seal)}
+.rc-cmd{margin:14px 0 0;padding-top:12px;border-top:1px dashed var(--line-2);color:var(--muted);overflow-wrap:anywhere}
+.rc-cmd b{color:var(--verify);font-weight:600}
+.rc-cmd .c{display:block;color:var(--dim)}
+.rc-res{margin:4px 0 0;color:var(--verify);font-weight:700}
+.caret{display:none;width:.55em;height:1em;vertical-align:-.15em;background:var(--verify);margin-left:4px}
+html.motion .play .caret{display:inline-block;animation:blink .8s steps(1) infinite}
+.stamp{
+  --sp:clamp(0,calc((var(--tc) - 4.3)/.35),1);
+  position:absolute;right:20px;bottom:26px;
+  transform:rotate(-9deg) scale(calc(1 + 1.4*(1 - var(--sp))*(1 - var(--sp))));opacity:clamp(0,calc((var(--tc) - 4.3)*12),1);
+  font-weight:800;letter-spacing:.2em;font-size:1.05rem;color:var(--verify);
+  border:3px solid var(--verify);border-radius:8px;padding:5px 12px 5px 16px;
+  background:rgba(11,14,23,.72);box-shadow:0 0 0 1px rgba(61,220,196,.25),0 0 28px rgba(61,220,196,.28);
+}
+figcaption,.alt{font-size:.82rem;color:var(--dim);line-height:1.55}
+.receipt-fig figcaption{margin-top:18px;max-width:46ch}
+
+/* ---- stat tiles ---- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:60px;position:relative;z-index:1}
+.stat{
+  background:linear-gradient(180deg,rgba(22,29,49,.9),rgba(17,22,38,.9));
+  border:1px solid var(--line);border-radius:14px;padding:26px 22px 22px;position:relative;box-shadow:var(--hl);
+}
+.stat::before{content:"";position:absolute;left:22px;right:22px;top:-1px;height:2px;background:linear-gradient(90deg,var(--verify),rgba(61,220,196,0));border-radius:2px}
+.stat .n{display:block;font-size:clamp(2.1rem,3.4vw,2.8rem);font-weight:700;letter-spacing:-.04em;line-height:1;color:var(--text)}
+.stat .n small{font-size:.5em;font-weight:600;color:var(--verify);letter-spacing:-.01em;margin-left:.15em}
+.stat .l{display:block;font-size:.86rem;color:var(--muted);margin-top:12px;line-height:1.5}
+.stat .l b{display:block;color:var(--text);font-weight:600;margin-bottom:2px}
+.hw{margin:22px 0 0;font-size:.88rem;color:var(--dim);position:relative;z-index:1}
+.hw strong{color:var(--muted);font-weight:600}
+
+/* ---- story rail ---- */
+.railnav{position:sticky;top:60px;z-index:15;background:rgba(11,14,23,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);border-bottom:1px solid rgba(46,57,86,.7)}
+.rail{list-style:none;margin:0 auto;padding:10px 24px;max-width:var(--wrap);display:grid;grid-template-columns:repeat(4,1fr);gap:10px;counter-reset:st}
+.rail li{counter-increment:st;min-width:0}
+.rail a{display:flex;gap:12px;align-items:center;color:var(--muted);padding:8px 10px;border-radius:10px;font-size:.86rem;line-height:1.3;height:100%}
+.rail a:hover{color:var(--text);text-decoration:none;background:rgba(147,160,189,.08)}
+.rail a::before{
+  content:counter(st);flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--verify);color:var(--verify);font-family:var(--mono);font-size:.8rem;background:rgba(61,220,196,.08)
+}
+
+/* ---- steps ---- */
+.step-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.04fr);gap:56px;align-items:start}
+.step-copy{min-width:0}
+.proofs{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:10px}
+.proofs li{border-left:2px solid var(--verify);padding:2px 0 2px 14px;color:var(--muted);font-size:.93rem;line-height:1.5}
+.proofs b{color:var(--text);font-weight:620}
+.decode{list-style:none;margin:0;padding:0;display:grid;gap:12px;max-width:34em}
+.decode li{color:var(--muted);font-size:.95rem;line-height:1.5;padding-left:16px;border-left:2px solid var(--line-2)}
+.decode b{color:var(--text);font-weight:620}
+details.how{margin-top:26px;border:1px solid var(--line);border-radius:14px;background:rgba(17,22,38,.55);box-shadow:var(--hl)}
+details.how>summary,details.q>summary{
+  list-style:none;cursor:pointer;padding:16px 52px 16px 20px;position:relative;font-weight:620;color:var(--text);
+}
+details.how>summary::-webkit-details-marker,details.q>summary::-webkit-details-marker{display:none}
+details.how>summary::after,details.q>summary::after{
+  content:"+";position:absolute;right:18px;top:50%;margin-top:-14px;width:28px;height:28px;border-radius:50%;
+  display:grid;place-items:center;border:1px solid var(--line-2);color:var(--verify);font-weight:500;line-height:1;
+}
+details[open]>summary::after{content:"\2212"}
+details.how>summary small{display:block;font-weight:400;color:var(--dim);font-size:.82rem;margin-top:2px}
+.how-in{padding:2px 20px 18px;color:var(--muted);font-size:.93rem}
+.how-in p{margin:0 0 .85em}
+.how-in ul{margin:0 0 .5em;padding-left:1.15em}
+.how-in li{margin-bottom:.45em}
+.how-in b{color:var(--text);font-weight:600}
+
+/* ---- visual cards ---- */
+.vis{
+  margin:0;padding:26px 24px 22px;border:1px solid var(--line);border-radius:18px;min-width:0;
+  background:radial-gradient(120% 90% at 50% 0,rgba(61,220,196,.07),transparent 60%),linear-gradient(180deg,rgba(22,29,49,.85),rgba(14,19,34,.9));
+  box-shadow:var(--hl);
+}
+.vis figcaption{margin-top:16px}
+.vis svg{display:block;width:100%;height:auto}
+.vis svg text{font-family:var(--mono);fill:var(--text)}
+.file-h{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:.76rem;color:var(--muted);padding:0 2px 12px}
+.file-h span{color:var(--dim)}
+.vis pre{margin:0}
+
+/* egress */
+.eg-w{opacity:min(clamp(0,calc((var(--te) + .01)*6),1),clamp(0,calc((7.9 - var(--te))*6),1))}
+.eg-lane{stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:3 6;fill:none}
+.eg-ag{fill:var(--ink-3);stroke:var(--verify);stroke-width:2}
+.eg-ag.bad{stroke:var(--warn)}
+.eg-core{fill:var(--verify)}
+.eg-core.bad{fill:var(--warn)}
+.eg-gate{fill:#0F1B26;stroke:var(--verify);stroke-width:2}
+.eg-gf{fill:none;stroke-width:3;opacity:min(clamp(0,calc((var(--te) - var(--a) - 1.05)*10),1),clamp(0,calc((var(--a) + 1.8 - var(--te))*3),1))}
+.eg-host{fill:var(--ink-3);stroke:var(--line-2);stroke-width:1.5}
+.eg-hl{fill:rgba(61,220,196,.07);stroke:var(--verify);stroke-width:2;opacity:clamp(0,calc((var(--te) - var(--a) - 2.4)*6),1)}
+.eg-ht{opacity:clamp(0,calc((var(--te) - var(--a) - 2.5)*5),1)}
+.eg-bad{--b:clamp(0,calc((var(--te) - var(--a) - 1.1)*8),1);opacity:var(--b)}
+.eg-bad path{stroke:var(--warn);stroke-width:3.5;stroke-linecap:round;fill:none}
+svg text.eg-lbl{fill:var(--dim);font-size:12px;letter-spacing:.16em}
+svg text.eg-warn{fill:var(--warn);font-size:14.5px;paint-order:stroke;stroke:#141B2E;stroke-width:5px;stroke-linejoin:round}
+svg text.eg-ver{fill:var(--verify)}
+.eg-pk{
+  --p1:clamp(0,calc((var(--te) - var(--a))/1.1),1);
+  --p2:clamp(0,calc((var(--te) - var(--a) - 1.1)/.6),1);
+  --p3:clamp(0,calc((var(--te) - var(--a) - 1.7)/.8),1);
+  --e1:calc(var(--p1)*var(--p1)*(3 - 2*var(--p1)));
+  --e2:calc(var(--p2)*var(--p2)*(3 - 2*var(--p2)));
+  --e3:calc(var(--p3)*var(--p3)*(3 - 2*var(--p3)));
+  fill:var(--verify);
+  transform:translate(calc((var(--x0) + var(--dx2)*var(--e2))*1px),calc((88 + 100*var(--e1) + 96*var(--e2) + 88*var(--e3))*1px));
+  opacity:calc(1 - 4*var(--p2)*(1 - var(--p2)))
+}
+.eg-pk.bad{
+  --eb:clamp(0,calc((var(--te) - var(--a) - 1.1)/.7),1);
+  fill:var(--warn);
+  transform:translate(calc(var(--x0)*1px),calc((88 + 100*var(--e1) - 70*var(--eb))*1px));
+  opacity:calc(1 - var(--eb))
+}
+
+/* boot */
+.bt-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 2px 16px;font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.bt-clock{font-size:1.9rem;letter-spacing:-.02em;color:var(--verify);font-weight:700;text-transform:none}
+.bt-clock i{font-style:normal;font-size:.55em;margin-left:.2em}
+.bt-rows{list-style:none;margin:0;padding:0;display:grid;gap:10px;position:relative}
+.bs{
+  --s:clamp(0,calc((var(--tb) - var(--b))/.3 + 1),1);
+  --act:clamp(0,calc((var(--tb) - var(--a))*8),1);
+  position:relative;display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:14px;align-items:center;
+  padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(17,22,38,.7);isolation:isolate;
+}
+.bs::before,.bs::after{content:"";position:absolute;inset:-1px;border-radius:12px;z-index:-1;pointer-events:none}
+.bs::before{border:1px solid rgba(242,177,56,.55);background:rgba(242,177,56,.07);opacity:calc(var(--act)*(1 - var(--s)))}
+.bs::after{border:1px solid rgba(61,220,196,.5);background:rgba(61,220,196,.07);opacity:var(--s)}
+.bs .lk{width:22px;height:26px;color:var(--verify);color:color-mix(in srgb,var(--verify) calc(var(--s)*100%),var(--seal));opacity:calc(.45 + .55*var(--act))}
+.bs .nm{display:block;font-weight:620;font-size:.97rem;line-height:1.3}
+.bs .nm small{display:block;font-weight:400;color:var(--dim);font-size:.8rem;margin-top:2px}
+.bs .st{display:grid;font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;justify-items:end}
+.bs .st span{grid-area:1/1;white-space:nowrap}
+.bs .st .d{color:var(--verify);opacity:clamp(0,calc((var(--s) - .5)*3),1)}
+.bs .st .w{color:var(--seal);opacity:calc(var(--act)*clamp(0,calc((.5 - var(--s))*3),1))}
+
+/* recover */
+.rec{
+  --cut:min(clamp(0,calc((var(--tr) - 3.8)*8),1),clamp(0,calc((5.4 - var(--tr))*3),1));
+  --fade:min(clamp(0,calc((var(--tr) + .01)*5),1),clamp(0,calc((10.9 - var(--tr))*6),1));
+  position:relative;opacity:var(--fade)
+}
+.rec-head{min-height:48px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 2px 14px;font-family:var(--mono);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.replay{display:none;padding:6px 14px;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono)}
+.rec-steps{list-style:none;margin:0;padding:0;display:grid;gap:9px;filter:brightness(calc(1 - .55*var(--cut)))}
+.rw{
+  --r:clamp(0,calc((var(--tr) - var(--d))/.5),1);
+  --k:clamp(0,calc((var(--tr) - var(--kk))/.4),1);
+  display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;
+  padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(17,22,38,.7)
+}
+.rw .ck{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;background:rgba(61,220,196,calc(.16*var(--r)));border-color:color-mix(in srgb,var(--verify) calc(var(--r)*100%),var(--line-2))}
+.rw .ck svg{width:13px;height:13px;opacity:var(--r);transform:scale(calc(.5 + .5*var(--r)))}
+.rw .nm{font-weight:600;font-size:.94rem;opacity:calc(1 - .3*var(--k))}
+.rw .nm small{display:block;font-weight:400;color:var(--dim);font-size:.78rem}
+.chip{display:grid;justify-items:end;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-align:right}
+.chip span{grid-area:1/1;opacity:0;max-width:15em}
+.chip .cw{color:var(--dim);opacity:clamp(0,calc((.5 - var(--r))*3),1)}
+.chip .cd{color:var(--verify);opacity:calc(clamp(0,calc((var(--r) - .5)*3),1)*(1 - var(--k)))}
+.chip .ck2{color:var(--seal);opacity:var(--k)}
+.chip .cw4{color:var(--dim);opacity:clamp(0,calc((3.2 - var(--tr))*8),1)}
+.chip .cr4{color:var(--seal);opacity:min(clamp(0,calc((var(--tr) - 3.2)*8),1),clamp(0,calc((3.85 - var(--tr))*20),1))}
+.chip .ci4{color:var(--warn);opacity:min(clamp(0,calc((var(--tr) - 3.85)*8),1),clamp(0,calc((7.4 - var(--tr))*8),1))}
+.rec-banner{position:relative;height:52px;margin-top:14px;border-radius:12px;border:1px solid var(--line-2);background:rgba(11,14,23,.6);overflow:hidden;font-weight:640}
+.rec-banner::before{content:"";position:absolute;inset:0;background:rgba(242,128,59,.24);opacity:var(--cut)}
+.rec-banner span{position:absolute;inset:0;display:grid;place-items:center;padding:0 12px;text-align:center;font-size:.95rem;opacity:0}
+.rec-banner .b1{color:#FFB48A;font-size:1.05rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-family:var(--mono);opacity:min(clamp(0,calc((var(--tr) - 3.85)*5),1),clamp(0,calc((5.3 - var(--tr))*5),1))}
+.rec-banner .b2{color:var(--seal);opacity:min(clamp(0,calc((var(--tr) - 5.3)*5),1),clamp(0,calc((6.5 - var(--tr))*5),1))}
+.rec-banner .b3{color:var(--seal);opacity:min(clamp(0,calc((var(--tr) - 6.5)*5),1),clamp(0,calc((8.6 - var(--tr))*5),1))}
+.rec-banner .b4{color:var(--verify);opacity:clamp(0,calc((var(--tr) - 8.9)*5),1)}
+.rec-flash{position:absolute;inset:0;border-radius:14px;pointer-events:none;background:rgba(242,128,59,.5);opacity:min(clamp(0,calc((var(--tr) - 3.8)*14),1),clamp(0,calc((4.2 - var(--tr))*6),1))}
+.rec-count{display:flex;gap:12px;margin-top:12px}
+.rec-count span{flex:1;text-align:center;border:1px solid rgba(61,220,196,.35);border-radius:12px;padding:10px 8px;background:rgba(61,220,196,.06);color:var(--muted);font-size:.84rem;opacity:calc(.55 + .45*clamp(0,calc((var(--tr) - 8.9)*4),1))}
+.rec-count b{display:block;font-size:1.7rem;line-height:1.1;color:var(--verify);letter-spacing:-.02em}
+
+/* ---- tables, notes ---- */
+.tablewrap{overflow-x:auto;margin-top:34px;border:1px solid var(--line);border-radius:14px;background:rgba(17,22,38,.7);box-shadow:var(--hl)}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:.92rem;min-width:620px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:middle}
+thead th{background:rgba(22,29,49,.95);color:var(--dim);font-weight:600;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:500;color:var(--text)}
+tbody tr:hover td,tbody tr:hover th{background:rgba(147,160,189,.045)}
+td.num,th.num{text-align:right}
+td.num{font-family:var(--mono);color:var(--verify);white-space:nowrap;font-weight:600}
+td.bar{font-family:var(--mono);color:var(--dim);white-space:nowrap;text-align:right}
+td.ev{color:var(--muted)}
+.gauge{display:block;height:4px;border-radius:4px;background:var(--line);margin-top:7px;overflow:hidden;min-width:96px}
+.gauge i{display:block;height:100%;background:linear-gradient(90deg,rgba(61,220,196,.4),var(--verify));border-radius:4px;transform-origin:left}
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.68rem;font-family:var(--mono);letter-spacing:.07em;text-transform:uppercase;border:1px solid;white-space:nowrap}
+.pill.ok{color:var(--verify);border-color:rgba(61,220,196,.42);background:rgba(61,220,196,.09)}
+.pill.soon{color:var(--seal);border-color:rgba(242,177,56,.45);background:rgba(242,177,56,.09)}
+.note{border-left:2px solid var(--seal);padding:2px 0 2px 18px;color:var(--muted);font-size:.92rem;margin-top:30px;max-width:78ch}
+.note b{color:var(--text);font-weight:600}
+.cmp th[scope=row]{position:sticky;left:0;background:#121829;z-index:1;min-width:190px}
+.cmp td{white-space:nowrap}
+.cmp td.t{white-space:normal;color:var(--muted);font-size:.85rem;min-width:130px}
+.cmp .us{background:rgba(61,220,196,.07);box-shadow:inset 1px 0 0 rgba(61,220,196,.4),inset -1px 0 0 rgba(61,220,196,.4)}
+.cmp thead th.us{color:var(--verify);box-shadow:inset 1px 0 0 rgba(61,220,196,.4),inset -1px 0 0 rgba(61,220,196,.4),inset 0 2px 0 var(--verify)}
+.cmp tbody tr:last-child td.us{box-shadow:inset 1px 0 0 rgba(61,220,196,.4),inset -1px 0 0 rgba(61,220,196,.4),inset 0 -2px 0 var(--verify)}
+.m{display:inline-flex;align-items:center;gap:8px;font-size:.84rem}
+.m.y{color:var(--verify);font-weight:700;font-size:1.1rem}
+.m.n{color:var(--dim)}
+.m.p{color:var(--seal)}
+.m.p::before{content:"";width:12px;height:12px;border-radius:50%;border:2px solid var(--seal);background:linear-gradient(90deg,var(--seal) 50%,transparent 50%)}
+.fine{font-size:.84rem;color:var(--dim);margin-top:18px;max-width:84ch}
+
+/* ---- code ---- */
+pre{
+  background:#0D1222;border:1px solid var(--line);border-radius:14px;
+  padding:20px 22px;overflow-x:auto;margin:34px 0 0;font-family:var(--mono);
+  font-size:.8rem;line-height:1.75;color:#C7D2E8;box-shadow:var(--hl);
+}
+pre .c{color:var(--dim)} pre .k{color:var(--verify)} pre .s{color:var(--seal)}
+
+/* ---- faq, glossary ---- */
+.faq{display:grid;gap:12px;margin-top:30px;max-width:860px}
+details.q{border:1px solid var(--line);border-radius:14px;background:rgba(17,22,38,.65);box-shadow:var(--hl)}
+details.q[open]{border-color:var(--line-2)}
+.q-in{padding:0 20px 18px;color:var(--muted);font-size:.95rem}
+.q-in p{margin:0 0 .7em}
+.q-in b{color:var(--text);font-weight:600}
+.gl{display:grid;grid-template-columns:210px minmax(0,1fr);margin:30px 0 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(17,22,38,.55)}
+.gl dt,.gl dd{margin:0;padding:15px 20px;border-bottom:1px solid var(--line)}
+.gl dt{font-weight:620;color:var(--text);background:rgba(22,29,49,.7)}
+.gl dd{color:var(--muted);font-size:.94rem}
+.gl dt:last-of-type,.gl dd:last-of-type{border-bottom:0}
+
+/* ---- partners ---- */
+.cta-panel{
+  position:relative;border-radius:22px;padding:1px;margin-top:10px;
+  background:linear-gradient(135deg,rgba(61,220,196,.7),rgba(46,57,86,.5) 40%,rgba(242,177,56,.55));
+}
+.cta-in{
+  border-radius:21px;padding:52px 44px;position:relative;overflow:hidden;
+  background:radial-gradient(90% 120% at 100% 0,rgba(61,220,196,.1),transparent 55%),#0E1426;
+}
+.cta-in .mark{position:absolute;right:-40px;bottom:-60px;width:280px;opacity:.06;pointer-events:none}
+.cta-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin:34px 0 36px;position:relative}
+.cta-cols h3{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--seal);margin-bottom:.8em}
+.cta-cols ul{margin:0;padding:0 0 0 1.1em;color:var(--muted);font-size:.94rem}
+.cta-cols li{margin-bottom:.5em}
+.contact{display:flex;flex-wrap:wrap;align-items:center;gap:16px;position:relative;min-height:54px}
+.contact noscript{color:var(--muted);font-family:var(--mono);font-size:.92rem}
+
+footer{border-top:1px solid var(--line);padding:42px 0 64px;color:var(--dim);font-size:.86rem}
+footer .wrap{display:grid;gap:14px}
+footer p{margin:0;max-width:86ch}
+footer .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+
+/* ---- responsive ---- */
+@media(max-width:1020px){
+  .step-grid{grid-template-columns:1fr;gap:34px}
+  .vis{max-width:600px}
+}
+@media(max-width:960px){
+  .hero-grid{grid-template-columns:1fr;gap:44px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .cta-cols{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .railnav{position:static}
+  .rail{grid-template-columns:1fr 1fr;padding:12px 18px}
+  .gl{grid-template-columns:1fr}
+  .gl dt{border-bottom:0;padding-bottom:4px}
+  .gl dd{padding-top:0}
+}
+@media(max-width:620px){
+  section{padding:60px 0}
+  .hero{padding:52px 0 44px}
+  .wrap{padding:0 18px}
+  .rail{grid-template-columns:1fr;gap:2px}
+  .stats{gap:12px}
+  .stat{padding:22px 16px 18px}
+  .cta-in{padding:34px 22px}
+  .receipt{padding:28px 16px 104px;font-size:.74rem}
+  .stamp{right:10px;font-size:.9rem}
+  .brand span{display:none}
+  .navlinks a.hm,.navlinks a.rp{display:none}
+  .navlinks a{padding:8px 8px}
+  th,td{padding:12px 14px}
+  .vis{padding:20px 14px 18px}
+  .bs{padding:11px 12px;gap:10px}
+  .rw{padding:10px 11px;gap:10px}
+  .rec-banner span{font-size:.86rem}
+}
+@media(max-width:380px){
+  .stats{grid-template-columns:1fr}
+}
+
+/* ---- motion layer: opt-in. The script adds html.motion only when reduced motion is not requested.
+        Without it, every visual above already shows its finished state. ---- */
+@keyframes tl-e{from{--te:0}to{--te:8}}
+@keyframes tl-r{from{--tr:0}to{--tr:11}}
+@keyframes tl-b{from{--tb:0}to{--tb:3.49}}
+@keyframes tl-c{from{--tc:0}to{--tc:6}}
+@keyframes blink{50%{opacity:0}}
+html.motion .fig-eg.play{animation:tl-e 8s linear infinite}
+html.motion .fig-rec.play{animation:tl-r 11s linear infinite}
+html.motion .fig-boot.play{animation:tl-b 3.49s linear forwards}
+html.motion .receipt-fig.play{animation:tl-c 6s linear forwards}
+html.motion .replay{display:inline-flex}
+html.motion section .wrap>*{transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+html.motion section .wrap>*:nth-child(2){transition-delay:.07s}
+html.motion section .wrap>*:nth-child(3){transition-delay:.14s}
+html.motion section .wrap>*:nth-child(n+4){transition-delay:.21s}
+
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+@media print{
+  body{background:#fff;color:#000}
+  body::before,body::after,.hero::before,.hero::after,.topnav,.railnav,.skip{display:none}
+  *{animation:none!important;transition:none!important;box-shadow:none!important;filter:none!important}
+  .receipt{-webkit-mask:none;mask:none;background:#f2f2f2;color:#000}
+  .stat,.vis,.tablewrap,pre,details.how,details.q{background:#fff!important;border-color:#bbb}
+  .hero h1 .accent{color:#000;background:none}
+  .vis svg text{fill:#000}
+  a{color:#000;text-decoration:underline}
+  section{padding:28px 0;break-inside:avoid-page}
+  .lede,.plain,.stat .l,.note,td.ev,.how-in,.q-in{color:#222}
+  td.num,.stat .n small,.eyebrow{color:#000}
+}
+
+/* ---- v4 skin: ink and paper bands, display face, announcement bar ---- */
+h1,h2,h3,.stat .n,.big{font-family:var(--display)}
+h1{letter-spacing:-.02em}
+h2{letter-spacing:-.02em}
+.announce{background:var(--paper);color:var(--paper-ink);text-align:center;font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;padding:9px 16px;line-height:1.4}
+.announce a{color:var(--paper-ok);font-weight:700;text-decoration:underline;text-underline-offset:3px;margin-left:10px}
+.ink{--surface:rgba(22,29,49,.8)}
+.paper{
+  --text:var(--paper-ink);--muted:var(--paper-muted);--dim:var(--paper-dim);--line:var(--paper-line);--line-2:#A99E84;
+  --verify:var(--paper-ok);--warn:var(--paper-bad);--seal:var(--paper-seal);--surface:#FBF8F0;
+  background-color:var(--paper);color:var(--text);
+  background-image:repeating-linear-gradient(180deg,transparent 0 31px,rgba(20,23,31,.05) 31px 32px);
+}
+.paper::before{content:"";position:absolute;left:0;right:0;top:0;width:auto;height:10px;transform:none;pointer-events:none;
+  background:radial-gradient(circle at 9px 0,var(--ink) 6px,transparent 6.6px) 0 0/18px 10px repeat-x}
+.ink::before{display:none}
+.paper details.how,.paper details.q,.paper .tablewrap,.paper .gl,.paper .stat{background:var(--surface);box-shadow:none}
+.paper thead th,.paper .gl dt{background:var(--surface)}
+.paper .cmp th[scope=row]{background:var(--surface)}
+.paper .btn{background:transparent}
+.paper .btn-primary{background:var(--verify);color:#fff;box-shadow:none}
+.paper .vis,.paper pre{--text:#EEF2FA;--muted:#B4BED3;--dim:#8F9CB8;--line:#232C44;--line-2:#344060;--verify:#3DDCC4;--warn:#F2803B;--seal:#F2B138;color:#EEF2FA}
+.paper .vis{background:linear-gradient(180deg,#161D31,#10162A);background-color:#10162A;border-color:#232C44}
+.paper .cta-in{background:var(--surface)}
+.paper .cta-panel{background:var(--paper-line)}
+.paper .proofs li{border-left-color:var(--verify)}
+.btn-primary{box-shadow:none}
+.hero h1 .accent{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--verify)}
+td.num,th.num{text-align:right}
+.hw{color:var(--muted)}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="announce">Pre-1.0 · accepting a small number of design partners <a href="../#partners">Apply</a></div>
+<nav class="topnav" aria-label="Primary">
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../assets/logo-256.png" alt=""><span>VOLENT</span></a>
+    <div class="navlinks">
+      <a class="hm" href="./" aria-current="page">How it works</a>
+      <a class="hm" href="../use-cases/">Use cases</a>
+      <a class="hm" href="../security/">Security</a>
+      <a class="hm" href="../compare/">Compare</a>
+      <a href="../pricing/">Pricing</a>
+      <a class="hm" href="../benchmarks/">Benchmarks</a>
+      <a class="apply" href="../#partners">Book a demo</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+<header class="hero ink" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">For regulated and sovereign teams</p>
+        <h1>Prove what your agents ran <span class="accent">— and where the data went.</span></h1>
+        <p class="lede plain">Run your AI agents inside one sealed machine. Hand an auditor a signed receipt of exactly what ran.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#partners">Become a design partner</a>
+          <a class="btn" href="#step-1">See how it works</a>
+        </div>
+      </div>
+
+      <figure class="vis receipt-fig" id="receipt" data-anim="receipt">
+        <div class="receipt-wrap">
+          <div class="receipt" role="group" aria-label="Example attestation report, with a verified result">
+            <div class="rc-head"><span>ATTESTATION REPORT</span><span>example</span></div>
+            <ul class="rc-lines">
+              <li class="pr" style="--s:.2"><span class="k">boot_profile</span><span class="v">full-chain</span></li>
+              <li class="pr" style="--s:.55"><span class="k">secure_boot</span><span class="v">enabled</span></li>
+              <li class="pr" style="--s:.9"><span class="k">sb_key_provenance</span><span class="v w">dev-only</span></li>
+              <li class="pr" style="--s:1.25"><span class="k">pcr0</span><span class="v">3b1f…a9c2</span></li>
+              <li class="pr" style="--s:1.6"><span class="k">pcr7</span><span class="v">c04e…71d8</span></li>
+              <li class="pr" style="--s:1.95"><span class="k">verity_roothash</span><span class="v">7cf7788ddd05…c135c</span></li>
+              <li class="pr" style="--s:2.3"><span class="k">egress_allowlist</span><span class="v">api.anthropic.com, erp.internal</span></li>
+              <li class="pr" style="--s:2.65"><span class="k">journal_digest</span><span class="v">e5a2…0b36</span></li>
+            </ul>
+            <p class="rc-cmd pr" style="--s:3.05"><b>$</b> volent attest --verify policy.json <span class="c"># run off-node</span></p>
+            <p class="rc-res pr" style="--s:3.6">VERIFIED <span class="caret" aria-hidden="true"></span></p>
+            <span class="stamp" aria-hidden="true">VERIFIED</span>
+          </div>
+        </div>
+        <figcaption>
+          The layout is illustrative. Only the roothash is a measured value: it belongs to the
+          phase-7 build behind the numbers on this page. Digests shown with an ellipsis are placeholders.
+        </figcaption>
+      </figure>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="n"><span data-count="3.486">3.486</span><small>s</small></span><span class="l"><b>From power-on to agents running</b>About three and a half seconds. Median of 3, cold start. Limit is 5&nbsp;s.</span></div>
+      <div class="stat"><span class="n"><span data-count="40.5">40.5</span><small>MB</small></span><span class="l"><b>Total memory for 10,000 idle agents</b>About 4&nbsp;KB each, roughly one page of plain text. Under a tenth of the 600&nbsp;MB limit.</span></div>
+      <div class="stat"><span class="n"><span data-count="50">50</span><small>µs</small></span><span class="l"><b>To answer a control request</b>50 millionths of a second at 10,000 agents (p99). Limit is 100&nbsp;ms.</span></div>
+      <div class="stat"><span class="n"><span data-count="0">0</span></span><span class="l"><b>Duplicated side effects</b>Killed at five different points with <code>kill -9</code>, nothing ran twice.</span></div>
+    </div>
+    <p class="hw"><strong>Measured on decade-old hardware:</strong> a 2013 Intel i7-4770 under KVM. Image built from tag phase-7, roothash 7cf7788d…</p>
+  </div>
+</header>
+
+<nav class="railnav" aria-label="How it works in four steps">
+  <ol class="rail">
+    <li><a href="#step-1">Describe your agents in one simple file</a></li>
+    <li><a href="#step-2">It starts sealed</a></li>
+    <li><a href="#step-3">Every outbound call passes one checkpoint</a></li>
+    <li><a href="#step-4">You get a receipt you can hand an auditor</a></li>
+  </ol>
+</nav>
+
+<section id="step-1" class="step paper">
+  <div class="wrap"><div class="step-grid">
+    <div class="step-copy">
+      <p class="eyebrow">Step 1 of 4</p>
+      <h2>Describe your agents in one simple file.</h2>
+      <p class="plain">One simple file lists each agent, the AI model it uses, its tools, and the places it may connect. Nothing else is needed.</p>
+      <details class="how">
+        <summary>How it works, in detail<small>The manifest, its schema and the tool sandbox</small></summary>
+        <div class="how-in">
+          <p>Each agent is one <code>*.agent.yaml</code> manifest, checked against a published JSON Schema. <b>Unknown fields are errors</b>: nothing is silently ignored, and rejected manifests return a pointer to the line and field.</p>
+          <ul>
+            <li><b>Tools are WebAssembly components</b> in any language, referenced by content hash and signature-checked. Each declares memory, fuel and time limits.</li>
+            <li><b>Capability tokens.</b> A tool can only use a capability the manifest names, and each capability must map to an entry on the egress allowlist.</li>
+            <li><b>Human approval</b> can be required for named tools. A pending approval survives a reboot.</li>
+            <li>The control API is HTTP/JSON with RFC 7807 errors and a generated OpenAPI 3.1 document. The implementation language never appears in a response.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+    <figure class="vis">
+      <div class="file-h">invoice-triage.agent.yaml<span>excerpt</span></div>
+<pre><span class="k">apiVersion</span>: volent/v1
+<span class="k">kind</span>: Agent
+<span class="k">metadata</span>:
+  <span class="k">name</span>: invoice-triage
+<span class="k">spec</span>:
+  <span class="k">model</span>:
+    <span class="k">provider</span>: anthropic
+    <span class="k">budget</span>: { <span class="k">max_concurrent</span>: 4 }
+  <span class="k">tools</span>:
+    - <span class="k">name</span>: fetch_invoice
+      <span class="k">kind</span>: http
+      <span class="k">capability</span>: erp-read   <span class="c"># must map to an</span>
+                              <span class="c"># egress allowlist entry</span>
+    - <span class="k">name</span>: parse_pdf
+      <span class="k">kind</span>: wasm
+      <span class="k">component</span>: <span class="s">sha256:ab12…</span>
+  <span class="k">approval</span>:
+    <span class="k">required_for</span>: [<span class="s">tool:erp-write</span>]</pre>
+      <figcaption>An excerpt of the manifest format: one agent, its model, a tool that may only reach what its capability allows, and a tool that runs in a sandbox.</figcaption>
+    </figure>
+  </div></div>
+</section>
+
+<section id="step-2" class="step ink">
+  <div class="wrap"><div class="step-grid">
+    <div class="step-copy">
+      <p class="eyebrow">Step 2 of 4</p>
+      <h2>It starts sealed.</h2>
+      <p class="plain">It refuses to start if anything was changed. While it runs, nothing inside can be edited.</p>
+      <details class="how">
+        <summary>How it works, in detail<small>Boot chain, verified root, updates</small></summary>
+        <div class="how-in">
+          <ul>
+            <li><b>Secure Boot chain.</b> UEFI Secure Boot loads shim, then GRUB, then a signed kernel with modules off. Each link verifies the next.</li>
+            <li><b>Measured boot.</b> Each stage is recorded into the TPM's PCRs, so the attestation can prove what actually booted.</li>
+            <li><b>Sealed system files.</b> The root is a read-only squashfs under dm-verity, with a roothash the kernel checks before running anything. A changed slot does not boot. Only <code>/data</code> is writable, and it is mounted <code>noexec</code>.</li>
+            <li><b>No shell.</b> There is no shell, package manager or SSH in the production root. PID 1 is a small C program we wrote.</li>
+            <li><b>A/B updates.</b> Signed bundles are checked before a byte is written, then staged to the inactive slot. Three failed boots in ninety seconds revert automatically.</li>
+          </ul>
+          <p><b>Read before relying on it.</b> v0.1.0 ships development Secure Boot keys; production key custody is v0.2. The shim chain has never booted on stock Microsoft-CA firmware.</p>
+        </div>
+      </details>
+    </div>
+    <figure class="vis fig-boot" data-anim="boot">
+      <div class="bt-head"><span>Power on</span><span class="bt-clock"><b data-clock="tb">3.49</b><i>s</i></span></div>
+      <ol class="bt-rows" aria-hidden="true">
+        <li class="bs" style="--a:0;--b:.45"><svg class="lk" aria-hidden="true" viewBox="0 0 22 26"><rect x="2.5" y="11" width="17" height="13" rx="3" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2"/><path d="M6.5 11V7.5a4.5 4.5 0 0 1 9 0V11" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="nm">Firmware starts<small>checks the signed bootloader</small></span><span class="st"><span class="w">checking</span><span class="d">sealed</span></span></li>
+        <li class="bs" style="--a:.45;--b:.95"><svg class="lk" aria-hidden="true" viewBox="0 0 22 26"><rect x="2.5" y="11" width="17" height="13" rx="3" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2"/><path d="M6.5 11V7.5a4.5 4.5 0 0 1 9 0V11" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="nm">Signed bootloader<small>checks the signed kernel</small></span><span class="st"><span class="w">checking</span><span class="d">sealed</span></span></li>
+        <li class="bs" style="--a:.95;--b:1.5"><svg class="lk" aria-hidden="true" viewBox="0 0 22 26"><rect x="2.5" y="11" width="17" height="13" rx="3" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2"/><path d="M6.5 11V7.5a4.5 4.5 0 0 1 9 0V11" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="nm">Signed kernel<small>refuses a changed system</small></span><span class="st"><span class="w">checking</span><span class="d">sealed</span></span></li>
+        <li class="bs" style="--a:1.5;--b:2.2"><svg class="lk" aria-hidden="true" viewBox="0 0 22 26"><rect x="2.5" y="11" width="17" height="13" rx="3" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2"/><path d="M6.5 11V7.5a4.5 4.5 0 0 1 9 0V11" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="nm">System files checked<small>every block verified, read-only</small></span><span class="st"><span class="w">checking</span><span class="d">sealed</span></span></li>
+        <li class="bs" style="--a:2.2;--b:2.9"><svg class="lk" aria-hidden="true" viewBox="0 0 22 26"><rect x="2.5" y="11" width="17" height="13" rx="3" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2"/><path d="M6.5 11V7.5a4.5 4.5 0 0 1 9 0V11" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="nm">Runtime<small>the sealed program that runs agents</small></span><span class="st"><span class="w">checking</span><span class="d">sealed</span></span></li>
+        <li class="bs" style="--a:2.9;--b:3.49"><svg class="lk" aria-hidden="true" viewBox="0 0 22 26"><rect x="2.5" y="11" width="17" height="13" rx="3" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2"/><path d="M6.5 11V7.5a4.5 4.5 0 0 1 9 0V11" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="nm">Agents running<small>the first heartbeat</small></span><span class="st"><span class="w">starting</span><span class="d">running</span></span></li>
+      </ol>
+      <figcaption>Power on to agents running took 3.486 s, the median of 3 runs with a cold page cache. Stage widths here are illustrative; the total is measured.</figcaption>
+    </figure>
+  </div></div>
+</section>
+
+<section id="step-3" class="step paper">
+  <div class="wrap"><div class="step-grid">
+    <div class="step-copy">
+      <p class="eyebrow">Step 3 of 4</p>
+      <h2>Every outbound call passes one checkpoint.</h2>
+      <p class="plain">Every call to the outside world goes through one gate. Anything not on your list is stopped and logged.</p>
+      <ul class="proofs">
+        <li><b>1,500 model calls in flight at once</b> on 2 vCPU against a mock model server. 0 refused, 0 duplicates.</li>
+        <li><b>1,000 of 1,000 sandboxed runs</b> finished in the sandbox storm. 0 crashed.</li>
+      </ul>
+      <details class="how">
+        <summary>How it works, in detail<small>Allowlist, SSRF rules, the bytecode audit, the sandbox</small></summary>
+        <div class="how-in">
+          <ul>
+            <li><b>Deny by default.</b> The allowlist comes from the manifests. A request needs a capability token and a matching entry, or it is denied and the denial is journaled.</li>
+            <li><b>SSRF hardening and DNS pinning.</b> Internal and link-local addresses are refused, the resolved address is pinned, and every redirect is re-judged from the top.</li>
+            <li><b>Audited, not assumed.</b> A build-time audit reads the compiled bytecode. Naming a socket API anywhere outside the gate fails the build.</li>
+            <li><b>Untrusted code runs only in WebAssembly.</b> Each call gets a fresh wasmtime store with a memory cap, an instruction-fuel budget and a wall-clock monitor. The whole capability surface is one WIT file: no filesystem, no sockets, no fine-grained clocks.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+    <figure class="vis fig-eg" data-anim="egress">
+      <svg viewBox="0 0 400 470" aria-hidden="true" focusable="false">
+        <g class="eg-w">
+          <text class="eg-lbl" x="200" y="16" text-anchor="middle">YOUR AGENTS</text>
+          <path class="eg-lane" d="M60 76V190M147 76V190M253 76V190M340 76V190M105 282V380M295 282V380"/>
+          <g><circle class="eg-ag" cx="60" cy="56" r="17"/><circle class="eg-core" cx="60" cy="56" r="5"/></g>
+          <g><circle class="eg-ag" cx="147" cy="56" r="17"/><circle class="eg-core" cx="147" cy="56" r="5"/></g>
+          <g><circle class="eg-ag bad" cx="253" cy="56" r="17"/><circle class="eg-core bad" cx="253" cy="56" r="5"/></g>
+          <g><circle class="eg-ag bad" cx="340" cy="56" r="17"/><circle class="eg-core bad" cx="340" cy="56" r="5"/></g>
+          <rect class="eg-gate" x="20" y="190" width="360" height="92" rx="14"/>
+          <rect class="eg-gf" x="20" y="190" width="360" height="92" rx="14" style="--a:.5;stroke:var(--verify)"/>
+          <rect class="eg-gf" x="20" y="190" width="360" height="92" rx="14" style="--a:1.3;stroke:var(--verify)"/>
+          <rect class="eg-gf" x="20" y="190" width="360" height="92" rx="14" style="--a:3.2;stroke:var(--warn)"/>
+          <rect class="eg-gf" x="20" y="190" width="360" height="92" rx="14" style="--a:4.4;stroke:var(--warn)"/>
+          <text class="eg-ver" x="200" y="216" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="3">ONE CHECKPOINT</text>
+          <text x="200" y="242" font-size="14" text-anchor="middle">token · allowlist · address rules</text>
+          <text class="eg-lbl" x="200" y="266" text-anchor="middle" letter-spacing="1.2">EVERY DECISION IS LOGGED</text>
+          <g class="eg-bad" style="--a:3.2"><path d="M246 182l14 14M260 182l-14 14"/></g>
+          <g class="eg-bad" style="--a:4.4"><path d="M333 182l14 14M347 182l-14 14"/></g>
+          <g class="eg-bad" style="--a:3.2"><text class="eg-warn" x="241" y="174" text-anchor="end">not on allowlist</text></g>
+          <g class="eg-bad" style="--a:4.4"><text class="eg-warn" x="328" y="148" text-anchor="end">internal address</text></g>
+          <rect class="eg-host" x="20" y="380" width="170" height="66" rx="12"/>
+          <rect class="eg-hl" x="20" y="380" width="170" height="66" rx="12" style="--a:.5"/>
+          <rect class="eg-host" x="210" y="380" width="170" height="66" rx="12"/>
+          <rect class="eg-hl" x="210" y="380" width="170" height="66" rx="12" style="--a:1.3"/>
+          <text x="105" y="408" font-size="14" font-weight="700" text-anchor="middle">api.anthropic.com</text>
+          <text x="295" y="408" font-size="14" font-weight="700" text-anchor="middle">erp.internal</text>
+          <text class="eg-ver eg-ht" x="105" y="430" font-size="13.5" text-anchor="middle" style="--a:.5">allowed</text>
+          <text class="eg-ver eg-ht" x="295" y="430" font-size="13.5" text-anchor="middle" style="--a:1.3">allowed</text>
+          <rect class="eg-pk" x="-8" y="-5.5" width="16" height="11" rx="3" style="--a:.5;--x0:60;--dx2:45"/>
+          <rect class="eg-pk" x="-8" y="-5.5" width="16" height="11" rx="3" style="--a:1.3;--x0:147;--dx2:148"/>
+          <rect class="eg-pk bad" x="-8" y="-5.5" width="16" height="11" rx="3" style="--a:3.2;--x0:253"/>
+          <rect class="eg-pk bad" x="-8" y="-5.5" width="16" height="11" rx="3" style="--a:4.4;--x0:340"/>
+        </g>
+      </svg>
+      <figcaption>Four agents each make one outbound call. Two reach hosts on the allowlist. Two are stopped at the gate and logged, with the reason shown. A made-up example.</figcaption>
+    </figure>
+  </div></div>
+</section>
+
+<section id="step-4" class="step ink">
+  <div class="wrap"><div class="step-grid">
+    <div class="step-copy">
+      <p class="eyebrow">Step 4 of 4</p>
+      <h2>You get a receipt you can hand to an auditor.</h2>
+      <p class="plain">The machine signs a report of exactly what started. Someone else checks it, away from the machine.</p>
+      <details class="how">
+        <summary>How it works, in detail<small>What is signed, and how it is verified</small></summary>
+        <div class="how-in">
+          <ul>
+            <li>The report carries the boot profile (full-chain, shim-chain or verity-only), Secure Boot state and key provenance, the TPM PCR values, the verity roothash, the egress allowlist and a digest of the journal.</li>
+            <li>It is signed on the node and verified <b>off the node</b>: <code>volent attest --verify policy.json</code> compares it with a policy you wrote.</li>
+            <li>Key provenance is always reported. Any release-shaped build fails closed while it reads <code>dev-only</code>.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+    <div class="vis">
+      <p class="eyebrow">Reading the receipt</p>
+      <ul class="decode">
+        <li><b>boot_profile</b> says which security chain the machine started with.</li>
+        <li><b>verity_roothash</b> is a fingerprint of every file in the system. If one byte changes, it changes.</li>
+        <li><b>egress_allowlist</b> lists the only places the agents were allowed to call.</li>
+        <li><b>journal_digest</b> is a fingerprint of the record of what the agents did.</li>
+        <li><b>VERIFIED</b> means a separate program, off the machine, checked all of it against your policy.</li>
+      </ul>
+    </div>
+  </div></div>
+</section>
+
+<section id="recover" class="step paper">
+  <div class="wrap"><div class="step-grid">
+    <div class="step-copy">
+      <p class="eyebrow">And if it crashes</p>
+      <h2>If the power dies, it picks up where it left off.</h2>
+      <p class="plain">If power is cut in the middle of a task, it resumes. It never repeats a step that already happened.</p>
+      <ul class="proofs">
+        <li><b>0 duplicated side effects, 0 lost steps</b> across five kill -9 points.</li>
+        <li><b>400 of 400 steps completed</b> with 100 agents running 3 steps each.</li>
+      </ul>
+      <details class="how">
+        <summary>How it works, in detail<small>The journal and idempotency keys</small></summary>
+        <div class="how-in">
+          <ul>
+            <li>Every side effect is written to an on-disk journal <b>before</b> it happens, under an idempotency key of <code>{agent, step}</code>.</li>
+            <li>After a restart the runtime replays the journal. A step whose key is already recorded is skipped, never repeated.</li>
+            <li>Tested by killing the VM with <code>kill -9</code> at five points: 100 agents, 3 steps each, 400 of 400 completed, 0 duplicated, 0 lost.</li>
+            <li>There is no database in the image. Durability is the journal on <code>/data</code>.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+    <figure class="vis fig-rec" data-anim="recover">
+      <div class="rec">
+        <div class="rec-head"><span>Invoice batch, 5 steps</span><button class="btn replay" type="button" data-js>Replay</button></div>
+        <ol class="rec-steps" aria-hidden="true">
+          <li class="rw" style="--d:.9;--kk:6.6"><span class="ck"><svg aria-hidden="true" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="#3DDCC4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nm">1 Read the invoice</span><span class="chip"><span class="cw">waiting</span><span class="cd">done</span><span class="ck2">skipped, already done</span></span></li>
+          <li class="rw" style="--d:1.9;--kk:6.7"><span class="ck"><svg aria-hidden="true" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="#3DDCC4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nm">2 Check the totals</span><span class="chip"><span class="cw">waiting</span><span class="cd">done</span><span class="ck2">skipped, already done</span></span></li>
+          <li class="rw" style="--d:2.9;--kk:6.8"><span class="ck"><svg aria-hidden="true" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="#3DDCC4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nm">3 Ask the AI model</span><span class="chip"><span class="cw">waiting</span><span class="cd">done</span><span class="ck2">skipped, already done</span></span></li>
+          <li class="rw" style="--d:7.6;--kk:99"><span class="ck"><svg aria-hidden="true" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="#3DDCC4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nm">4 Write to the ledger</span><span class="chip"><span class="cw4">waiting</span><span class="cr4">running</span><span class="ci4">interrupted</span><span class="cd">done</span></span></li>
+          <li class="rw" style="--d:8.4;--kk:99"><span class="ck"><svg aria-hidden="true" viewBox="0 0 14 14"><path d="M2.5 7.5l3 3 6-7" fill="none" stroke="#3DDCC4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nm">5 Send the confirmation</span><span class="chip"><span class="cw">waiting</span><span class="cd">done</span></span></li>
+        </ol>
+        <div class="rec-banner" aria-hidden="true"><span class="b1">Power cut</span><span class="b2">Restarting</span><span class="b3">Replaying the journal</span><span class="b4">Back at work: nothing repeated, nothing lost</span></div>
+        <div class="rec-count" aria-hidden="true"><span><b>0</b> duplicates</span><span><b>0</b> lost</span></div>
+        <div class="rec-flash" aria-hidden="true"></div>
+      </div>
+      <figcaption>Power is cut after step 3 of 5. On restart the journal shows steps 1 to 3 are done, so they are skipped, and steps 4 and 5 finish. Across five kill -9 points: 0 duplicates, 0 lost.</figcaption>
+    </figure>
+  </div></div>
+</section>
+
+<section id="measured" class="ink">
+  <div class="wrap">
+    <p class="eyebrow">Measured, not asserted</p>
+    <h2>Every number here came out of a test.</h2>
+    <p class="plain">Each number below was measured on real hardware, three times. We report the middle result, not the best one.</p>
+    <p class="lede">
+      Each phase of the build ends with a gate that must pass before the work is tagged. More than
+      10% run-to-run variance counts as a failure, because an unstable measurement is an untrusted one.
+      Figures are valid on hardware-accelerated KVM only.
+    </p>
+
+    <div class="tablewrap" role="region" aria-label="Measured results" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">What</th><th scope="col" class="num">Measured</th><th scope="col" class="num">Bar</th><th scope="col">Where</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Boot to first heartbeat (spread 3.0%)</th><td class="num">3.486 s<span class="gauge" aria-hidden="true"><i style="width:69.7%"></i></span></td><td class="bar">&lt; 5 s</td><td class="ev">KVM host, cold page cache</td></tr>
+          <tr><th scope="row">Root payload</th><td class="num">53 MB</td><td class="bar">50–100 MB</td><td class="ev">squashfs + dm-verity</td></tr>
+          <tr><th scope="row">10,000 idle agents, total runtime memory</th><td class="num">40.5 MB<span class="gauge" aria-hidden="true"><i style="width:6.8%"></i></span></td><td class="bar">&lt; 600 MB</td><td class="ev">4 GB guest, 2 vCPU; about 4 KB each</td></tr>
+          <tr><th scope="row">Control API p99 at 10,000 agents</th><td class="num">50 µs<span class="gauge" aria-hidden="true"><i style="width:.5%;min-width:3px"></i></span></td><td class="bar">&lt; 100 ms</td><td class="ev">median of 3 runs</td></tr>
+          <tr><th scope="row">Concurrent in-flight model calls</th><td class="num">1,500</td><td class="bar">≥ 1,500</td><td class="ev">2 vCPU, against a mock model server; 0 refused, 0 duplicates</td></tr>
+          <tr><th scope="row">Side effects duplicated after kill -9</th><td class="num">0</td><td class="bar">0</td><td class="ev">five chaos points, 100 agents × 3 steps</td></tr>
+          <tr><th scope="row">Completed steps lost after kill -9</th><td class="num">0</td><td class="bar">0</td><td class="ev">400/400 completed at every point; 0 lost</td></tr>
+          <tr><th scope="row">Sandbox storm, WebAssembly invocations</th><td class="num">1,000/1,000</td><td class="bar">0 crashed</td><td class="ev">2 vCPU, three runs</td></tr>
+          <tr><th scope="row">WebAssembly engine NIF, two clean builds</th><td class="num">byte-identical</td><td class="bar">2 of 2</td><td class="ev">clean rebuild</td></tr>
+          <tr><th scope="row">Third-party crates digest-verified</th><td class="num">282/282</td><td class="bar">100%</td><td class="ev">against the upstream lock</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      <b>Hardware.</b> Intel i7-4770 (2013), 8 cores, under KVM; guest of 2 vCPU and 4&nbsp;GB. Three runs, median
+      reported. Image built from tag phase-7, roothash 7cf7788d… The engine NIF is the one component shown to build
+      identically twice; <b>reproducing the whole image from its release tag is a Phase 8 gate, not yet a claim.</b>
+    </p>
+  </div>
+</section>
+
+<section id="compare" class="paper">
+  <div class="wrap">
+    <p class="eyebrow">How it compares</p>
+    <h2>A different shape from what you can rent.</h2>
+    <p class="plain">Other tools solve other problems well. This one is built so a regulated team can show what ran.</p>
+    <p class="lede">The trade is stated plainly in the last row: it boots a whole VM.</p>
+
+    <div class="tablewrap" role="region" aria-label="Comparison of categories" tabindex="0">
+      <table class="cmp">
+        <thead><tr>
+          <th scope="col">Capability</th><th scope="col">Hosted code sandboxes</th><th scope="col">Cloud agent runtimes</th><th scope="col">Durable workflow engines</th><th scope="col" class="us">VOLENT</th>
+        </tr></thead>
+        <tbody>
+          <tr><th scope="row">Self-hostable on any hypervisor or cloud</th>
+            <td><span class="m p">partial</span></td><td><span class="m n"><span aria-hidden="true">–</span><span class="sr">No</span></span></td><td><span class="m y"><span aria-hidden="true">✓</span><span class="sr">Yes</span></span></td><td class="us"><span class="m y"><span aria-hidden="true">✓</span><span class="sr">Yes</span></span></td></tr>
+          <tr><th scope="row">Cryptographic attestation of what ran</th>
+            <td><span class="m n"><span aria-hidden="true">–</span><span class="sr">No</span></span></td><td><span class="m n"><span aria-hidden="true">–</span><span class="sr">No</span></span></td><td><span class="m n"><span aria-hidden="true">–</span><span class="sr">No</span></span></td><td class="us"><span class="m y"><span aria-hidden="true">✓</span><span class="sr">Yes</span></span></td></tr>
+          <tr><th scope="row">Untrusted code isolation</th>
+            <td><span class="m y"><span aria-hidden="true">✓</span><span class="sr">Yes</span></span></td><td><span class="m p">partial</span></td><td><span class="m n"><span aria-hidden="true">–</span><span class="sr">No</span></span></td><td class="us"><span class="m y"><span aria-hidden="true">✓</span><span class="sr">Yes</span></span></td></tr>
+          <tr><th scope="row">Deny-by-default egress, built in</th>
+            <td><span class="m p">partial</span></td><td><span class="m p">partial</span></td><td><span class="m n"><span aria-hidden="true">–</span><span class="sr">No</span></span></td><td class="us"><span class="m y"><span aria-hidden="true">✓</span><span class="sr">Yes</span></span></td></tr>
+          <tr><th scope="row">Durable, journaled side effects</th>
+            <td><span class="m n"><span aria-hidden="true">–</span><span class="sr">No</span></span></td><td><span class="m p">partial</span></td><td><span class="m y"><span aria-hidden="true">✓</span><span class="sr">Yes</span></span></td><td class="us"><span class="m y"><span aria-hidden="true">✓</span><span class="sr">Yes</span></span></td></tr>
+          <tr><th scope="row">Startup</th>
+            <td class="t">tens of ms (snapshots / warm pools)</td><td class="t">ms (warm)</td><td class="t">n/a (runs in your workers)</td><td class="us t" style="color:var(--text)">≈3.5 s cold boot of the whole VM</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fine">Categories, not products; individual products vary and change. Attestation here means a signed report verified off-node. Secure Boot keys are development keys in v0.1.0. Ratings are conservative and are the authors' reading, not a benchmark.</p>
+  </div>
+</section>
+
+<section id="status" class="ink">
+  <div class="wrap">
+    <p class="eyebrow">Status</p>
+    <h2>What works today, and what does not yet.</h2>
+    <p class="plain">This is early software, not yet version 1.0. The table says what is done and what is still in progress.</p>
+
+    <div class="tablewrap" role="region" aria-label="Build status" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Capability</th><th scope="col">State</th><th scope="col">Evidence</th></tr></thead>
+        <tbody>
+          <tr><td>Hardened image, UEFI boot under 5 s</td><td><span class="pill ok">Shipped</span></td><td class="ev">Phase 1–2 gates</td></tr>
+          <tr><td>Custom PID 1, sealed runtime, no shell in root</td><td><span class="pill ok">Shipped</span></td><td class="ev">Phase 3 gate</td></tr>
+          <tr><td>dm-verity, Secure Boot, A/B slots with auto-revert</td><td><span class="pill ok">Shipped</span></td><td class="ev">Phase 4 gate</td></tr>
+          <tr><td>Agent runtime, manifests, control API, journal, chaos recovery</td><td><span class="pill ok">Shipped</span></td><td class="ev">Phase 5 gate</td></tr>
+          <tr><td>WASM sandbox, egress gate, inference through the gate</td><td><span class="pill ok">Shipped</span></td><td class="ev">Phase 6 gate</td></tr>
+          <tr><td>Signed attestation report (PCRs, roothash, boot profile) with off-node verification (<code>volent attest --verify</code>)</td><td><span class="pill ok">Shipped</span></td><td class="ev">Phase 7 gate</td></tr>
+          <tr><td>First-boot cloud-metadata provisioning, then sealed</td><td><span class="pill ok">Shipped</span></td><td class="ev">Phase 7 gate</td></tr>
+          <tr><td>Per-cloud image formats (raw, qcow2, vhd, AWS UEFI blob) and the takeover installer; three boot profiles</td><td><span class="pill ok">Shipped</span></td><td class="ev">Phase 7 gate</td></tr>
+          <tr><td>Fleet-enrollment POST and generated runbooks</td><td><span class="pill ok">Shipped</span></td><td class="ev">Phase 7 gate</td></tr>
+          <tr><td>CycloneDX SBOM at every build</td><td><span class="pill soon">In progress</span></td><td class="ev">Phase 8</td></tr>
+          <tr><td>Bench freeze with a regression guard</td><td><span class="pill soon">In progress</span></td><td class="ev">Phase 8</td></tr>
+          <tr><td>Full image reproducible from its release tag</td><td><span class="pill soon">In progress</span></td><td class="ev">Phase 8 gate</td></tr>
+          <tr><td>WebAssembly engine security update</td><td><span class="pill soon">In progress</span></td><td class="ev">Phase 8</td></tr>
+          <tr><td>Confidential-VM support (host cannot read VM memory)</td><td><span class="pill soon">Roadmap</span></td><td class="ev">Planned for v0.2, not built</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      <b>Read before relying on it.</b> v0.1.0 ships development Secure Boot keys; production key custody is v0.2.
+      The shim chain has not yet booted under stock Microsoft-CA firmware, because that needs a Microsoft-signed shim,
+      so do not assume Secure Boot works on stock cloud firmware out of the box.
+    </p>
+    <p class="note">
+      Scope deliberately excluded from v0.1.0: ARM, bare metal, multi-VM clustering, a web
+      UI, a Kubernetes operator, and local GPU inference. Multi-tenancy is one VM per
+      tenant. Agents inside a single node share a trust domain, and that is stated rather
+      than implied.
+    </p>
+  </div>
+</section>
+
+<section id="faq" class="paper">
+  <div class="wrap">
+    <p class="eyebrow">FAQ</p>
+    <h2>Questions people ask first.</h2>
+    <p class="plain">Straight answers to what compliance and security teams ask. We say so plainly when the answer is not yet.</p>
+
+    <div class="faq">
+      <details class="q">
+        <summary>Is my data private from whoever runs the host?</summary>
+        <div class="q-in"><p><b>Not yet — on our roadmap.</b> Whoever controls the host machine can see the VM's memory today. Confidential-VM support is planned for v0.2 and is not built.</p><p>What the image does give you today is control over where data goes: the checkpoint stops every call that is not on your list, and the receipt shows what ran.</p></div>
+      </details>
+      <details class="q">
+        <summary>Does it run in my cloud or on-prem?</summary>
+        <div class="q-in"><p>Yes, as one image on your own hypervisor or in your own cloud account. Formats are raw, qcow2, vhd and an AWS UEFI blob. Runbooks exist for AWS, Azure, GCP, DigitalOcean, Oracle, Hyper-V, KVM/Proxmox and Firecracker.</p><p>Two limits. Every number on this page was measured on KVM only. And the Secure Boot chain has not yet booted on stock cloud firmware, so on a public cloud expect the weaker boot profiles first.</p></div>
+      </details>
+      <details class="q">
+        <summary>Which AI models can it use?</summary>
+        <div class="q-in"><p>Anthropic, OpenAI, and any OpenAI-compatible endpoint you point it at. Every model call goes through the checkpoint like any other outbound call.</p><p>There is no local GPU inference in v0.1.0.</p></div>
+      </details>
+      <details class="q">
+        <summary>What happens if it crashes?</summary>
+        <div class="q-in"><p>It picks up where it left off. Every side effect is written to a journal before it happens, so a restart skips what is already done.</p><p>We tested this by killing the VM with <code>kill -9</code> at five different points: 0 duplicated side effects and 0 lost steps, with 400 of 400 steps completed.</p></div>
+      </details>
+      <details class="q">
+        <summary>Is it production-ready?</summary>
+        <div class="q-in"><p><b>No.</b> It is pre-1.0 and we are looking for design partners. v0.1.0 uses development Secure Boot keys; production key custody is planned for v0.2.</p><p>The gates behind each shipped item are public in the test report.</p></div>
+      </details>
+      <details class="q">
+        <summary>How is this different from a sandbox service?</summary>
+        <div class="q-in"><p>You run the whole sealed VM yourself, and you get three things a hosted sandbox does not offer: a signed receipt, one checkpoint for all outbound calls, and a journal that survives a crash.</p><p>The trade is startup time. It takes about 3.5 s for a cold boot of the whole VM, where hosted sandboxes start in milliseconds.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="glossary" class="ink">
+  <div class="wrap">
+    <p class="eyebrow">Glossary</p>
+    <h2>Plain words for the technical terms.</h2>
+    <p class="plain">Short definitions of the terms used on this page. Skip it if you already know them.</p>
+    <dl class="gl">
+      <dt>Attestation</dt><dd>A signed report of what a machine started with, checked by a separate program away from the machine.</dd>
+      <dt>Allowlist</dt><dd>The list of places an agent is allowed to connect to. Everything else is blocked.</dd>
+      <dt>Egress</dt><dd>Traffic leaving the machine for the outside world.</dd>
+      <dt>Journal</dt><dd>A written record of each action, saved before the action happens, so work can resume after a crash without repeating anything.</dd>
+      <dt>Sealed image</dt><dd>The whole operating system as one read-only file that is checked on every start. Nothing inside it can be edited while it runs.</dd>
+      <dt>Secure Boot</dt><dd>A firmware feature that only starts software signed with a trusted key.</dd>
+      <dt>TPM</dt><dd>A small chip, real or virtual, that records fingerprints of what started so the record cannot be rewritten later.</dd>
+      <dt>Manifest</dt><dd>The file that describes an agent: its model, its tools and where it may connect.</dd>
+      <dt>WebAssembly sandbox</dt><dd>A locked box for running code you do not fully trust. It can only do what the box was given permission to do.</dd>
+      <dt>Hypervisor</dt><dd>Software that runs virtual machines on a physical computer, such as KVM, Hyper-V or VMware.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="partners" class="paper">
+  <div class="wrap">
+    <div class="cta-panel">
+      <div class="cta-in">
+        <img class="mark" src="../assets/logo-hero.png" alt="" aria-hidden="true">
+        <p class="eyebrow">Design partners</p>
+        <h2>Help decide what “proof” has to mean.</h2>
+        <p class="plain">We want a few teams who answer to an auditor or a regulator. Use it on your own hardware and tell us where it breaks.</p>
+        <div class="cta-cols">
+          <div>
+            <h3>Who it is for</h3>
+            <ul>
+              <li>Regulated and sovereign teams running AI agents on data that must not leave</li>
+              <li>Teams who need to show an auditor what ran, not describe it</li>
+              <li>Operators on their own hypervisor, their own cloud account, or private interconnect and edge hosting partners</li>
+            </ul>
+          </div>
+          <div>
+            <h3>What partners get</h3>
+            <ul>
+              <li>Images in the formats your platform imports, with generated runbooks</li>
+              <li>A direct line to the people building it</li>
+              <li>A say in what the attestation report must carry</li>
+            </ul>
+          </div>
+          <div>
+            <h3>What we ask</h3>
+            <ul>
+              <li>Run it on your own hardware, and tell us where it breaks</li>
+              <li>Review the attestation report against your real audit questions</li>
+              <li>Accept that this is pre-1.0 and development-key only</li>
+            </ul>
+          </div>
+        </div>
+        <p class="contact"><a id="contact" data-js class="btn btn-primary" hidden>Email us</a><noscript>bhavin500 [at] yahoo [dot] com</noscript></p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav class="footnav" aria-label="Site">
+      <a href="../">Home</a><a href="./">How it works</a><a href="../use-cases/">Use cases</a><a href="../security/">Security</a><a href="../compare/">Compare</a><a href="../pricing/">Pricing</a><a href="../benchmarks/">Benchmarks</a><a href="../report/">Test report</a>
+    </nav>
+    <p>Neither this page nor the test report loads anything from anyone else — no outside fonts, scripts, analytics or CDNs. This page's Content-Security-Policy enforces it; view source.</p>
+    <div class="row">
+      <span>VOLENT — agentic OS appliance. Pre-1.0, working with a small group of design partners.</span>
+      <span class="mono">x86-64 · KVM · Xen · Hyper-V · VMware · Firecracker</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){var a=document.getElementById("contact");if(!a)return;var p=["bhavin500","yahoo.com"];var e=p[0]+"@"+p[1];a.href="mailto:"+e+"?subject="+encodeURIComponent("Design partner enquiry");a.textContent=e;a.hidden=false;})();
+</script>
+<script>
+(function(){
+if(!window.matchMedia||matchMedia("(prefers-reduced-motion: reduce)").matches||!window.IntersectionObserver)return;
+var d=document,q=function(s){return[].slice.call(d.querySelectorAll(s))};
+d.documentElement.classList.add("motion");
+function info(e){var t=e.textContent,p=t.split(".");return{t:t,n:(p[1]||"").length,c:t.indexOf(",")>-1,v:parseFloat(t.replace(/,/g,""))}}
+function fmt(v,i){var p=v.toFixed(i.n).split(".");if(i.c)p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,",");return p.join(".")}
+function count(e){var i=e.__i,s=0;e.__s=1;if(!i.v)return;requestAnimationFrame(function f(ts){s=s||ts;var k=Math.min((ts-s)/1200,1);e.textContent=k<1?fmt(i.v*(.9+.1*(1-Math.pow(1-k,3))),i):i.t;if(k<1)requestAnimationFrame(f)})}
+var clocks=q("[data-clock]");
+function tick(){var on=0;clocks.forEach(function(c){var f=c.closest("figure");if(f.__d){c.textContent=c.__t}else if(f.classList.contains("play")){on=1;var v=parseFloat(getComputedStyle(f).getPropertyValue("--"+c.getAttribute("data-clock")));if(v>=0)c.textContent=v.toFixed(2)}});if(on)requestAnimationFrame(tick)}
+function restart(f){f.classList.remove("play");f.style.animation="none";void f.offsetWidth;f.style.animation="";f.__d=0;f.classList.add("play");tick()}
+var io=new IntersectionObserver(function(es){es.forEach(function(e){var t=e.target;
+if(t.tagName=="SECTION"){if(e.isIntersecting)t.classList.add("seen");return}
+var on=e.intersectionRatio>=.35;
+if(t.hasAttribute("data-count")){if(on&&!t.__s)count(t);return}
+if(on){if(t.__d)restart(t);else{t.classList.add("play");tick()}}else t.classList.remove("play")})},{threshold:[0,.35],rootMargin:"0px 0px -8% 0px"});
+q("[data-count]").forEach(function(e){e.__i=info(e);io.observe(e)});
+clocks.forEach(function(c){c.__t=c.textContent});
+q("[data-anim]").forEach(function(f){f.addEventListener("animationend",function(){f.__d=1;tick()});io.observe(f)});
+q("section").forEach(function(s){io.observe(s)});
+d.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".replay");if(b)restart(b.closest("figure"))});
+})();
+</script>
+</body>
+</html>

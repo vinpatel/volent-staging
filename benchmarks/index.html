@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; font-src 'self'; script-src 'none'; base-uri 'none'; form-action 'none'">
+<title>VOLENT benchmarks — every table, every label, the method</title>
+<meta name="description" content="Benchmark v1: real agents on an open-weight model, concurrency, and capacity by VM size. Single measured runs on 2013 hardware, with the hardware, model, image and method on the page.">
+<link rel="canonical" href="https://vinpatel.github.io/volent/benchmarks/">
+<link rel="icon" href="../assets/favicon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VOLENT benchmarks — every table, every label, the method">
+<meta property="og:description" content="Real agents on an open-weight model, concurrency, and capacity by VM size. Single measured runs on 2013 hardware, labelled with hardware, model, image and method.">
+<meta property="og:image" content="https://vinpatel.github.io/volent/assets/logo-1024.png">
+<meta property="og:url" content="https://vinpatel.github.io/volent/benchmarks/">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+@font-face{font-family:"Display";src:url("../assets/fonts/display.woff2") format("woff2");font-weight:500 700;font-display:swap}
+@property --te{syntax:"<number>";inherits:true;initial-value:7}
+@property --tr{syntax:"<number>";inherits:true;initial-value:10}
+@property --tb{syntax:"<number>";inherits:true;initial-value:3.49}
+@property --tc{syntax:"<number>";inherits:true;initial-value:6}
+@property --tt{syntax:"<number>";inherits:true;initial-value:6}
+@property --tk{syntax:"<number>";inherits:true;initial-value:8}
+@property --tm{syntax:"<number>";inherits:true;initial-value:10}
+:root{
+  --ink:#0B0E17; --ink-2:#111626; --ink-3:#161D31;
+  --line:#232C44; --line-2:#344060;
+  --text:#EEF2FA; --muted:#B4BED3; --dim:#8F9CB8;
+  --paper:#F3EEE2; --paper-ink:#14171F; --paper-muted:#3E4250; --paper-dim:#5A5E6B; --paper-line:#C9C0AA;
+  --paper-ok:#065348; --paper-bad:#B02E14; --paper-seal:#7A5200;
+  --verify:#3DDCC4; --seal:#F2B138; --warn:#F2803B;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --wrap:1200px; --gutter:24px;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --display:"Display",var(--sans);
+  /* timeline clocks: the final frame is the default, so no-JS and reduced motion show finished states */
+  --te:7; --tr:10; --tb:3.49; --tc:6; --tt:6; --tk:8; --tm:10;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:96px}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;overflow-x:hidden}
+a{color:var(--verify);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--verify);outline-offset:3px;border-radius:4px}
+.skip{position:absolute;left:12px;top:-60px;z-index:50;background:var(--verify);color:#06231F;padding:10px 16px;border-radius:8px;font-weight:600}
+.skip:focus{top:12px;text-decoration:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gutter)}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gutter)}
+.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:1/-1}
+h1,h2,h3{font-family:var(--display);margin:0;font-weight:700}
+h1{font-size:clamp(2.7rem,1.5rem + 4vw,4.6rem);letter-spacing:-.02em;line-height:1.04}
+h2{font-size:clamp(2.25rem,1.4rem + 2.6vw,3.5rem);letter-spacing:-.02em;line-height:1.08;margin:0 0 .4em}
+h3{font-size:1.18rem;line-height:1.25;font-weight:600}
+p{margin:0 0 1em}
+code,.mono{font-family:var(--mono);font-size:.88em}
+.ic{width:1.1em;height:1.1em;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.2em}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--verify);margin:0 0 var(--s4);font-weight:600}
+.eyebrow::before{content:"";width:24px;height:2px;background:currentColor}
+.plain{font-size:clamp(1.1rem,1rem + .5vw,1.3rem);line-height:1.5;color:var(--muted);max-width:36em;margin:0 0 1em}
+.lede{font-size:clamp(1.15rem,1.05rem + .6vw,1.4rem);color:var(--text);max-width:30em;margin:0 0 .8em;line-height:1.4;font-weight:500}
+.fine{font-size:.88rem;color:var(--dim);margin-top:var(--s4);max-width:84ch}
+
+/* ---- ink and paper bands ---- */
+section,.hero{position:relative;padding-block:clamp(72px,9vw,128px)}
+.ink{background:var(--ink);color:var(--text);--surface:rgba(22,29,49,.8);--btn-on:#06231F}
+.paper{
+  --text:var(--paper-ink);--muted:var(--paper-muted);--dim:var(--paper-dim);--line:var(--paper-line);--line-2:#A99E84;
+  --verify:var(--paper-ok);--warn:var(--paper-bad);--seal:var(--paper-seal);--surface:#FBF8F0;--btn-on:#fff;
+  background-color:var(--paper);color:var(--text);
+  background-image:repeating-linear-gradient(180deg,transparent 0 31px,rgba(20,23,31,.05) 31px 32px);
+}
+.paper::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;pointer-events:none;
+  background:radial-gradient(circle at 9px 0,var(--ink) 6px,transparent 6.6px) 0 0/18px 10px repeat-x}
+.ink + .paper::before,.paper::before{display:block}
+.paper + .paper::before{display:none}
+
+/* ---- announcement bar and nav ---- */
+.announce{background:var(--paper);color:var(--paper-ink);text-align:center;font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;padding:9px 16px;line-height:1.4}
+.announce a{color:var(--paper-ok);font-weight:700;text-decoration:underline;text-underline-offset:3px;margin-left:10px}
+.topnav{position:sticky;top:0;z-index:20;background:rgba(11,14,23,.86);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
+.topnav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;letter-spacing:.08em;flex:none;color:var(--text)}
+.brand:hover{text-decoration:none}
+.brand img{width:26px;height:26px;display:block}
+.navlinks{margin-left:auto;display:flex;gap:4px;font-size:.9rem;min-width:0;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{color:var(--muted);padding:8px 10px;border-radius:8px;flex:none}
+.navlinks a:hover{color:var(--text);text-decoration:none;background:rgba(147,160,189,.12)}
+.navlinks a.rep{color:var(--verify);border:1px solid rgba(61,220,196,.4)}
+.navlinks a[aria-current]{color:var(--text)}
+.navlinks a.apply{background:var(--verify);color:#06231F;font-weight:700}
+.navlinks a.apply:hover{filter:brightness(1.08)}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;border-radius:12px;font-size:.98rem;font-weight:600;border:1.5px solid var(--line-2);color:var(--text);background:transparent;font-family:inherit;cursor:pointer;transition:border-color .15s,transform .15s}
+.btn:hover{border-color:var(--verify);text-decoration:none;transform:translateY(-1px)}
+.btn-primary{background:var(--verify);border-color:var(--verify);color:var(--btn-on)}
+.btn-primary:hover{filter:brightness(1.07)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.cta .btn{padding:14px 24px;font-size:1.02rem}
+.textlink{color:var(--text);font-weight:600;border-bottom:2px solid var(--verify);padding-bottom:1px}
+.textlink:hover{text-decoration:none;color:var(--verify)}
+.replay{display:inline-flex;visibility:hidden;padding:6px 14px;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono)}
+.contact{display:flex;align-items:center;min-height:54px;margin:0}
+
+/* ---- hero ---- */
+.hero{padding-top:clamp(28px,3vw,40px);padding-bottom:clamp(56px,6vw,88px);overflow:hidden}
+.hero-grid{align-items:start;row-gap:var(--s7)}
+.hero h1 .accent{color:var(--verify)}
+.hero .eyebrow{margin-bottom:var(--s4)}
+.hero .lede{margin-top:var(--s5)}
+.support{color:var(--muted);max-width:30em;margin:0 0 var(--s5);font-size:1.05rem}
+.hero .cta{margin-bottom:var(--s5)}
+.maturity{margin:var(--s5) 0 0;font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:10px}
+.maturity::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--seal);flex:none}
+.hero-vis{display:grid;gap:var(--s3);min-width:0}
+
+/* ---- cards and visuals ---- */
+.vis{margin:0;padding:var(--s4) var(--s5);border:1px solid var(--line);border-radius:16px;min-width:0;background:var(--surface)}
+.vis figcaption{margin-top:var(--s3)}
+.vis svg{display:block;width:100%;height:auto}
+.vis svg text{font-family:var(--mono);fill:var(--text)}
+.vis-t{min-height:48px;font-family:var(--mono);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 2px 14px}
+figcaption,.alt{font-size:.86rem;color:var(--dim);line-height:1.55}
+.scrollx{overflow-x:auto}
+.card{position:relative;border:1px solid var(--line);border-radius:14px;padding:var(--s5);min-width:0;background:var(--surface)}
+.card h3{margin-bottom:.5em}
+.card p{margin:0;color:var(--muted);font-size:1rem;line-height:1.55}
+.cards{display:grid;gap:var(--gutter);margin-top:var(--s7)}
+.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.sec-head{margin-bottom:var(--s5);row-gap:var(--s3);align-items:end}
+.more{margin:var(--s6) 0 0}
+.more a{font-weight:600}
+
+/* ---- room diagram, clock --tm runs 0 to 10 ---- */
+.rm-wrap{min-width:600px}
+.swipe{display:none;margin:var(--s2) 0 0}
+.rm-room{fill:rgba(61,220,196,.05);stroke:var(--verify);stroke-width:2}
+.rm-lane{stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:3 6;fill:none}
+.rm-ag{fill:var(--ink-3);stroke:var(--verify);stroke-width:2}
+.rm-ag.bad{stroke:var(--warn)}
+.rm-core{fill:var(--verify)}
+.rm-core.bad{fill:var(--warn)}
+.rm-door{fill:#0F1B26;stroke:var(--verify);stroke-width:2.5}
+.rm-gf{fill:none;stroke-width:4;opacity:min(clamp(0,calc((var(--tm) - var(--a) - 1.7)*10),1),clamp(0,calc((var(--a) + 2.9 - var(--tm))*3),1))}
+.rm-box{fill:var(--ink-3);stroke:var(--line-2);stroke-width:1.5}
+.rm-hl{fill:rgba(61,220,196,.1);stroke:var(--verify);stroke-width:2;opacity:clamp(0,calc((var(--tm) - var(--a) - 2.5)*6),1)}
+.rm-ok{opacity:clamp(0,calc((var(--tm) - var(--a) - 2.5)*5),1)}
+.rm-bad{opacity:clamp(0,calc((var(--tm) - var(--a) - 1.8)*8),1)}
+.rm-bad path{stroke:var(--warn);stroke-width:4;stroke-linecap:round;fill:none}
+.rm-log{fill:#0D1220;stroke:var(--line-2);stroke-width:1.5}
+.rm-ln{opacity:clamp(0,calc((var(--tm) - var(--a))*5),1)}
+svg text.rm-lbl{fill:var(--dim);font-size:12px;letter-spacing:.14em}
+svg text.rm-ver{fill:var(--verify)}
+svg text.rm-warn{fill:var(--warn);paint-order:stroke;stroke:#141B2E;stroke-width:5px;stroke-linejoin:round}
+.rm-pk{
+  --p1:clamp(0,calc((var(--tm) - var(--a))/.6),1);
+  --p2:clamp(0,calc((var(--tm) - var(--a) - .6)/1.2),1);
+  --p3:clamp(0,calc((var(--tm) - var(--a) - 1.8)/.8),1);
+  --e1:calc(var(--p1)*var(--p1)*(3 - 2*var(--p1)));
+  --e2:calc(var(--p2)*var(--p2)*(3 - 2*var(--p2)));
+  --e3:calc(var(--p3)*var(--p3)*(3 - 2*var(--p3)));
+  fill:var(--verify);
+  transform:translate(calc((var(--x0) + (396 - var(--x0))*var(--e2) + 94*var(--e3))*1px),calc((112 + 78*var(--e1) + (var(--ye) - 190)*var(--e3))*1px));
+  opacity:min(clamp(0,calc((var(--tm) - var(--a))*10),1),clamp(0,calc((var(--a) + 2.7 - var(--tm))*6),1))
+}
+.rm-pk.bad{
+  fill:var(--warn);
+  transform:translate(calc((var(--x0) + (392 - var(--x0))*var(--e2) - 100*var(--p3))*1px),calc((112 + 78*var(--e1))*1px))
+}
+.rm-slip{
+  --r1:clamp(0,calc((var(--tm) - 6.2)/.5),1);
+  --r2:clamp(0,calc((var(--tm) - 6.7)/.9),1);
+  --r3:clamp(0,calc((var(--tm) - 7.6)/.6),1);
+  --r4:clamp(0,calc((var(--tm) - 8.2)/.5),1);
+  fill:#F3EEE2;stroke:#C9C0AA;stroke-width:1;
+  transform:translate(calc((240 + 210*var(--r2) + 110*var(--r4))*1px),calc((296 - 106*var(--r1) + 130*var(--r3))*1px));
+  opacity:clamp(0,calc((var(--tm) - 6.2)*10),1)
+}
+
+/* ---- the sample receipt that leaves the room ---- */
+.receipt-fig{margin:0;min-width:0}
+.slip{
+  position:relative;background:var(--paper);color:var(--paper-ink);padding:18px 24px 22px;
+  --text:var(--paper-ink);--muted:var(--paper-muted);--dim:var(--paper-dim);--line:var(--paper-line);--line-2:#A99E84;--verify:var(--paper-ok);--warn:var(--paper-bad);--btn-on:#fff;
+  -webkit-mask:radial-gradient(circle at 9px 0,#0000 6px,#000 6.6px) top/18px 51% repeat-x,radial-gradient(circle at 9px 100%,#0000 6px,#000 6.6px) bottom/18px 51% repeat-x;
+  mask:radial-gradient(circle at 9px 0,#0000 6px,#000 6.6px) top/18px 51% repeat-x,radial-gradient(circle at 9px 100%,#0000 6px,#000 6.6px) bottom/18px 51% repeat-x;
+}
+.sl-head{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--paper-dim);padding-bottom:10px;border-bottom:1px dashed #A99E84}
+.sl-foot{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s4);padding-top:var(--s2)}
+.sl-foot .rc-zone{flex:1;min-width:0}
+.sl-rows{list-style:none;margin:2px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--s5)}
+.sl-rows li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;padding:8px 6px;border-bottom:1px solid rgba(20,23,31,.1);position:relative;border-radius:6px}
+.sl-rows b{display:block;font-weight:650;font-size:.92rem;line-height:1.3;color:var(--paper-ink)}
+.sl-rows small{display:block;color:var(--paper-dim);font-size:.72rem;margin-top:2px;font-family:var(--mono);overflow-wrap:anywhere}
+.sl-rows li.changed{box-shadow:inset 0 0 0 2px var(--paper-bad);background:rgba(176,46,20,.08)}
+.sl-rows .was{display:block;font-family:var(--mono);font-size:.7rem;color:var(--paper-dim);margin-top:2px}
+.tick{width:22px;height:22px;border-radius:50%;background:var(--paper-ok);color:#fff;display:grid;place-items:center;margin-top:1px}
+.tick .ic{width:13px;height:13px;stroke-width:2.6}
+.tick.bad{background:var(--paper-bad)}
+.rstamp{
+  --sp:clamp(0,calc((var(--tc) - 4.3)/.35),1);
+  width:96px;height:96px;border-radius:50%;display:grid;place-items:center;text-align:center;
+  color:var(--paper-ok);border:3px double var(--paper-ok);font-family:var(--display);font-weight:700;line-height:1.2;
+  transform:rotate(-8deg) scale(calc(1 + 1.3*(1 - var(--sp))*(1 - var(--sp))));opacity:clamp(0,calc((var(--tc) - 4.3)*12),1)
+}
+.rstamp i{display:block;font-style:normal;font-size:.84rem;letter-spacing:.06em}
+.rstamp b{display:block;font-family:var(--mono);font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;margin-top:4px;font-weight:700}
+.rstamp.bad{color:var(--paper-bad);border-color:var(--paper-bad)}
+.rstamp.idle{color:var(--paper-dim);border-color:var(--paper-dim)}
+.pr{--lp:clamp(0,calc((var(--tc) - var(--s))/.4),1);clip-path:inset(0 calc((1 - var(--lp))*100%) 0 0)}
+.rc-zone{min-height:150px}
+.rc-zone .rc-btns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.rc-zone .btn{padding:10px 18px;font-size:.95rem}
+.rc-zone output{display:flex;align-items:center;gap:8px;margin-top:var(--s2);font-weight:600;min-height:1.6em;font-size:.98rem}
+.rc-zone output.ok{color:var(--verify)}
+.rc-zone output.bad{color:var(--warn)}
+.receipt-fig figcaption{margin-top:var(--s3)}
+.receipt-fig .fine{margin:var(--s2) 0 0}
+
+/* ---- proof strip ---- */
+.facts-strip{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+.facts-strip li{padding:var(--s5);border-left:1px solid var(--line);min-width:0}
+.facts-strip li:first-child{border-left:0;padding-left:0}
+.fig{display:block;font-family:var(--display);font-weight:700;font-size:clamp(2rem,1.5rem + 1.2vw,2.8rem);letter-spacing:-.03em;line-height:1;color:var(--text);margin-bottom:var(--s3)}
+.facts-strip .what{display:block;font-weight:600;line-height:1.35;margin-bottom:var(--s3)}
+.facts-strip small{display:block;font-family:var(--mono);font-size:.74rem;line-height:1.55;color:var(--dim);margin-bottom:var(--s3)}
+.facts-strip a{font-weight:600;font-size:.92rem}
+
+/* ---- promises, risks ---- */
+.risk .n{display:block;font-family:var(--mono);font-size:.76rem;letter-spacing:.16em;color:var(--warn);margin-bottom:var(--s3)}
+.risk{border-top:3px solid var(--warn)}
+.outcome{padding:var(--s6) var(--s5) var(--s5)}
+.outcome .n{display:block;font-family:var(--display);font-size:3.4rem;font-weight:700;letter-spacing:-.04em;line-height:1;color:var(--verify);margin-bottom:var(--s4)}
+.outcome h3{font-size:1.5rem;line-height:1.15;letter-spacing:-.01em;margin-bottom:.6em}
+.proofline{margin-top:var(--s5)!important;padding-top:var(--s4);border-top:1px dashed var(--line-2);font-family:var(--mono);font-size:.82rem!important;line-height:1.55;color:var(--verify)!important;font-weight:600}
+
+/* ---- try to break it ---- */
+.try{align-items:center;row-gap:var(--s5);margin-top:var(--s8)}
+.try .tn{display:inline-block;font-family:var(--mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--seal);margin-bottom:var(--s3);font-weight:600}
+.try h3{font-size:clamp(1.6rem,1.2rem + 1.4vw,2.3rem);line-height:1.12;letter-spacing:-.015em;margin-bottom:.5em}
+.try p{color:var(--muted);max-width:30em}
+.try .vis{max-width:560px}
+.steps{list-style:none;margin:var(--s8) 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s5);counter-reset:s}
+.steps li{counter-increment:s;position:relative;padding-top:58px;min-width:0}
+.steps li::before{content:counter(s);position:absolute;top:0;left:0;width:42px;height:42px;border-radius:50%;border:2px solid var(--verify);color:var(--verify);display:grid;place-items:center;font-family:var(--display);font-weight:700}
+.steps h3{font-size:1.1rem;margin-bottom:.4em}
+.steps p{margin:0;color:var(--muted);font-size:.96rem}
+.stage-t{font-family:var(--mono);font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:var(--s7) 0 var(--s4)}
+
+/* egress (door), boot, recover (power cut), tamper figures */
+.eg-w{opacity:min(clamp(0,calc((var(--te) + .01)*6),1),clamp(0,calc((7.9 - var(--te))*6),1))}
+.eg-lane{stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:3 6;fill:none}
+.eg-ag{fill:var(--ink-3);stroke:var(--verify);stroke-width:2}
+.eg-ag.bad{stroke:var(--warn)}
+.eg-core{fill:var(--verify)}
+.eg-core.bad{fill:var(--warn)}
+.eg-gate{fill:#0F1B26;stroke:var(--verify);stroke-width:2}
+.eg-gf{fill:none;stroke-width:3;opacity:min(clamp(0,calc((var(--te) - var(--a) - 1.05)*10),1),clamp(0,calc((var(--a) + 1.8 - var(--te))*3),1))}
+.eg-host{fill:var(--ink-3);stroke:var(--line-2);stroke-width:1.5}
+.eg-hl{fill:rgba(61,220,196,.07);stroke:var(--verify);stroke-width:2;opacity:clamp(0,calc((var(--te) - var(--a) - 2.4)*6),1)}
+.eg-ht{opacity:clamp(0,calc((var(--te) - var(--a) - 2.5)*5),1)}
+.eg-bad{--b:clamp(0,calc((var(--te) - var(--a) - 1.1)*8),1);opacity:var(--b)}
+.eg-bad path{stroke:var(--warn);stroke-width:3.5;stroke-linecap:round;fill:none}
+svg text.eg-lbl{fill:var(--dim);font-size:12px;letter-spacing:.16em}
+svg text.eg-warn{fill:var(--warn);font-size:14.5px;paint-order:stroke;stroke:#141B2E;stroke-width:5px;stroke-linejoin:round}
+svg text.eg-ver{fill:var(--verify)}
+.eg-pk{
+  --p1:clamp(0,calc((var(--te) - var(--a))/1.1),1);
+  --p2:clamp(0,calc((var(--te) - var(--a) - 1.1)/.6),1);
+  --p3:clamp(0,calc((var(--te) - var(--a) - 1.7)/.8),1);
+  --e1:calc(var(--p1)*var(--p1)*(3 - 2*var(--p1)));
+  --e2:calc(var(--p2)*var(--p2)*(3 - 2*var(--p2)));
+  --e3:calc(var(--p3)*var(--p3)*(3 - 2*var(--p3)));
+  fill:var(--verify);
+  transform:translate(calc((var(--x0) + var(--dx2)*var(--e2))*1px),calc((88 + 100*var(--e1) + 96*var(--e2) + 88*var(--e3))*1px));
+  opacity:calc(1 - 4*var(--p2)*(1 - var(--p2)))
+}
+.eg-pk.bad{
+  --eb:clamp(0,calc((var(--te) - var(--a) - 1.1)/.7),1);
+  fill:var(--warn);
+  transform:translate(calc(var(--x0)*1px),calc((88 + 100*var(--e1) - 70*var(--eb))*1px));
+  opacity:calc(1 - var(--eb))
+}
+.bt-clock{font-family:var(--display);font-size:1.9rem;letter-spacing:-.02em;color:var(--verify);font-weight:700;text-transform:none}
+.bt-clock i{font-style:normal;font-size:.55em;margin-left:.2em}
+.bt-rows{list-style:none;margin:0;padding:0;display:grid;gap:10px;position:relative}
+.bs{
+  --s:clamp(0,calc((var(--tb) - var(--b))/.3 + 1),1);
+  --act:clamp(0,calc((var(--tb) - var(--a))*8),1);
+  position:relative;display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:14px;align-items:center;
+  padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(17,22,38,.7);isolation:isolate;
+}
+.bs::before,.bs::after{content:"";position:absolute;inset:-1px;border-radius:12px;z-index:-1;pointer-events:none}
+.bs::before{border:1px solid rgba(242,177,56,.55);background:rgba(242,177,56,.07);opacity:calc(var(--act)*(1 - var(--s)))}
+.bs::after{border:1px solid rgba(61,220,196,.5);background:rgba(61,220,196,.07);opacity:var(--s)}
+.bs .lk{width:22px;height:26px;color:var(--verify);color:color-mix(in srgb,var(--verify) calc(var(--s)*100%),var(--seal));opacity:calc(.45 + .55*var(--act))}
+.bs .nm{display:block;font-weight:620;font-size:.97rem;line-height:1.3}
+.bs .nm small{display:block;font-weight:400;color:var(--dim);font-size:.8rem;margin-top:2px}
+.bs .st{display:grid;font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;justify-items:end}
+.bs .st span{grid-area:1/1;white-space:nowrap}
+.bs .st .d{color:var(--verify);opacity:clamp(0,calc((var(--s) - .5)*3),1)}
+.bs .st .w{color:var(--seal);opacity:calc(var(--act)*clamp(0,calc((.5 - var(--s))*3),1))}
+.rec{
+  --cut:min(clamp(0,calc((var(--tr) - 3.8)*8),1),clamp(0,calc((5.4 - var(--tr))*3),1));
+  --fade:min(clamp(0,calc((var(--tr) + .01)*5),1),clamp(0,calc((10.9 - var(--tr))*6),1));
+  position:relative;opacity:var(--fade)
+}
+.rec-head{min-height:48px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 2px 14px;font-family:var(--mono);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.rec-steps{list-style:none;margin:0;padding:0;display:grid;gap:9px;filter:brightness(calc(1 - .55*var(--cut)))}
+.rw{
+  --r:clamp(0,calc((var(--tr) - var(--d))/.5),1);
+  --k:clamp(0,calc((var(--tr) - var(--kk))/.4),1);
+  display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;
+  padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(17,22,38,.7)
+}
+.rw .ck{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;background:rgba(61,220,196,calc(.16*var(--r)));border-color:color-mix(in srgb,var(--verify) calc(var(--r)*100%),var(--line-2))}
+.rw .ck svg{width:13px;height:13px;opacity:var(--r);transform:scale(calc(.5 + .5*var(--r)))}
+.rw .nm{font-weight:600;font-size:.94rem;opacity:calc(1 - .3*var(--k))}
+.chip{display:grid;justify-items:end;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-align:right}
+.chip span{grid-area:1/1;opacity:0;max-width:15em}
+.chip .cw{color:var(--dim);opacity:clamp(0,calc((.5 - var(--r))*3),1)}
+.chip .cd{color:var(--verify);opacity:calc(clamp(0,calc((var(--r) - .5)*3),1)*(1 - var(--k)))}
+.chip .ck2{color:var(--seal);opacity:var(--k)}
+.chip .cw4{color:var(--dim);opacity:clamp(0,calc((3.2 - var(--tr))*8),1)}
+.chip .cr4{color:var(--seal);opacity:min(clamp(0,calc((var(--tr) - 3.2)*8),1),clamp(0,calc((3.85 - var(--tr))*20),1))}
+.chip .ci4{color:var(--warn);opacity:min(clamp(0,calc((var(--tr) - 3.85)*8),1),clamp(0,calc((7.4 - var(--tr))*8),1))}
+.rec-banner{position:relative;height:52px;margin-top:14px;border-radius:12px;border:1px solid var(--line-2);background:rgba(11,14,23,.6);overflow:hidden;font-weight:640}
+.rec-banner::before{content:"";position:absolute;inset:0;background:rgba(242,128,59,.24);opacity:var(--cut)}
+.rec-banner span{position:absolute;inset:0;display:grid;place-items:center;padding:0 12px;text-align:center;font-size:.95rem;opacity:0}
+.rec-banner .b1{color:#FFB48A;font-size:1.05rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-family:var(--mono);opacity:min(clamp(0,calc((var(--tr) - 3.85)*5),1),clamp(0,calc((5.3 - var(--tr))*5),1))}
+.rec-banner .b2{color:var(--seal);opacity:min(clamp(0,calc((var(--tr) - 5.3)*5),1),clamp(0,calc((6.5 - var(--tr))*5),1))}
+.rec-banner .b3{color:var(--seal);opacity:min(clamp(0,calc((var(--tr) - 6.5)*5),1),clamp(0,calc((8.6 - var(--tr))*5),1))}
+.rec-banner .b4{color:var(--verify);opacity:clamp(0,calc((var(--tr) - 8.9)*5),1)}
+.rec-flash{position:absolute;inset:0;border-radius:14px;pointer-events:none;background:rgba(242,128,59,.5);opacity:min(clamp(0,calc((var(--tr) - 3.8)*14),1),clamp(0,calc((4.2 - var(--tr))*6),1))}
+.rec-count{display:flex;gap:10px;margin-top:12px}
+.rec-count span{flex:1;text-align:center;border:1px solid rgba(61,220,196,.35);border-radius:12px;padding:10px 6px;background:rgba(61,220,196,.06);color:var(--muted);font-size:.8rem;opacity:calc(.55 + .45*clamp(0,calc((var(--tr) - 8.9)*4),1))}
+.rec-count b{display:block;font-family:var(--display);font-size:1.6rem;line-height:1.1;color:var(--verify);letter-spacing:-.02em}
+.fig-tamper{
+  --bad:clamp(0,calc((var(--tt) - 4)/.35),1);
+  --ed:clamp(0,calc((var(--tt) - 1.6)/.6),1);
+  --sel:min(clamp(0,calc((var(--tt) - 1)/.25),1),clamp(0,calc((2.2 - var(--tt))*3),1));
+  --ok:clamp(0,calc((3.1 - var(--tt))*5),1);
+  --chk:min(clamp(0,calc((var(--tt) - 3)/.25),1),clamp(0,calc((4.1 - var(--tt))*6),1));
+}
+.tm-slip{max-width:380px;margin:0 auto 18px}
+.tm-slip .slip{padding:22px 22px 24px}
+.tm-slip .sl-rows{display:block}
+.tm-row{background:linear-gradient(rgba(176,46,20,calc(.09*var(--bad))),rgba(176,46,20,calc(.09*var(--bad))));box-shadow:inset 0 0 0 calc(2px*var(--bad)) rgba(176,46,20,var(--bad));border-radius:6px}
+.tm-val{display:grid;font-family:var(--mono);font-size:.78rem;margin-top:3px;overflow-wrap:anywhere}
+.tm-val span{grid-area:1/1}
+.tm-val .v0{color:var(--paper-dim);opacity:calc(1 - var(--ed))}
+.tm-val .v1{color:var(--paper-bad);font-weight:700;opacity:var(--ed)}
+.tm-val::before{content:"";grid-area:1/1;background:rgba(95,130,255,.38);opacity:var(--sel);margin:-1px -3px}
+.tm-was{display:block;font-family:var(--mono);font-size:.7rem;color:var(--paper-dim);margin-top:4px;opacity:var(--ed);min-height:1.1em}
+.tm-tick{position:relative;background:color-mix(in srgb,var(--paper-bad) calc(var(--bad)*100%),var(--paper-ok))}
+.tm-tick .ic{grid-area:1/1;position:absolute;left:4.5px;top:4.5px}
+.tm-tick .t1{opacity:calc(1 - var(--bad))}
+.tm-tick .t2{opacity:var(--bad)}
+.chk{position:relative;border-radius:14px;padding:20px 22px;border:1px solid var(--line-2);border-color:color-mix(in srgb,var(--warn) calc(var(--bad)*100%),rgba(61,220,196,.45));overflow:hidden;min-height:112px;isolation:isolate}
+.chk::before,.chk::after{content:"";position:absolute;inset:0;z-index:-1}
+.chk::before{background:rgba(61,220,196,.09);opacity:calc(1 - var(--bad))}
+.chk::after{background:rgba(242,128,59,.2);opacity:var(--bad)}
+.chk h4{margin:0 0 10px;font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);font-weight:500}
+.chk .st{display:grid}
+.chk .st>span{grid-area:1/1}
+.chk .r{font-size:1.3rem;font-weight:700;letter-spacing:-.01em;line-height:1.25;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chk .r small{display:block;flex-basis:100%;margin-top:2px;font-size:.84rem;font-weight:400;color:var(--muted);letter-spacing:0}
+.chk .r1{color:var(--verify);opacity:var(--ok)}
+.chk .r2{color:var(--text);opacity:var(--chk)}
+.chk .r3{color:#FFB48A;opacity:var(--bad)}
+
+/* ---- operator console, clock --tk runs 0 to 8 ---- */
+.fig-console{margin:0}
+.cpanel{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 18px 40px -22px rgba(20,23,31,.45)}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:48px;padding:6px var(--s4);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.cbody{display:grid;grid-template-columns:260px minmax(0,1fr)}
+.cagents{list-style:none;margin:0;padding:var(--s4);border-right:1px solid var(--line);display:grid;gap:var(--s3);align-content:start}
+.cagents li{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:600;font-size:.95rem}
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.68rem;font-family:var(--mono);letter-spacing:.07em;text-transform:uppercase;border:1px solid;white-space:nowrap;font-weight:600}
+.pill.ok{color:var(--verify);border-color:var(--verify)}
+.pill.soon{color:var(--seal);border-color:var(--seal)}
+.clog{list-style:none;margin:0;padding:0;font-size:.92rem}
+.cl{display:grid;grid-template-columns:78px 120px 150px 100px minmax(0,1fr);gap:var(--s3);align-items:center;padding:12px var(--s4);border-bottom:1px solid var(--line);opacity:clamp(0,calc((var(--tk) - var(--a))*5),1)}
+.cl:last-child{border-bottom:0}
+.cl .t{font-family:var(--mono);font-size:.8rem;color:var(--dim)}
+.cl .d{font-family:var(--mono);font-size:.85rem}
+.cl .res{display:flex;align-items:center;gap:6px;font-weight:700;color:var(--verify)}
+.cl.no .res,.cl.no .why{color:var(--warn)}
+.cl.no{background:rgba(176,46,20,.07)}
+.cl .why{color:var(--muted);font-size:.88rem}
+.cl.done{background:rgba(11,107,94,.08);font-weight:600}
+.cl.done .why{color:var(--text)}
+.cl.done .span{grid-column:2/-1;display:flex;gap:8px;align-items:center}
+
+/* ---- stats, benchmarks ---- */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gutter);margin-top:var(--s7)}
+.stat{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--verify);border-radius:14px;padding:var(--s5) var(--s5) var(--s4)}
+.stat .n{display:block;font-family:var(--display);font-size:clamp(2.4rem,1.8rem + 1.6vw,3.4rem);font-weight:700;letter-spacing:-.035em;line-height:1;color:var(--text)}
+.stat .n small{font-size:.42em;font-weight:600;color:var(--verify);letter-spacing:-.01em;margin-left:.2em}
+.stat .l{display:block;font-size:.94rem;color:var(--muted);margin-top:var(--s3);line-height:1.5}
+.stat .l b{display:block;color:var(--text);font-weight:650;margin-bottom:3px}
+.also{margin:var(--s5) 0 0;color:var(--muted);max-width:56em}
+.method{margin:var(--s3) 0 0;max-width:46em;color:var(--muted)}
+.method strong{color:var(--text)}
+.bench-label{margin:var(--s5) 0 0;padding:8px 0 8px 14px;border-left:3px solid var(--seal);font-family:var(--mono);font-size:.78rem;line-height:1.6;color:var(--muted);max-width:76ch}
+.bcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gutter);margin-top:var(--s5)}
+.bcard{border:1px solid var(--line);border-radius:14px;padding:var(--s5);min-width:0;background:var(--surface)}
+.bcard h3{margin-bottom:.8em}
+.big{display:block;font-family:var(--display);font-size:clamp(2.6rem,2rem + 1.8vw,3.6rem);font-weight:700;letter-spacing:-.04em;line-height:1;color:var(--text)}
+.big small{font-size:.38em;color:var(--verify);margin-left:.3em;letter-spacing:0;font-weight:600}
+.bcard p{color:var(--muted);font-size:.95rem;line-height:1.55;margin:.7em 0 0}
+.bcard p b{color:var(--text)}
+.bars{list-style:none;margin:var(--s4) 0 0;padding:0;display:grid;gap:10px}
+.bars li{display:grid;grid-template-columns:6.4em minmax(0,1fr) 4.4em;gap:10px;align-items:center;font-size:.86rem;color:var(--muted)}
+.bars .t{height:10px;border-radius:6px;background:var(--line);overflow:hidden}
+.bars .t i{display:block;height:100%;width:var(--w);background:var(--verify);border-radius:6px}
+.bars .t i.w{background:var(--warn)}
+.bars b{font-family:var(--mono);color:var(--text);text-align:right;font-weight:600;font-size:.84rem}
+.honest{margin:var(--s6) 0 0;border-left:3px solid var(--seal);padding:2px 0 2px 18px;max-width:62em;color:var(--muted)}
+.honest b{color:var(--text)}
+.vmteaser{margin-top:var(--s6)}
+.vmteaser h3{margin-bottom:.4em}
+.vmteaser .vmgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+.vmteaser .vmcol{border:1px solid var(--line);border-radius:12px;padding:var(--s3);background:var(--surface)}
+.vmteaser .vmcol b{display:block;font-family:var(--mono);font-size:.78rem;margin-bottom:var(--s2)}
+.vmteaser .vmcol .t{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin:6px 0 2px}
+.vmteaser .vmcol .t i{display:block;height:100%;width:var(--w);background:var(--verify)}
+.vmteaser .vmcol span{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+
+/* ---- tables ---- */
+.tablewrap{overflow-x:auto;margin-top:var(--s6);border-top:2px solid var(--text);border-bottom:2px solid var(--text)}
+table{width:100%;border-collapse:collapse;font-size:.95rem;min-width:620px}
+th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+thead th{color:var(--dim);font-weight:600;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;font-family:var(--mono)}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+tbody th{font-weight:600;color:var(--text)}
+td.num{font-family:var(--mono);white-space:nowrap}
+.cmp th[scope=row]{min-width:190px}
+.cmp td{white-space:nowrap}
+.cmp td.t{white-space:normal;color:var(--muted);font-size:.9rem;min-width:130px}
+.cmp .us{background:rgba(11,107,94,.08)}
+.cmp thead th.us{color:var(--verify);box-shadow:inset 0 3px 0 var(--verify)}
+.m{display:inline-flex;align-items:center;gap:8px;font-size:.9rem}
+.m.y{color:var(--verify);font-weight:700}
+.m.n{color:var(--dim)}
+.m.p{color:var(--seal);font-weight:600}
+
+/* ---- ciso, partners, faq ---- */
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gutter);margin-top:var(--s7)}
+.fact{border:1px solid var(--line);border-radius:14px;padding:var(--s5) var(--s5) var(--s3);background:var(--surface)}
+.fact h3{font-family:var(--mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:1em}
+.fact.yes h3{color:var(--verify)}
+.fact.no h3{color:var(--seal)}
+.fact ul{list-style:none;margin:0;padding:0}
+.fact li{position:relative;padding:0 0 14px 22px;color:var(--muted);font-size:.98rem;line-height:1.55}
+.fact li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:8px;border-radius:50%}
+.fact.yes li::before{background:var(--verify)}
+.fact.no li::before{background:var(--seal)}
+.fact li b{color:var(--text)}
+.pcols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s6);margin:var(--s6) 0}
+.pcols h3{font-family:var(--mono);font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--seal);margin-bottom:.9em}
+.pcols ul,.pcols ol{margin:0;padding:0 0 0 1.1em;color:var(--muted);font-size:.98rem}
+.pcols li{margin-bottom:.5em}
+.sigline{margin-top:var(--s6);border-top:1px solid var(--text);padding-top:var(--s2);font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);max-width:340px}
+.stamp{display:inline-grid;place-items:center;width:104px;height:104px;border-radius:50%;border:3px double var(--paper-ok);color:var(--paper-ok);font-family:var(--display);font-weight:700;letter-spacing:.06em;transform:rotate(-8deg);text-align:center;line-height:1.2;font-size:.9rem}
+.stamp span{display:block;font-family:var(--mono);font-size:.5rem;letter-spacing:.14em;margin-top:3px}
+.pstamp{position:absolute;right:var(--gutter);top:0}
+.faq{display:grid;gap:12px;margin-top:var(--s6);max-width:860px}
+details.q{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+details.q summary{padding:16px 20px;font-weight:600;cursor:pointer}
+details.q[open]{border-color:var(--line-2)}
+.q-in{padding:0 20px 18px;color:var(--muted);font-size:1rem}
+.q-in p{margin:0 0 .7em}
+.q-in b{color:var(--text)}
+.final{text-align:center}
+.final h2{max-width:16em;margin:0 auto .5em}
+.final .cta{justify-content:center}
+.final .lede{margin:0 auto 1.4em;text-align:center}
+.final .sigline{margin:var(--s7) auto 0}
+footer{background:var(--ink);border-top:1px solid var(--line);padding:var(--s7) 0 var(--s8);color:var(--dim);font-size:.9rem}
+footer .wrap{display:grid;gap:14px}
+footer p{margin:0;max-width:86ch}
+footer .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.footnav{display:flex;flex-wrap:wrap;gap:6px 22px}
+.footnav a{color:var(--muted)}
+
+/* ---- responsive ---- */
+@media(max-width:1060px){
+  .c4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bcards{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5)}
+  .facts-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facts-strip li:nth-child(3){border-left:0;padding-left:0}
+  .cbody{grid-template-columns:1fr}
+  .cagents{border-right:0;border-bottom:1px solid var(--line)}
+  .vmteaser .vmgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .swipe{display:block}
+  .rm-wrap{min-width:560px}
+  .s4,.s5,.s6,.s7,.s8{grid-column:1/-1}
+  .c3,.facts,.pcols{grid-template-columns:1fr}
+  .try .vis{max-width:none}
+  .cl{grid-template-columns:70px minmax(0,1fr) 100px}
+  .cl .d,.cl .why{grid-column:2/-1}
+}
+@media(max-width:620px){
+  :root{--gutter:18px}
+  .navlinks a.hm,.navlinks a.rp{display:none}
+  .brand span{display:none}
+  .cta .btn{flex:1 1 100%}
+  .sl-foot{flex-direction:column;align-items:stretch}
+  .rc-zone{min-height:210px}
+  .rstamp{justify-self:center}
+  .sl-rows{grid-template-columns:1fr}
+  .facts-strip{grid-template-columns:1fr}
+  .facts-strip li{border-left:0;border-top:1px solid var(--line);padding:var(--s5) 0}
+  .facts-strip li:first-child{border-top:0}
+  .steps{grid-template-columns:1fr}
+  .bars li{grid-template-columns:5.6em minmax(0,1fr) 4em}
+  .stats{gap:12px}
+  .stat{padding:var(--s4)}
+  .vis{padding:var(--s4) 14px}
+  .bs,.rw{padding:10px 11px;gap:10px}
+  .vmteaser .vmgrid{grid-template-columns:1fr 1fr}
+  th,td{padding:12px 12px}
+}
+@media(max-width:380px){.stats,.c4{grid-template-columns:1fr}}
+
+/* ---- motion layer: opt-in. The script adds html.motion only when reduced motion is not requested.
+        Without it, every visual above already shows its finished state. ---- */
+@keyframes tl-e{from{--te:0}to{--te:8}}
+@keyframes tl-r{from{--tr:0}to{--tr:11}}
+@keyframes tl-b{from{--tb:0}to{--tb:3.49}}
+@keyframes tl-c{from{--tc:0}to{--tc:6}}
+@keyframes tl-t{from{--tt:0}to{--tt:6}}
+@keyframes tl-k{from{--tk:0}to{--tk:8}}
+@keyframes tl-m{from{--tm:0}to{--tm:10}}
+html.motion .fig-eg.play{animation:tl-e 8s linear infinite}
+html.motion .fig-rec.play{animation:tl-r 11s linear infinite}
+html.motion .fig-boot.play{animation:tl-b 3.49s linear forwards}
+html.motion .receipt-fig.play{animation:tl-c 6s linear forwards}
+html.motion .fig-tamper.play{animation:tl-t 7s linear forwards}
+html.motion .fig-console.play{animation:tl-k 8s linear forwards}
+html.motion .fig-room.play{animation:tl-m 10s linear forwards}
+html.motion .replay{visibility:visible}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+@media print{
+  body,.ink{background:#fff;color:#000}
+  .topnav,.skip{display:none}
+  *{animation:none!important;transition:none!important;box-shadow:none!important;filter:none!important}
+  .slip{-webkit-mask:none;mask:none;background:#f2f2f2;color:#000}
+  .stat,.vis,.card,.bcard,.fact,details.q{background:#fff!important;border-color:#bbb}
+  a{color:#000;text-decoration:underline}
+  section{padding:28px 0;break-inside:avoid-page}
+}
+
+/* ---- benchmarks page ---- */
+.pagehead{padding-top:clamp(48px,6vw,88px);padding-bottom:var(--s7)}
+.pagehead h1{max-width:16em;margin-bottom:.4em}
+.pagehead .lede{max-width:40em;color:var(--muted);font-weight:400}
+section.bsec{padding-block:clamp(56px,7vw,96px)}
+.bsec h2{margin-bottom:.4em}
+.bsec .plain{max-width:44em}
+.blocktag{display:inline-block;font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;border:1.5px solid var(--seal);color:var(--seal);border-radius:6px;padding:4px 10px;margin:0 0 var(--s4);font-weight:600}
+.bench-label{margin:0 0 var(--s4)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gutter);margin:var(--s6) 0 var(--s2)}
+.kpi{border:1px solid var(--line);border-radius:14px;padding:var(--s5);background:var(--surface)}
+.kpi b{display:block;font-family:var(--display);font-size:clamp(2rem,1.6rem + 1.2vw,2.8rem);letter-spacing:-.03em;line-height:1;color:var(--text)}
+.kpi span{display:block;margin-top:10px;font-size:.9rem;color:var(--muted);line-height:1.5}
+.bsec .tablewrap{margin-top:var(--s4)}
+.tablewrap.tall{max-height:560px;overflow:auto}
+.tablewrap.tall thead th{position:sticky;top:0;z-index:2;background:var(--surface)}
+td.q{max-width:34em;white-space:normal;color:var(--text)}
+td.bar{position:relative;background-image:linear-gradient(90deg,rgba(61,220,196,.28) var(--w),transparent var(--w));background-repeat:no-repeat;text-align:right}
+.paper td.bar{background-image:linear-gradient(90deg,rgba(11,107,94,.22) var(--w),transparent var(--w))}
+td.num,th.num{text-align:right}
+td.num{color:var(--verify);font-weight:600}
+td.ev{color:var(--muted)}
+td.out{background:rgba(242,128,59,.14);box-shadow:inset 0 0 0 1.5px var(--warn);color:var(--warn)}
+.cap td.num{text-align:center}
+.cap thead th{text-align:center}
+.cap thead th:first-child{text-align:left}
+.cmpnote{border:1px solid var(--line-2);border-radius:14px;padding:var(--s5);background:var(--surface);max-width:78ch}
+.cmpnote h3{margin-bottom:.5em}
+.mono-list{margin:0;padding-left:1.1em;color:var(--muted)}
+.mono-list li{margin-bottom:.5em}
+.mono-list b{color:var(--text)}
+.chart-h{margin:var(--s7) 0 var(--s4)}
+.vmcharts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s4)}
+.vmchart{border:1px solid var(--line);border-radius:14px;padding:var(--s4);background:var(--surface);min-width:0}
+.vmchart h3{font-family:var(--mono);font-size:.82rem;letter-spacing:.06em;margin-bottom:var(--s3)}
+.vmchart .bars li{grid-template-columns:1fr;gap:4px}
+.vmchart .bars li span:first-child{font-size:.8rem;color:var(--muted)}
+.vmchart .bars b{text-align:left}
+@media(max-width:1060px){.vmcharts{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.kpis,.vmcharts{grid-template-columns:1fr}.tablewrap.tall{max-height:440px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" hidden aria-hidden="true" focusable="false"><symbol id="i-ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol><symbol id="i-no" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol></svg>
+<div class="announce">Pre-1.0 · accepting a small number of design partners <a href="../#partners">Apply</a></div>
+<nav class="topnav" aria-label="Primary">
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../assets/logo-256.png" alt=""><span>VOLENT</span></a>
+    <div class="navlinks">
+      <a class="hm" href="../how-it-works/">How it works</a>
+      <a class="hm" href="../use-cases/">Use cases</a>
+      <a class="hm" href="../security/">Security</a>
+      <a class="hm" href="../compare/">Compare</a>
+      <a href="../pricing/">Pricing</a>
+      <a class="hm" href="./" aria-current="page">Benchmarks</a>
+      <a class="apply" href="../#partners">Book a demo</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+<header class="pagehead ink">
+  <div class="wrap">
+    <p class="eyebrow">Benchmark v1</p>
+    <h1>Real agents, an open model, old hardware. Every number labelled.</h1>
+    <p class="lede">These are measured results with the hardware, model, image and method on the page. They are single runs, so they are evidence and not certified bars. Certified results come with our paper.</p>
+  </div>
+</header>
+
+<section id="intro" class="bsec paper">
+  <div class="wrap">
+    <h2>What was measured, and how much to trust it.</h2>
+    <p class="plain">Two things were measured. First, real agents calling a real open-weight model through the one outbound checkpoint. Second, how many calls a single VM can hold open at once, for five VM sizes.</p>
+    <p class="plain">Each result below is a single run. Our own rule is 3 runs, report the median, and treat more than 10% spread between runs as a failure. Single runs do not meet that rule, so they are labelled as evidence. The same harness will run three times on the final image, and those certified numbers will be published with our paper.</p>
+    <p class="plain">The memory figures are the runtime's total runtime memory as the harness reported it, not operating-system RSS.</p>
+  </div>
+</section>
+
+<section id="real-model" class="bsec ink">
+  <div class="wrap">
+    <h2>Real agents, one open model, one checkpoint.</h2>
+    <p class="blocktag">Real open model · 2 vCPU / 4 GB only</p>
+    <p class="plain">Every model call goes through the single outbound checkpoint. Two separate runs are shown here, and the numbers are not added together. Real-model runs on every VM size, 3 runs each, are in progress for the paper.</p>
+    <p class="bench-label">Measured, single run, 2026-09-23, pre-release image cf922365, 2013 Intel i7-4770 under KVM, open-weight model llama3.2:1b on CPU.</p>
+    <div class="kpis">
+      <div class="kpi"><b>896</b><span>calls in the three concurrency runs (128 + 256 + 512 at 4, 8 and 16 agents). Checkpoint tally: allow 896, deny 0. 0 delivery failures.</span></div>
+      <div class="kpi"><b>768</b><span>calls in the per-task run (24 tasks, 32 runs each, 8 at a time). Checkpoint tally: allow 768, deny 0. 0 failed.</span></div>
+      <div class="kpi"><b>3 of 3</b><span>controls behaved: a host not on the list was refused, an emptied trust store failed closed with no downgrade, and a scan of the node's own output for the provisioned credential came back clean.</span></div>
+      <div class="kpi"><b>5 of 24</b><span>tasks were answered correctly on all 32 runs by the 1B model. Others were not. The tables below show every task.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="per-tier" class="bsec paper">
+  <div class="wrap">
+    <h2>Correctness by tier: this measures the model.</h2>
+    <p class="plain">The 24 tasks fall into four tiers. A one-billion-parameter model gets some tiers right and others wrong. That is a property of the model, and this table measures the model, not VOLENT.</p>
+    <p class="bench-label">Measured, single run, 2026-09-23, pre-release image cf922365, 2013 Intel i7-4770 under KVM, open-weight model llama3.2:1b on CPU.</p>
+    <div class="tablewrap" role="region" aria-label="Correctness and latency by tier" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Tier</th><th scope="col" class="num">Correct</th><th scope="col" class="num">Share</th><th scope="col" class="num">p50 ms</th><th scope="col" class="num">p95 ms</th></tr></thead>
+        <tbody>
+<tr><th scope="row">recall</th><td class="num">163/192</td><td class="num bar" style="--w:85%">85 %</td><td class="num">1,353</td><td class="num">2,282</td></tr>
+<tr><th scope="row">arithmetic</th><td class="num">67/192</td><td class="num bar" style="--w:35%">35 %</td><td class="num">1,124</td><td class="num">3,500</td></tr>
+<tr><th scope="row">reasoning</th><td class="num">49/192</td><td class="num bar" style="--w:26%">26 %</td><td class="num">4,160</td><td class="num">12,296</td></tr>
+<tr><th scope="row">structured</th><td class="num">167/192</td><td class="num bar" style="--w:87%">87 %</td><td class="num">4,352</td><td class="num">9,598</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="per-task" class="bsec ink">
+  <div class="wrap">
+    <h2>All 24 tasks.</h2>
+    <p class="plain">Each task ran 32 times. Correct is runs answered correctly out of runs scored. Times are milliseconds per call on CPU inference.</p>
+    <p class="bench-label">Measured, single run, 2026-09-23, pre-release image cf922365, 2013 Intel i7-4770 under KVM, open-weight model llama3.2:1b on CPU.</p>
+    <div class="tablewrap tall" role="region" aria-label="Per-task results" tabindex="0">
+      <table>
+        <thead><tr><th scope="col" class="num">#</th><th scope="col">Tier</th><th scope="col">Task</th><th scope="col" class="num">Correct</th><th scope="col" class="num">p50 ms</th><th scope="col" class="num">p95 ms</th></tr></thead>
+        <tbody>
+<tr><td class="num">1</td><td>recall</td><td class="q">What is the capital city of Japan?</td><td class="num">32/32</td><td class="num">1,585</td><td class="num">2,287</td></tr>
+<tr><td class="num">2</td><td>recall</td><td class="q">Which planet is closest to the Sun?</td><td class="num">23/32</td><td class="num">1,642</td><td class="num">2,181</td></tr>
+<tr><td class="num">3</td><td>recall</td><td class="q">What is the chemical symbol for water?</td><td class="num">24/32</td><td class="num">1,648</td><td class="num">2,400</td></tr>
+<tr><td class="num">4</td><td>recall</td><td class="q">Which ocean is the largest?</td><td class="num">28/32</td><td class="num">1,084</td><td class="num">1,817</td></tr>
+<tr><td class="num">5</td><td>recall</td><td class="q">How many days are in a week?</td><td class="num">27/32</td><td class="num">1,051</td><td class="num">1,954</td></tr>
+<tr><td class="num">6</td><td>recall</td><td class="q">What is the freezing point of water in Celsius?</td><td class="num">29/32</td><td class="num">1,424</td><td class="num">2,664</td></tr>
+<tr><td class="num">7</td><td>arithmetic</td><td class="q">Compute 17 plus 25.</td><td class="num">3/32</td><td class="num">1,116</td><td class="num">1,555</td></tr>
+<tr><td class="num">8</td><td>arithmetic</td><td class="q">Compute 8 times 7.</td><td class="num">12/32</td><td class="num">1,062</td><td class="num">1,934</td></tr>
+<tr><td class="num">9</td><td>arithmetic</td><td class="q">Compute 144 divided by 12.</td><td class="num">5/32</td><td class="num">1,259</td><td class="num">1,859</td></tr>
+<tr><td class="num">10</td><td>arithmetic</td><td class="q">A box holds 6 eggs. How many eggs are in 9 boxes?</td><td class="num">16/32</td><td class="num">2,524</td><td class="num">10,920</td></tr>
+<tr><td class="num">11</td><td>arithmetic</td><td class="q">Compute 100 minus 37.</td><td class="num">11/32</td><td class="num">937</td><td class="num">1,491</td></tr>
+<tr><td class="num">12</td><td>arithmetic</td><td class="q">What is one quarter of 80?</td><td class="num">20/32</td><td class="num">1,172</td><td class="num">1,914</td></tr>
+<tr><td class="num">13</td><td>reasoning</td><td class="q">Anna is taller than Ben. Ben is taller than Carl. Who is the shortest?</td><td class="num">14/32</td><td class="num">2,518</td><td class="num">8,779</td></tr>
+<tr><td class="num">14</td><td>reasoning</td><td class="q">A train leaves at 09:00 and the journey takes 3 hours. At what time does it arrive?</td><td class="num">13/32</td><td class="num">9,496</td><td class="num">12,832</td></tr>
+<tr><td class="num">15</td><td>reasoning</td><td class="q">All roses are flowers. This object is a rose. Is it a flower?</td><td class="num">12/32</td><td class="num">1,173</td><td class="num">2,082</td></tr>
+<tr><td class="num">16</td><td>reasoning</td><td class="q">Sam had 12 apples, gave away 5, then bought 3 more. How many does Sam have now?</td><td class="num">5/32</td><td class="num">9,218</td><td class="num">13,150</td></tr>
+<tr><td class="num">17</td><td>reasoning</td><td class="q">If today is Monday, what day will it be in 3 days?</td><td class="num">0/32</td><td class="num">1,087</td><td class="num">1,802</td></tr>
+<tr><td class="num">18</td><td>reasoning</td><td class="q">A shirt costs 20 dollars and is discounted by 25 percent. What is the new price in dollars?</td><td class="num">5/32</td><td class="num">8,556</td><td class="num">13,090</td></tr>
+<tr><td class="num">19</td><td>structured</td><td class="q">Reply with exactly this JSON and nothing else: {&quot;status&quot;: &quot;ok&quot;, &quot;count&quot;: 3}</td><td class="num">31/32</td><td class="num">4,968</td><td class="num">9,598</td></tr>
+<tr><td class="num">20</td><td>structured</td><td class="q">List exactly three primary colours, separated by commas, in this order: red, then yellow, then b</td><td class="num">32/32</td><td class="num">4,461</td><td class="num">9,797</td></tr>
+<tr><td class="num">21</td><td>structured</td><td class="q">Extract the year from this sentence and reply with JSON of the form {&quot;year&quot;: NNNN}: The treaty w</td><td class="num">32/32</td><td class="num">7,535</td><td class="num">11,858</td></tr>
+<tr><td class="num">22</td><td>structured</td><td class="q">Reply with a JSON object whose only key is &quot;capital&quot; and whose value is the capital of France.</td><td class="num">32/32</td><td class="num">4,840</td><td class="num">6,605</td></tr>
+<tr><td class="num">23</td><td>structured</td><td class="q">Summarise in one short sentence, beginning with the word Water: Water boils at 100 degrees Celsi</td><td class="num">32/32</td><td class="num">4,016</td><td class="num">6,184</td></tr>
+<tr><td class="num">24</td><td>structured</td><td class="q">Reply with a comma-separated list of the first four positive even numbers, digits only.</td><td class="num">8/32</td><td class="num">2,806</td><td class="num">7,885</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="concurrency" class="bsec paper">
+  <div class="wrap">
+    <h2>More agents at once.</h2>
+    <p class="plain">Agents ran against the same open model on a 4 GB, 2 vCPU guest. Throughput flattened as agents were added, while memory stayed at 78 MB. The model server was the ceiling, not the runtime.</p>
+    <p class="bench-label">Measured, single run, 2026-09-23, pre-release image cf922365, 2013 Intel i7-4770 under KVM, open-weight model llama3.2:1b on CPU.</p>
+    <div class="tablewrap" role="region" aria-label="Concurrency against a real model server" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">Agents</th><th scope="col" class="num">Calls</th><th scope="col" class="num">Completed</th><th scope="col" class="num">p50 ms</th><th scope="col" class="num">p95 ms</th><th scope="col" class="num">Throughput</th><th scope="col" class="num">Total runtime memory</th></tr></thead>
+        <tbody>
+<tr><th scope="row">4</th><td class="num">128</td><td class="num">128</td><td class="num">1,203</td><td class="num">7,521</td><td class="num">1.40/s</td><td class="num">78 MB</td></tr>
+<tr><th scope="row">8</th><td class="num">256</td><td class="num">256</td><td class="num">1,674</td><td class="num">11,118</td><td class="num">2.11/s</td><td class="num">78 MB</td></tr>
+<tr><th scope="row">16</th><td class="num">512</td><td class="num">512</td><td class="num">5,353</td><td class="num">14,592</td><td class="num">2.23/s</td><td class="num">78 MB</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="capacity" class="bsec ink">
+  <div class="wrap">
+    <h2>How many calls one VM can hold open.</h2>
+    <p class="plain">The model is replaced by a 5 ms stand-in, so the test measures the runtime alone. Five VM sizes, four load levels, 20 runs. 0 refused in all 20 runs. 150,000 calls in flight fit on 1 vCPU and 1 GB at 212 MB. More processors did not help, because the work is wait-bound: each call spends its time waiting.</p>
+    <p class="bench-label">Capacity figures use a 5 ms mock model, so they measure VOLENT, not a model. Certified three-run results on the final image will follow with our paper.</p>
+    <p class="bench-label">Measured, single run, 2026-09-23, pre-release image cf922365, 2013 Intel i7-4770 under KVM, open-weight model llama3.2:1b on CPU.</p>
+    <div class="tablewrap" role="region" aria-label="Capacity by VM size" tabindex="0">
+      <table class="cap">
+        <thead><tr><th scope="col">VM size</th><th scope="col">1,500 in flight</th><th scope="col">10,000 in flight</th><th scope="col">50,000 in flight</th><th scope="col">150,000 in flight</th></tr></thead>
+        <tbody>
+<tr><th scope="row">1 vCPU / 1 GB</th><td class="num">0 refused · 79 MB</td><td class="num">0 refused · 86 MB</td><td class="num">0 refused · 123 MB</td><td class="num">0 refused · 212 MB</td></tr>
+<tr><th scope="row">2 vCPU / 2 GB</th><td class="num">0 refused · 81 MB</td><td class="num">0 refused · 92 MB</td><td class="num">0 refused · 140 MB</td><td class="num">0 refused · 217 MB</td></tr>
+<tr><th scope="row">2 vCPU / 4 GB</th><td class="num">0 refused · 79 MB</td><td class="num">0 refused · 92 MB</td><td class="num">0 refused · 111 MB</td><td class="num">0 refused · 217 MB</td></tr>
+<tr><th scope="row">4 vCPU / 8 GB</th><td class="num">0 refused · 82 MB</td><td class="num">0 refused · 90 MB</td><td class="num">0 refused · 112 MB</td><td class="num out">0 refused · 336 MB</td></tr>
+<tr><th scope="row">8 vCPU / 16 GB</th><td class="num">0 refused · 85 MB</td><td class="num">0 refused · 95 MB</td><td class="num">0 refused · 144 MB</td><td class="num">0 refused · 222 MB</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fine">Each cell is calls refused, then total runtime memory. The highlighted cell, 4 vCPU and 8 GB at 150,000 in flight, used 336 MB where its neighbours used 212 to 222 MB. It is unexplained, and we left it in.</p>
+  </div>
+</section>
+
+<section id="by-vm-size" class="bsec paper">
+  <div class="wrap">
+    <h2>Same tasks, five VM sizes.</h2>
+    <p class="plain">For each VM size and each load: how many tasks were asked for, how many finished in parallel, how long it took, and how much runtime memory it used. Every task finished, and none were refused.</p>
+    <p class="bench-label">Capacity test with a 5 ms mock model — measures VOLENT's own scheduling, not model speed · single run · 2026-09-23 · pre-release image cf922365 · 2013 Intel i7-4770</p>
+    <div class="tablewrap" role="region" aria-label="Tasks completed by VM size and load" tabindex="0">
+      <table class="vm">
+        <thead><tr><th scope="col">VM size</th><th scope="col" class="num">Tasks asked for</th><th scope="col" class="num">Completed in parallel</th><th scope="col" class="num">Refused</th><th scope="col" class="num">Time taken</th><th scope="col" class="num">Tasks per second</th><th scope="col" class="num">Runtime memory</th></tr></thead>
+        <tbody>
+<tr><th scope="row">1 vCPU / 1 GB</th><td class="num">1,500</td><td class="num">1,500</td><td class="num">0</td><td class="num">69 ms</td><td class="num">21,739 /s</td><td class="num">79 MB</td></tr>
+<tr><th scope="row">1 vCPU / 1 GB</th><td class="num">10,000</td><td class="num">10,000</td><td class="num">0</td><td class="num">1.3 s</td><td class="num">7,570 /s</td><td class="num">86 MB</td></tr>
+<tr><th scope="row">1 vCPU / 1 GB</th><td class="num">50,000</td><td class="num">50,000</td><td class="num">0</td><td class="num">33.0 s</td><td class="num">1,517 /s</td><td class="num">123 MB</td></tr>
+<tr><th scope="row">1 vCPU / 1 GB</th><td class="num">150,000</td><td class="num">150,000</td><td class="num">0</td><td class="num">347.5 s</td><td class="num">432 /s</td><td class="num">212 MB</td></tr>
+<tr><th scope="row">2 vCPU / 2 GB</th><td class="num">1,500</td><td class="num">1,500</td><td class="num">0</td><td class="num">69 ms</td><td class="num">21,739 /s</td><td class="num">81 MB</td></tr>
+<tr><th scope="row">2 vCPU / 2 GB</th><td class="num">10,000</td><td class="num">10,000</td><td class="num">0</td><td class="num">1.4 s</td><td class="num">7,013 /s</td><td class="num">92 MB</td></tr>
+<tr><th scope="row">2 vCPU / 2 GB</th><td class="num">50,000</td><td class="num">50,000</td><td class="num">0</td><td class="num">41.0 s</td><td class="num">1,219 /s</td><td class="num">140 MB</td></tr>
+<tr><th scope="row">2 vCPU / 2 GB</th><td class="num">150,000</td><td class="num">150,000</td><td class="num">0</td><td class="num">363.0 s</td><td class="num">413 /s</td><td class="num">217 MB</td></tr>
+<tr><th scope="row">2 vCPU / 4 GB</th><td class="num">1,500</td><td class="num">1,500</td><td class="num">0</td><td class="num">95 ms</td><td class="num">15,790 /s</td><td class="num">79 MB</td></tr>
+<tr><th scope="row">2 vCPU / 4 GB</th><td class="num">10,000</td><td class="num">10,000</td><td class="num">0</td><td class="num">1.5 s</td><td class="num">6,859 /s</td><td class="num">92 MB</td></tr>
+<tr><th scope="row">2 vCPU / 4 GB</th><td class="num">50,000</td><td class="num">50,000</td><td class="num">0</td><td class="num">41.9 s</td><td class="num">1,192 /s</td><td class="num">111 MB</td></tr>
+<tr><th scope="row">2 vCPU / 4 GB</th><td class="num">150,000</td><td class="num">150,000</td><td class="num">0</td><td class="num">360.4 s</td><td class="num">416 /s</td><td class="num">217 MB</td></tr>
+<tr><th scope="row">4 vCPU / 8 GB</th><td class="num">1,500</td><td class="num">1,500</td><td class="num">0</td><td class="num">89 ms</td><td class="num">16,854 /s</td><td class="num">82 MB</td></tr>
+<tr><th scope="row">4 vCPU / 8 GB</th><td class="num">10,000</td><td class="num">10,000</td><td class="num">0</td><td class="num">1.7 s</td><td class="num">5,963 /s</td><td class="num">90 MB</td></tr>
+<tr><th scope="row">4 vCPU / 8 GB</th><td class="num">50,000</td><td class="num">50,000</td><td class="num">0</td><td class="num">41.0 s</td><td class="num">1,219 /s</td><td class="num">112 MB</td></tr>
+<tr><th scope="row">4 vCPU / 8 GB</th><td class="num">150,000</td><td class="num">150,000</td><td class="num">0</td><td class="num">344.3 s</td><td class="num">436 /s</td><td class="num">336 MB</td></tr>
+<tr><th scope="row">8 vCPU / 16 GB</th><td class="num">1,500</td><td class="num">1,500</td><td class="num">0</td><td class="num">109 ms</td><td class="num">13,762 /s</td><td class="num">85 MB</td></tr>
+<tr><th scope="row">8 vCPU / 16 GB</th><td class="num">10,000</td><td class="num">10,000</td><td class="num">0</td><td class="num">1.6 s</td><td class="num">6,219 /s</td><td class="num">95 MB</td></tr>
+<tr><th scope="row">8 vCPU / 16 GB</th><td class="num">50,000</td><td class="num">50,000</td><td class="num">0</td><td class="num">42.4 s</td><td class="num">1,180 /s</td><td class="num">144 MB</td></tr>
+<tr><th scope="row">8 vCPU / 16 GB</th><td class="num">150,000</td><td class="num">150,000</td><td class="num">0</td><td class="num">339.3 s</td><td class="num">442 /s</td><td class="num">222 MB</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fine">Each row is one single run. Time is wall-clock time from the first task to the last. More processors did not make the largest loads faster, because each task spends its time waiting.</p>
+    <h3 class="chart-h">Completed, and how long it took</h3>
+    <div class="vmcharts">
+<div class="vmchart"><h3>1 vCPU / 1 GB</h3><ul class="bars vmbars"><li><span>1,500 tasks</span><span class="t"><i style="--w:100%"></i></span><b>69 ms</b></li><li><span>10,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>1.3 s</b></li><li><span>50,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>33.0 s</b></li><li><span>150,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>347.5 s</b></li></ul></div>
+<div class="vmchart"><h3>2 vCPU / 2 GB</h3><ul class="bars vmbars"><li><span>1,500 tasks</span><span class="t"><i style="--w:100%"></i></span><b>69 ms</b></li><li><span>10,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>1.4 s</b></li><li><span>50,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>41.0 s</b></li><li><span>150,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>363.0 s</b></li></ul></div>
+<div class="vmchart"><h3>2 vCPU / 4 GB</h3><ul class="bars vmbars"><li><span>1,500 tasks</span><span class="t"><i style="--w:100%"></i></span><b>95 ms</b></li><li><span>10,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>1.5 s</b></li><li><span>50,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>41.9 s</b></li><li><span>150,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>360.4 s</b></li></ul></div>
+<div class="vmchart"><h3>4 vCPU / 8 GB</h3><ul class="bars vmbars"><li><span>1,500 tasks</span><span class="t"><i style="--w:100%"></i></span><b>89 ms</b></li><li><span>10,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>1.7 s</b></li><li><span>50,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>41.0 s</b></li><li><span>150,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>344.3 s</b></li></ul></div>
+<div class="vmchart"><h3>8 vCPU / 16 GB</h3><ul class="bars vmbars"><li><span>1,500 tasks</span><span class="t"><i style="--w:100%"></i></span><b>109 ms</b></li><li><span>10,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>1.6 s</b></li><li><span>50,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>42.4 s</b></li><li><span>150,000 tasks</span><span class="t"><i style="--w:100%"></i></span><b>339.3 s</b></li></ul></div>
+    </div>
+    <p class="fine">Every bar is full because every task asked for was completed. The label is the time it took.</p>
+  </div>
+</section>
+
+<section id="baseline" class="bsec ink">
+  <div class="wrap">
+    <h2>The clean baseline, from the tagged image.</h2>
+    <p class="plain">These came from a later, cleaner pass on the image built from the phase-7 tag. Where a test ran three times, the median is shown.</p>
+    <p class="bench-label">Measured 2026-10-14 on the image built from tag phase-7, median of 3 runs where run three times, 2013 Intel i7-4770 under KVM.</p>
+    <div class="tablewrap" role="region" aria-label="Phase 7 baseline" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">What</th><th scope="col" class="num">Measured</th><th scope="col">Detail</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Cold start, power-on to agents running</th><td class="num">3.486 s</td><td class="ev">spread 3.0%, limit 5 s</td></tr>
+          <tr><th scope="row">Total runtime memory, 10,000 idle agents</th><td class="num">40.5 MB</td><td class="ev">about 4 KB each</td></tr>
+          <tr><th scope="row">Control API p99 at 10,000 agents</th><td class="num">50 µs</td><td class="ev">limit 100 ms</td></tr>
+          <tr><th scope="row">Concurrent calls in flight</th><td class="num">1,500</td><td class="ev">0 refused, 2 vCPU, mock model server</td></tr>
+          <tr><th scope="row">Forced crashes at five points</th><td class="num">0 lost</td><td class="ev">0 duplicates; 100 agents × 3 steps, 400/400 completed</td></tr>
+          <tr><th scope="row">Sandboxed tool runs</th><td class="num">1,000/1,000</td><td class="ev">0 crashed</td></tr>
+          <tr><th scope="row">Root payload</th><td class="num">53 MB</td><td class="ev">282/282 third-party crates digest-verified</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="method" class="bsec paper">
+  <div class="wrap">
+    <h2>Method.</h2>
+    <p class="plain">Everything needed to judge these numbers, and to check them against the raw files.</p>
+    <ul class="mono-list">
+      <li><b>Hardware.</b> One Intel i7-4770 from 2013, 8 cores, 31 GB, running guests under KVM. Capacity guests came in five shapes: 1 vCPU with 1 GB, 2 with 2 GB, 2 with 4 GB, 4 with 8 GB and 8 with 16 GB. The real-model runs used 2 vCPU with 4 GB.</li>
+      <li><b>Image.</b> A pre-release build, digest cf922365, taken before the final phase closed. It is not the frozen release image.</li>
+      <li><b>Model.</b> llama3.2:1b through Ollama on the host, CPU inference, over TLS and HTTP/2, reached through the checkpoint. The capacity runs use a stand-in model with a fixed 5 ms delay.</li>
+      <li><b>Corpus.</b> 24 tasks in four tiers: recall, arithmetic, reasoning and structured output. Corpus digest 9d19af46e999. 32 runs per task, 8 at a time.</li>
+      <li><b>Rule.</b> Our standard is 3 runs, median reported, and more than 10% spread counts as a failure. These are single runs and say so.</li>
+      <li><b>Raw data.</b> The raw files are archived byte for byte, with sha256 checksums for each. The archive tarball's sha256 starts d9bb2569. Every cell in the tables above is checked against those files before this page is published.</li>
+      <li><b>To rerun.</b> Boot the image on a machine like this one, point it at a local open-weight model, run the 24-task corpus 32 times at 8 at once, then run the five VM sizes at the four load levels. The same harness will run three times on the final image.</li>
+    </ul>
+    <div class="cmpnote" style="margin-top:34px">
+      <h3>How to compare</h3>
+      <p>Snapshot and warm-pool products quote start-up times on modern servers. This is a cold start of a whole sealed system on 2013 hardware. We do not quote any competitor's numbers here.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav class="footnav" aria-label="Site">
+      <a href="../">Home</a><a href="../how-it-works/">How it works</a><a href="../use-cases/">Use cases</a><a href="../security/">Security</a><a href="../compare/">Compare</a><a href="../pricing/">Pricing</a><a href="./">Benchmarks</a><a href="../report/">Test report</a>
+    </nav>
+    <p>Neither this page nor the test report loads anything from anyone else — no outside fonts, scripts, analytics or CDNs. This page's Content-Security-Policy enforces it; view source.</p>
+    <div class="row">
+      <span>VOLENT — agentic OS appliance. Pre-1.0, working with a small group of design partners.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="What VOLENT is, what it measured, and what we are asking a network partner for.">
+<meta name="robots" content="noindex">
+<style>*,*::before,*::after{box-sizing:border-box}body,h1,h2,h3,h4,p,dl,dd,table,pre,ul,ol{margin:0}ul,ol{padding:0}img{max-width:100%}</style>
+<title>VOLENT Test Report</title>
+
+</head>
+<body>
+<style>
+:root {
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+  --paper:   #FAFBFC;
+  --panel:   #F1F4F7;
+  --ink:     #0F1720;
+  --muted:   #5A6B7B;
+  --faint:   #8496A6;
+  --rule:    #D3DCE4;
+  --hair:    #E4EAEF;
+  --accent:  #0D6E6E;
+  --accent-soft: #E0EFEE;
+  --ok:      #1E7A4C;
+  --warn:    #8A6000;
+  --crit:    #A5312B;
+  --shadow:  0 1px 0 rgba(15,23,32,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:   #0A0E13;
+    --panel:   #121922;
+    --ink:     #DCE5EE;
+    --muted:   #8A9AAA;
+    --faint:   #667888;
+    --rule:    #222E3A;
+    --hair:    #1A242E;
+    --accent:  #46C3B8;
+    --accent-soft: #0E2A2A;
+    --ok:      #4FBF7F;
+    --warn:    #D6A431;
+    --crit:    #E4736C;
+    --shadow:  0 1px 0 rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"] {
+  --paper:   #0A0E13;
+  --panel:   #121922;
+  --ink:     #DCE5EE;
+  --muted:   #8A9AAA;
+  --faint:   #667888;
+  --rule:    #222E3A;
+  --hair:    #1A242E;
+  --accent:  #46C3B8;
+  --accent-soft: #0E2A2A;
+  --ok:      #4FBF7F;
+  --warn:    #D6A431;
+  --crit:    #E4736C;
+  --shadow:  0 1px 0 rgba(0,0,0,.4);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sheet {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 28px 120px;
+}
+
+/* ---------- masthead: a test-report cover block ---------- */
+
+.masthead {
+  border-bottom: 2px solid var(--ink);
+  padding: 56px 0 18px;
+  margin-bottom: 0;
+}
+.wordmark {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(38px, 7vw, 66px);
+  letter-spacing: .10em;
+  line-height: .96;
+  margin: 0;
+  text-wrap: balance;
+}
+.subtitle {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: clamp(15px, 2vw, 19px);
+  color: var(--muted);
+  letter-spacing: .02em;
+  margin: 10px 0 0;
+  max-width: 62ch;
+}
+
+.docmeta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 0;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 44px;
+}
+.docmeta div {
+  padding: 14px 18px 15px 0;
+  border-right: 1px solid var(--hair);
+}
+.docmeta div:last-child { border-right: 0; }
+.docmeta dt {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin: 0 0 5px;
+}
+.docmeta dd {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  margin: 0;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ---------- the one diagram ---------- */
+.flow { display:flex; flex-wrap:wrap; align-items:stretch; gap:0; margin:30px 0 8px; }
+.stage { flex:1 1 210px; min-width:200px; border:1px solid var(--rule); background:var(--panel); padding:16px 18px 18px; }
+.stage + .stage { border-left:0; }
+.stage.owned { background:var(--accent-soft); border-color:var(--accent); }
+.stage.owned + .stage { border-left:1px solid var(--rule); }
+.stage h4 { font-family:var(--sans); font-size:10.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--faint); margin:0 0 9px; font-weight:600; }
+.stage.owned h4 { color:var(--accent); }
+.stage .big { font-family:var(--sans); font-size:17px; font-weight:600;
+  line-height:1.25; margin:0 0 8px; }
+.stage ul { margin:0; padding-left:16px; font-size:13.5px; line-height:1.5; }
+.stage li { margin-bottom:3px; }
+.stage .note2 { font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:9px; }
+.ask { border:1px solid var(--accent); border-left-width:3px; padding:20px 24px; margin:34px 0 8px; }
+.ask h4 { font-family:var(--sans); font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 12px; font-weight:600; }
+.ask ol { margin:0; padding-left:20px; }
+.ask li { margin-bottom:10px; }
+.ask li:last-child { margin-bottom:0; }
+@media (max-width:760px){ .stage + .stage { border-left:1px solid var(--rule); border-top:0; } }
+
+/* ---------- sections ---------- */
+
+section { margin: 0 0 66px; scroll-margin-top: 20px; }
+
+h2 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 25px;
+  letter-spacing: .005em;
+  margin: 0 0 6px;
+  padding-top: 26px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  text-wrap: balance;
+}
+h2 .num {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: .04em;
+  flex: none;
+}
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 16.5px;
+  letter-spacing: .01em;
+  margin: 34px 0 8px;
+  text-wrap: balance;
+}
+p { margin: 0 0 15px; max-width: 68ch; }
+.lede { color: var(--muted); max-width: 70ch; margin-bottom: 26px; }
+strong { font-weight: 600; }
+em { font-style: italic; }
+
+code, .m {
+  font-family: var(--mono);
+  font-size: .875em;
+  font-variant-numeric: tabular-nums;
+}
+code {
+  background: var(--panel);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+/* ---------- status chips: the spine of the document ---------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  padding: 3px 8px 3px 7px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  white-space: nowrap;
+  vertical-align: 2px;
+}
+.chip::before {
+  content: "";
+  width: 6px; height: 6px;
+  background: currentColor;
+  border-radius: 50%;
+  flex: none;
+}
+.chip.cert { color: var(--ok); }
+.chip.meas { color: var(--warn); }
+.chip.none { color: var(--faint); }
+
+.legend {
+  background: var(--panel);
+  border-left: 3px solid var(--accent);
+  padding: 20px 24px;
+  margin: 0 0 40px;
+}
+.legend p { margin: 0 0 9px; max-width: 74ch; }
+.legend p:last-child { margin-bottom: 0; }
+
+/* ---------- data tables ---------- */
+
+.tw { overflow-x: auto; margin: 18px 0 8px; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  min-width: 560px;
+}
+caption {
+  caption-side: bottom;
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--faint);
+  padding-top: 10px;
+  letter-spacing: .01em;
+}
+th {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  text-align: right;
+  padding: 0 0 7px 16px;
+  border-bottom: 1px solid var(--ink);
+  white-space: nowrap;
+}
+th:first-child, td:first-child { padding-left: 0; text-align: left; }
+th.l, td.l { text-align: left; }
+td {
+  padding: 6px 0 6px 16px;
+  text-align: right;
+  border-bottom: 1px solid var(--hair);
+  white-space: nowrap;
+}
+td.wrap { white-space: normal; font-family: var(--sans); font-size: 13.5px; }
+tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
+.grp td {
+  border-bottom: 1px solid var(--rule);
+  padding-top: 13px;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+td.good { color: var(--ok); }
+td.bad  { color: var(--crit); }
+td.mid  { color: var(--warn); }
+.zero { color: var(--crit); font-weight: 600; }
+.perf { color: var(--ok); font-weight: 600; }
+
+/* ---------- key figures ---------- */
+
+.figs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(186px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  margin: 26px 0 30px;
+}
+.fig { background: var(--paper); padding: 18px 20px 20px; }
+.fig .v {
+  font-family: var(--mono);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  display: block;
+}
+.fig .u { font-size: 15px; color: var(--muted); font-weight: 400; }
+.fig .k {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-top: 7px;
+}
+
+/* ---------- console block ---------- */
+
+pre {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.66;
+  background: var(--panel);
+  border-left: 3px solid var(--rule);
+  padding: 15px 18px;
+  overflow-x: auto;
+  margin: 18px 0;
+  color: var(--ink);
+}
+pre .c { color: var(--faint); }
+pre .g { color: var(--ok); }
+pre .r { color: var(--crit); }
+
+ul { margin: 0 0 16px; padding-left: 20px; max-width: 68ch; }
+li { margin-bottom: 7px; }
+li::marker { color: var(--accent); }
+
+.note {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 18px 0;
+  margin: 30px 0;
+}
+.note .h {
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--crit);
+  margin-bottom: 7px;
+}
+.note.soft .h { color: var(--accent); }
+.note p:last-child { margin-bottom: 0; }
+
+footer {
+  border-top: 2px solid var(--ink);
+  padding-top: 18px;
+  margin-top: 76px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--faint);
+  line-height: 1.8;
+}
+
+a { color: var(--accent); }
+a:focus-visible, :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (max-width: 620px) {
+  .sheet { padding: 0 18px 80px; }
+  .docmeta div { border-right: 0; border-bottom: 1px solid var(--hair); }
+}
+</style>
+
+<div class="sheet">
+
+<header class="masthead">
+  <h1 class="wordmark">VOLENT</h1>
+  <p class="subtitle">A locked-down machine for running AI agents. It boots in 3.5 seconds, can prove it hasn't been tampered with, and nothing leaves it except where you said it could.</p>
+</header>
+
+<dl class="docmeta">
+  <div><dt>Test article</dt><dd>volent 0.1.0-dev</dd></div>
+  <div><dt>Pin digest</dt><dd>642d379bdd51</dd></div>
+  <div><dt>Kernel / OTP</dt><dd>6.12.104 / 27.3.4.16</dd></div>
+  <div><dt>Tier</dt><dd>T3 · KVM guest</dd></div>
+  <div><dt>Date</dt><dd>2026-09-23</dd></div>
+</dl>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§0</span> What was measured</h2>
+
+<p class="lede">You give a customer one file. They boot it as a virtual machine. What comes up is a locked-down system that runs their AI agents — with no way to log into it, nothing to install or patch, and a single controlled exit for network traffic. Ask it what it's running and it answers with proof you can check yourself.</p>
+
+<div class="figs">
+  <div class="fig"><span class="v">3.7<span class="u">&nbsp;s</span></span><div class="k">Cold boot to live</div></div>
+  <div class="fig"><span class="v">79<span class="u">&nbsp;MB</span></span><div class="k">Runtime footprint, idle</div></div>
+  <div class="fig"><span class="v">150<span class="u">&nbsp;k</span></span><div class="k">Concurrent agents, 1 vCPU</div></div>
+  <div class="fig"><span class="v">1</span><div class="k">Network egress path</div></div>
+  <div class="fig"><span class="v">0</span><div class="k">Shells, package managers, SSH daemons</div></div>
+</div>
+
+<p>There is nothing to log into and nothing to install. The disk is read-only and checked on every read, so a change made to it is detected rather than trusted. One small area is writable, for data only — nothing stored there can be run.</p>
+
+<h3>How it is deployed, and where a network partner sits</h3>
+
+<div class="flow">
+  <div class="stage">
+    <h4>Customer</h4>
+    <div class="big">Their hypervisor, their VM</div>
+    <ul>
+      <li>KVM, VMware, Hyper-V, Xen or Firecracker</li>
+      <li>Nothing of ours runs in anyone else's cloud</li>
+    </ul>
+  </div>
+  <div class="stage owned">
+    <h4>The product</h4>
+    <div class="big">VOLENT boots <em>as</em> the VM</div>
+    <ul>
+      <li>Nothing to log into, nothing to patch</li>
+      <li>Agents described in a config file, run and watched by the image</li>
+      <li>Proves what it's running, on demand</li>
+    </ul>
+    <div class="note2">3.5 s cold boot · 79 MB idle</div>
+  </div>
+  <div class="stage owned">
+    <h4>The product</h4>
+    <div class="big">One egress gate</div>
+    <ul>
+      <li>Nothing gets out unless you allowed it</li>
+      <li>Allowed per agent, and every attempt is logged with a reason</li>
+      <li>A second way out won't compile</li>
+    </ul>
+    <div class="note2">HTTP/2 · TLS 1.2 floor · named trust store</div>
+  </div>
+  <div class="stage">
+    <h4>Network partner</h4>
+    <div class="big">The path out</div>
+    <ul>
+      <li>A private line to AI providers and the customer's own systems</li>
+      <li>Traffic never touches the public internet</li>
+      <li>Tells the node what packet size the link carries; the node listens</li>
+    </ul>
+  </div>
+</div>
+<p class="lede" style="margin-top:14px">Left to right: your customer owns the machine, we control what runs on it and what's allowed out, and you carry it the rest of the way. The two shaded boxes are what we build.</p>
+
+<div class="ask">
+  <h4>What we are asking for</h4>
+  <ol>
+    <li><strong>A test link with an unusual packet size.</strong> The node asks the network what size it can carry and adjusts. We've proven that in a lab, but no real carrier link has ever told it. If we get this wrong on your network, connections stall silently rather than failing — so it's the first thing worth testing together, and the fastest to do.</li>
+    <li><strong>One pilot machine on a private connection.</strong> A single VM, one link to an AI provider, and two records afterwards: everything the machine tried to send, and proof of exactly what was running when it sent it.</li>
+    <li><strong>Your read on whether your customers want this.</strong> The buyer is someone in a regulated industry who won't send their work to someone else's cloud. Whether that's a real group on your side is something only you can tell us.</li>
+  </ol>
+</div>
+
+<p>Five properties are load-bearing for a network partner, and each has a section below: it boots fast enough to be treated as cattle&nbsp;(§2); it can prove its own identity and integrity to a third party&nbsp;(§3); every outbound connection it makes passes one auditable gate&nbsp;(§4); it holds agent concurrency without the VM growing&nbsp;(§6); and it gets onto a machine — imported, or written over whatever was already there&nbsp;(§7).</p>
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§1</span> How to read this report</h2>
+
+<p class="lede">Two kinds of number appear here and they are not interchangeable. Conflating them is the most common way a benchmark stops being true.</p>
+
+<div class="legend">
+  <p><span class="chip cert">Certified</span> &nbsp;A gate result. Three runs, median reported, run-to-run spread inside 10%. The build refuses to proceed if the bar is missed.</p>
+  <p><span class="chip meas">Measured</span> &nbsp;A single observed run on real hardware. Reproducible, but not median-of-three, so it is evidence and not a specification. Every capacity figure in §6 is of this kind.</p>
+</div>
+
+<p>Everything below ran against the real appliance image — the same squashfs, the same dm-verity table, the same runtime — booted under KVM. Nothing was simulated on the host except where the report says so explicitly.</p>
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§2</span> Boot <span class="chip cert">Certified</span></h2>
+
+<p>Cold boot to the first liveness line, under OVMF with the production image. Disk cache evicted before every run.</p>
+
+<div class="figs">
+  <div class="fig"><span class="v">3.678<span class="u">&nbsp;s</span></span><div class="k">Median of 3</div></div>
+  <div class="fig"><span class="v">1.5<span class="u">&nbsp;%</span></span><div class="k">Run-to-run spread</div></div>
+  <div class="fig"><span class="v">5.0<span class="u">&nbsp;s</span></span><div class="k">Bar (NFR-1)</div></div>
+  <div class="fig"><span class="v">1.32<span class="u">&nbsp;s</span></span><div class="k">Headroom</div></div>
+</div>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Run</th><th>Host elapsed</th><th>Note</th></tr></thead>
+  <tbody>
+    <tr><td class="l">warm-up</td><td>3.462 s</td><td>rig preparation, not counted</td></tr>
+    <tr><td class="l">1</td><td>3.729 s</td><td>—</td></tr>
+    <tr><td class="l">2</td><td>3.675 s</td><td>—</td></tr>
+    <tr><td class="l">3</td><td>3.678 s</td><td>—</td></tr>
+  </tbody>
+</table>
+<caption>Spread 54 ms against a 368 ms tolerance. Re-measured after the kernel gained a virtio-MMIO driver for the microVM profile and the supervision tree gained a fleet-enrollment child; 4.6% slower than the previous 3.516 s, inside the 10% regression bar.</caption>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§3</span> Attestation <span class="chip cert">Certified</span></h2>
+
+<p class="lede">The node produces a signed report carrying a real TPM2 quote. It is fetched from outside the guest and verified on the host by an implementation that shares no code with the node — it parses the attestation structure from the TPM specification and its cryptography is OpenSSL's, not the node's.</p>
+
+<h3>Four boots, each asserting something the others cannot</h3>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Boot</th><th class="l">Device</th><th class="l">Asserts</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td class="l">A</td><td class="l">tpm-crb</td><td class="l wrap">Identity signature, TPM signature, <code>TPM_GENERATED_VALUE</code>, nonce binding, recomputed PCR digest</td><td class="good">PASS</td></tr>
+    <tr><td class="l">B</td><td class="l">tpm-crb</td><td class="l wrap">Flipped payload bit, foreign signature, and a re-signed report with a PCR replaced are all refused</td><td class="good">PASS</td></tr>
+    <tr><td class="l">C</td><td class="l">tpm-tis</td><td class="l wrap">A TPM this kernel cannot drive reports <em>no TPM</em>, and the report still states version, profile and roothash</td><td class="good">PASS</td></tr>
+    <tr><td class="l">D</td><td class="l">tpm-crb</td><td class="l wrap">Two nonces produce two different quotes — the node is not replaying a cached one</td><td class="good">PASS</td></tr>
+  </tbody>
+</table>
+<caption>Software TPM (swtpm 0.10.1) presented over the CRB interface. The kernel is built <code>CONFIG_TCG_CRB=y</code>, <code>CONFIG_TCG_TIS</code> unset, <code>MODULES=n</code> — so boot C exercises a TPM that can never be driven, by construction.</caption>
+</div>
+
+<h3>Why the PCR digest check is the load-bearing one</h3>
+
+<p>The quote signs a <em>digest</em>; the report carries <em>values</em>. Recomputing the digest from those values and requiring it to match is what makes them evidence. Boot B's third case is an attacker holding the node's identity key but not its TPM — they re-sign whatever claims they like, the identity signature verifies, and only the digest refuses them:</p>
+
+<pre><span class="c">   the untouched report verifies; now breaking it</span>
+   <span class="r">FAIL: the machine-identity signature did not verify</span>
+   refused, as it must: one flipped bit in the payload
+   <span class="r">FAIL: the machine-identity signature did not verify</span>
+   refused, as it must: a signature from a different node
+   <span class="r">FAIL: the PCR values in the report do not produce the digest the TPM signed</span>
+   refused, as it must: a re-signed report with a PCR value replaced</pre>
+
+<p>The report also states its time source, trust-store digest, resolver lookup order, reachable egress destinations, API bind address, and whether the cloud-metadata window is sealed. A report that cannot say the window is shut cannot rule out the one hole that window exists to close.</p>
+
+<h3>The operator verifies it themselves</h3>
+
+<p>A signed report is only worth what the recipient can check. <code>volent attest --verify policy.json</code> is a standalone tool that takes a report and a policy describing what the node must be, and answers in exit status. It depends on <strong>neither the node's source nor any third-party package</strong> — it parses the attestation structure from the TPM2 specification and verifies with the platform's own cryptography, because a verifier built from the producer's code agrees with a bug in it.</p>
+
+<pre>  ok   machine identity signature <span class="c">— ed25519, over 2317 bytes of claims</span>
+  ok   node names its own key <span class="c">— 33b30618c5759d47…</span>
+  ok   freshness <span class="c">— the report carries the nonce that was sent</span>
+  ok   quote is TPM-generated <span class="c">— magic and attest type are a quote</span>
+  ok   quote is bound to a challenge
+  ok   TPM signature over the quote <span class="c">— ECDSA P-256 / SHA-256</span>
+  ok   PCR values match the signed digest <span class="c">— 8 PCRs reproduce it</span>
+  ok   image version <span class="c">— 0.1.0-dev</span>
+  ok   pin digest <span class="c">— 642d379bdd51</span>
+  ok   verity roothash <span class="c">— b01bf5a4beb688e6df7939…</span>
+  ok   boot profile <span class="c">— verity_only</span>
+  ok   metadata window sealed <span class="c">— true</span>
+
+<span class="g">PASS: the report verifies and satisfies the policy</span> <span class="c">(2 check(s) the policy did not ask for)</span></pre>
+
+<p>Every policy field is optional, and the tool <strong>states how many it was not asked to check</strong>. A thin policy printing a bare <code>OK</code> would be the most dangerous output it could produce, because it would look exactly like a thorough pass.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Given</th><th class="l">Answers</th><th>Exit</th></tr></thead>
+  <tbody>
+    <tr><td class="l wrap">A clean report and a matching policy</td><td class="l">every check passes</td><td class="good">0</td></tr>
+    <tr><td class="l wrap">One flipped bit anywhere in the signed claims</td><td class="l">the signature does not verify</td><td class="bad">1</td></tr>
+    <tr><td class="l wrap">A nonce other than the one sent</td><td class="l">the report and the quote are both refused</td><td class="bad">1</td></tr>
+    <tr><td class="l wrap">A PCR value replaced</td><td class="l">the values do not produce the signed digest</td><td class="bad">1</td></tr>
+  </tbody>
+</table>
+<caption>The gate runs this tool over the same reports its own independent verifier checks. Two verifiers disagreeing is the signal worth having; a gate exercising only its own would leave the tool an operator runs untested.</caption>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§4</span> Network posture <span class="chip cert">Certified</span></h2>
+
+<p class="lede">The node configures its own network at boot and has exactly one way out. Both are properties a network operator can audit rather than take on trust, and both are enforced by the build rather than by convention.</p>
+
+<h3>What it does on its own at boot</h3>
+
+<pre><span class="c">VOLENT-ENTROPY</span>  seeded after 1ms
+<span class="c">VOLENT-NET</span>      link eth0 up
+<span class="c">VOLENT-NET</span>      eth0 addr=10.0.2.15/24 gw=10.0.2.2 lease=86400s
+<span class="c">VOLENT-NET</span>      resolver: 1 nameserver(s) installed
+<span class="c">VOLENT-TIME</span>     no time server offered by the network; running on monotonic time
+<span class="c">VOLENT-PROVISION</span> provisioned from ec2: api_token, api_bind; metadata window sealed
+<span class="c">VOLENT-API</span>      control api: listening</pre>
+
+<p>Interface selection comes from the kernel's own link table rather than a configured name, so the image boots unattended on a hypervisor nobody tried — <code>eth0</code>, <code>ens3</code> and <code>enp0s3</code> are all the same to it. DHCP, address, default route and resolver are the node's own work. A guest with no interface is a reported condition, not a crash.</p>
+
+<h3>One egress path, deny by default</h3>
+
+<p>Every outbound request — an agent's tool call, a model API, an image update — traverses a single gate in a fixed order. There is no second socket, and that is checked at build time by auditing the compiled modules rather than by grepping source: naming a socket API anywhere outside the gate fails the build.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Stage</th><th class="l">What it decides</th><th class="l">Refusal is</th></tr></thead>
+  <tbody>
+    <tr><td class="l">Capability token</td><td class="l wrap">Whether this caller may make any request at all</td><td class="l">a value, not a fault</td></tr>
+    <tr><td class="l">Allowlist</td><td class="l wrap">Whether this capability was granted this host — derived from the agent's own manifest, exact match, no wildcards</td><td class="l"><code>host_not_allowed</code></td></tr>
+    <tr><td class="l">URL shape</td><td class="l wrap">HTTPS only; an IP literal is refused as a literal, before its address is considered</td><td class="l"><code>ip_literal</code></td></tr>
+    <tr><td class="l">Resolve</td><td class="l wrap">Every address a name answers with is judged, not just the first</td><td class="l"><code>unresolvable</code></td></tr>
+    <tr><td class="l">Address</td><td class="l wrap">RFC1918, loopback, link-local, carrier-grade NAT, multicast and the IPv6 forms that embed them</td><td class="l"><code>blocked_range</code></td></tr>
+    <tr><td class="l">Connect</td><td class="l wrap">The socket goes to the address that was judged; the name rides along only as SNI and <code>Host</code></td><td class="l">—</td></tr>
+    <tr><td class="l">Redirect</td><td class="l wrap">A redirect re-enters the whole chain, allowlist included</td><td class="l"><code>too_many_redirects</code></td></tr>
+  </tbody>
+</table>
+<caption>Resolve-then-connect-to-what-was-judged is what closes DNS rebinding: the address the allowlist approved and the address the socket reaches are the same address by construction.</caption>
+</div>
+
+<p>Every decision, allowed or refused, is journalled with host, bytes, duration, the agent that asked and the reason. In §5's 896-call run the tally was <code>allow: 896, deny: 0</code> — and in the security controls run alongside it, a host not on the allowlist was refused, a deliberately emptied trust store produced a TLS failure rather than a silent downgrade, and a scan of the node's own output for the provisioned credential came back clean.</p>
+
+<h3>Transport</h3>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Property</th><th class="l">Value</th><th class="l">Note</th></tr></thead>
+  <tbody>
+    <tr><td class="l">Protocol</td><td class="l">HTTP/2 only</td><td class="l wrap">Connection pools are per resolved destination</td></tr>
+    <tr><td class="l">TLS floor</td><td class="l">1.2</td><td class="l wrap">1.0 and 1.1 are not available on the node's only way out</td></tr>
+    <tr><td class="l">Trust anchors</td><td class="l">144</td><td class="l wrap">Named explicitly from the image's own bundle, never discovered — the attestation report carries the bundle's digest</td></tr>
+    <tr><td class="l">Certificate check</td><td class="l">against the name</td><td class="l wrap">Not against the pinned literal the socket connects to</td></tr>
+    <tr><td class="l">Path MTU</td><td class="l">from the lease</td><td class="l wrap">DHCP option 26 is requested and applied before the address, so no packet is sent at a size the path was known not to carry. Values below 576 bytes are reported and declined. The MTU in force is printed at link-up and carried in the attestation report.</td></tr>
+    <tr><td class="l">Cloud metadata</td><td class="l">pre-seal only</td><td class="l wrap">The instance-credential address is reachable during a first-boot window that always closes, and never again</td></tr>
+  </tbody>
+</table>
+<caption>HTTP/2-only is a deliberate constraint with a consequence: an HTTPS endpoint that offers only HTTP/1.1 is unreachable, and the node reports that by name rather than as a generic failure.</caption>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§5</span> Agent workload <span class="chip meas">Measured</span></h2>
+
+<p class="lede">Real agents running inside the booted appliance, reaching a real model server over TLS and HTTP/2 through the node's single egress gate. Not a host-side harness calling a model.</p>
+
+<div class="figs">
+  <div class="fig"><span class="v">896</span><div class="k">Real calls, §5.2</div></div>
+  <div class="fig"><span class="v perf">0</span><div class="k">Delivery failures</div></div>
+  <div class="fig"><span class="v">47,898</span><div class="k">Provider tokens</div></div>
+  <div class="fig"><span class="v">24</span><div class="k">Corpus tasks</div></div>
+</div>
+
+<h3>5.1 &nbsp;The corpus is ordered by cost, not by difficulty</h3>
+
+<p>Tasks are graded into four tiers by <strong>expected output length</strong>, because difficulty is not a quantity a benchmark can measure and output length is — on a decode-bound server it is what drives cost. The results confirm the distinction is real rather than pedantic:</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Tier</th><th class="l">Exercises</th><th>Tasks</th><th>Mean tokens</th><th>Correct</th></tr></thead>
+  <tbody>
+    <tr><td class="l">recall</td><td class="l wrap">one-hop factual lookup</td><td>6</td><td>41</td><td class="good">85 %</td></tr>
+    <tr><td class="l">arithmetic</td><td class="l wrap">a short deterministic chain</td><td>6</td><td>42</td><td class="bad">35 %</td></tr>
+    <tr><td class="l">reasoning</td><td class="l wrap">multi-step inference over supplied facts</td><td>6</td><td>67</td><td class="bad">26 %</td></tr>
+    <tr><td class="l">structured</td><td class="l wrap">output in a required shape (JSON, ordered list)</td><td>6</td><td>63</td><td class="good">87 %</td></tr>
+  </tbody>
+</table>
+<caption>Corpus digest <code>9d19af46e999</code>. Two runs with different digests are not comparable, and the digest is reported with every result so a reader finds that out without diffing source.</caption>
+</div>
+
+<div class="note soft">
+  <div class="h">Read this before quoting the tier order</div>
+  <p>The <em>most</em> expensive tier scores highest and the second-cheapest scores worst. In this corpus, simple&nbsp;→&nbsp;complex means <strong>cheap&nbsp;→&nbsp;expensive</strong>, never easy&nbsp;→&nbsp;hard. Published as a difficulty ladder it would be wrong, and checkable.</p>
+</div>
+
+<h3>5.2 &nbsp;Per task, 32 runs each at concurrency 8</h3>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">#</th><th class="l">Task</th><th>Runs</th><th>Correct</th><th>Rate</th><th>p50</th><th>p95</th><th>Tokens</th></tr></thead>
+  <tbody>
+    <tr class="grp"><td colspan="8">recall — one-hop lookup</td></tr>
+    <tr><td class="l">0</td><td class="l wrap">Capital city of Japan</td><td>32</td><td>32</td><td class="good">100 %</td><td>1585</td><td>2287</td><td>41</td></tr>
+    <tr><td class="l">1</td><td class="l wrap">Planet closest to the Sun</td><td>32</td><td>23</td><td class="mid">72 %</td><td>1642</td><td>2181</td><td>41</td></tr>
+    <tr><td class="l">2</td><td class="l wrap">Chemical symbol for water</td><td>32</td><td>24</td><td class="mid">75 %</td><td>1648</td><td>2400</td><td>43</td></tr>
+    <tr><td class="l">3</td><td class="l wrap">Largest ocean</td><td>32</td><td>28</td><td class="good">88 %</td><td>1084</td><td>1817</td><td>38</td></tr>
+    <tr><td class="l">4</td><td class="l wrap">Days in a week</td><td>32</td><td>27</td><td class="good">84 %</td><td>1051</td><td>1954</td><td>40</td></tr>
+    <tr><td class="l">5</td><td class="l wrap">Freezing point of water in Celsius</td><td>32</td><td>29</td><td class="good">91 %</td><td>1424</td><td>2664</td><td>42</td></tr>
+
+    <tr class="grp"><td colspan="8">arithmetic — a short deterministic chain</td></tr>
+    <tr><td class="l">6</td><td class="l wrap">17 + 25</td><td>32</td><td>3</td><td class="bad">9 %</td><td>1116</td><td>1555</td><td>39</td></tr>
+    <tr><td class="l">7</td><td class="l wrap">8 × 7</td><td>32</td><td>12</td><td class="bad">38 %</td><td>1062</td><td>1934</td><td>39</td></tr>
+    <tr><td class="l">8</td><td class="l wrap">144 ÷ 12</td><td>32</td><td>5</td><td class="bad">16 %</td><td>1259</td><td>1859</td><td>40</td></tr>
+    <tr><td class="l">9</td><td class="l wrap">6 eggs per box, 9 boxes</td><td>32</td><td>16</td><td class="mid">50 %</td><td>2524</td><td>10920</td><td>55</td></tr>
+    <tr><td class="l">10</td><td class="l wrap">100 − 37</td><td>32</td><td>11</td><td class="bad">34 %</td><td>937</td><td>1491</td><td>39</td></tr>
+    <tr><td class="l">11</td><td class="l wrap">One quarter of 80</td><td>32</td><td>20</td><td class="mid">62 %</td><td>1172</td><td>1914</td><td>40</td></tr>
+
+    <tr class="grp"><td colspan="8">reasoning — multi-step over supplied facts</td></tr>
+    <tr><td class="l">12</td><td class="l wrap">Anna &gt; Ben &gt; Carl — who is shortest</td><td>32</td><td>14</td><td class="mid">44 %</td><td>2518</td><td>8779</td><td>56</td></tr>
+    <tr><td class="l">13</td><td class="l wrap">Departs 09:00, 3-hour journey — arrival</td><td>32</td><td>13</td><td class="bad">41 %</td><td>9496</td><td>12832</td><td>87</td></tr>
+    <tr><td class="l">14</td><td class="l wrap">All roses are flowers — syllogism</td><td>32</td><td>12</td><td class="bad">38 %</td><td>1173</td><td>2082</td><td>48</td></tr>
+    <tr><td class="l">15</td><td class="l wrap">12 apples, gave 5, bought 3</td><td>32</td><td>5</td><td class="bad">16 %</td><td>9218</td><td>13150</td><td>82</td></tr>
+    <tr><td class="l">16</td><td class="l wrap">Monday + 3 days</td><td>32</td><td class="zero">0</td><td class="zero">0 %</td><td>1087</td><td>1802</td><td>48</td></tr>
+    <tr><td class="l">17</td><td class="l wrap">$20 shirt, 25 % off</td><td>32</td><td>5</td><td class="bad">16 %</td><td>8556</td><td>13090</td><td>79</td></tr>
+
+    <tr class="grp"><td colspan="8">structured — output in a required shape</td></tr>
+    <tr><td class="l">18</td><td class="l wrap">Echo an exact JSON object</td><td>32</td><td>31</td><td class="good">97 %</td><td>4968</td><td>9598</td><td>62</td></tr>
+    <tr><td class="l">19</td><td class="l wrap">Three primary colours in a given order</td><td>32</td><td>32</td><td class="good">100 %</td><td>4461</td><td>9797</td><td>61</td></tr>
+    <tr><td class="l">20</td><td class="l wrap">Extract a year into <code>{"year": NNNN}</code></td><td>32</td><td>32</td><td class="good">100 %</td><td>7535</td><td>11858</td><td>78</td></tr>
+    <tr><td class="l">21</td><td class="l wrap">JSON object keyed <code>capital</code></td><td>32</td><td>32</td><td class="good">100 %</td><td>4840</td><td>6605</td><td>60</td></tr>
+    <tr><td class="l">22</td><td class="l wrap">One-sentence summary with a fixed first word</td><td>32</td><td>32</td><td class="good">100 %</td><td>4016</td><td>6184</td><td>62</td></tr>
+    <tr><td class="l">23</td><td class="l wrap">First four positive even numbers</td><td>32</td><td>8</td><td class="bad">25 %</td><td>2806</td><td>7885</td><td>52</td></tr>
+  </tbody>
+</table>
+<caption>768 calls, all completed. Latencies in milliseconds. Model: <code>llama3.2:1b</code>, CPU inference, served through the appliance's egress gate.</caption>
+</div>
+
+<div class="note">
+  <div class="h">Correctness here measures the model, not the appliance</div>
+  <p>Task 16 scored <strong>0 of 32</strong>; task 0 scored <strong>32 of 32</strong>; both cost roughly the same tokens and the same milliseconds. That spread is a property of a 1-billion-parameter model, not of the runtime. The appliance's own result is the other column: <strong>768 of 768 delivered</strong>, journalled, and returned — <code>failed: 0</code>, <code>failures_by_reason: {}</code>, egress tally <code>allow: 768, deny: 0</code>.</p>
+</div>
+
+<h3>5.3 &nbsp;Concurrency against a real model server</h3>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Concurrent agents</th><th>Calls</th><th>Completed</th><th>p50</th><th>p95</th><th>Throughput</th><th>Node RSS</th><th>Run queue</th></tr></thead>
+  <tbody>
+    <tr><td class="l">4</td><td>128</td><td>128</td><td>1203</td><td>7521</td><td>1.40 /s</td><td>78 MB</td><td>0</td></tr>
+    <tr><td class="l">8</td><td>256</td><td>256</td><td>1674</td><td>11118</td><td>2.11 /s</td><td>78 MB</td><td>0</td></tr>
+    <tr><td class="l">16</td><td>512</td><td>512</td><td>5353</td><td>14592</td><td>2.23 /s</td><td>78 MB</td><td>0</td></tr>
+  </tbody>
+</table>
+<caption>4 GB / 2 vCPU guest. Throughput flattened across a 4× concurrency range while memory, process count, atom count and run queue did not move at all.</caption>
+</div>
+
+<p>The benchmark's own verdict: <em>throughput flattened while the node stayed flat — this is the endpoint's ceiling, not the appliance's.</em> One CPU-bound model server with a fixed number of decode slots saturates long before the runtime does. <strong>No figure in this subsection is a claim about the appliance</strong>, because the appliance is not what ran out.</p>
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§6</span> Concurrency capacity <span class="chip meas">Measured</span></h2>
+
+<p class="lede">To measure the runtime's own ceiling the model is removed: an in-process stub answers with a fixed 5 ms latency, so what is being measured is admission, scheduling and bookkeeping rather than somebody's GPU. Five VM shapes, four load levels.</p>
+
+<div class="figs">
+  <div class="fig"><span class="v">150,000</span><div class="k">Concurrent in-flight</div></div>
+  <div class="fig"><span class="v perf">0</span><div class="k">Refusals, all 20 runs</div></div>
+  <div class="fig"><span class="v">1<span class="u">&nbsp;vCPU</span></span><div class="k">Smallest shape tested</div></div>
+  <div class="fig"><span class="v">212<span class="u">&nbsp;MB</span></span><div class="k">RSS at 150 k, 1 vCPU</div></div>
+</div>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Shape</th><th>Requested</th><th>Admitted</th><th>Refused</th><th>Wall</th><th>Throughput</th><th>RSS</th><th>Procs</th><th>Atoms</th><th>RQ</th></tr></thead>
+  <tbody>
+    <tr class="grp"><td colspan="10">1 vCPU / 1 GB</td></tr>
+    <tr><td class="l">min</td><td>1,500</td><td>1,500</td><td class="good">0</td><td>69 ms</td><td>21,739 /s</td><td>79 MB</td><td>140</td><td>39,617</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>10,000</td><td>10,000</td><td class="good">0</td><td>1,321 ms</td><td>7,570 /s</td><td>86 MB</td><td>140</td><td>39,617</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>50,000</td><td>50,000</td><td class="good">0</td><td>32,968 ms</td><td>1,517 /s</td><td>123 MB</td><td>140</td><td>39,617</td><td>0</td></tr>
+    <tr><td class="l">max</td><td>150,000</td><td>150,000</td><td class="good">0</td><td>347,511 ms</td><td>432 /s</td><td>212 MB</td><td>140</td><td>39,617</td><td>0</td></tr>
+
+    <tr class="grp"><td colspan="10">2 vCPU / 2 GB</td></tr>
+    <tr><td class="l">min</td><td>1,500</td><td>1,500</td><td class="good">0</td><td>69 ms</td><td>21,739 /s</td><td>81 MB</td><td>142</td><td>39,620</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>10,000</td><td>10,000</td><td class="good">0</td><td>1,426 ms</td><td>7,013 /s</td><td>92 MB</td><td>142</td><td>39,620</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>50,000</td><td>50,000</td><td class="good">0</td><td>41,025 ms</td><td>1,219 /s</td><td>140 MB</td><td>142</td><td>39,620</td><td>0</td></tr>
+    <tr><td class="l">max</td><td>150,000</td><td>150,000</td><td class="good">0</td><td>362,971 ms</td><td>413 /s</td><td>217 MB</td><td>142</td><td>39,620</td><td>0</td></tr>
+
+    <tr class="grp"><td colspan="10">2 vCPU / 4 GB — the certified bench shape</td></tr>
+    <tr><td class="l">min</td><td>1,500</td><td>1,500</td><td class="good">0</td><td>95 ms</td><td>15,790 /s</td><td>79 MB</td><td>142</td><td>39,620</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>10,000</td><td>10,000</td><td class="good">0</td><td>1,458 ms</td><td>6,859 /s</td><td>92 MB</td><td>142</td><td>39,620</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>50,000</td><td>50,000</td><td class="good">0</td><td>41,932 ms</td><td>1,192 /s</td><td>111 MB</td><td>142</td><td>39,620</td><td>0</td></tr>
+    <tr><td class="l">max</td><td>150,000</td><td>150,000</td><td class="good">0</td><td>360,381 ms</td><td>416 /s</td><td>217 MB</td><td>142</td><td>39,620</td><td>0</td></tr>
+
+    <tr class="grp"><td colspan="10">4 vCPU / 8 GB</td></tr>
+    <tr><td class="l">min</td><td>1,500</td><td>1,500</td><td class="good">0</td><td>89 ms</td><td>16,854 /s</td><td>82 MB</td><td>146</td><td>39,626</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>10,000</td><td>10,000</td><td class="good">0</td><td>1,677 ms</td><td>5,963 /s</td><td>90 MB</td><td>146</td><td>39,626</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>50,000</td><td>50,000</td><td class="good">0</td><td>41,010 ms</td><td>1,219 /s</td><td>112 MB</td><td>146</td><td>39,626</td><td>0</td></tr>
+    <tr><td class="l">max</td><td>150,000</td><td>150,000</td><td class="good">0</td><td>344,294 ms</td><td>436 /s</td><td>336 MB</td><td>146</td><td>39,626</td><td>0</td></tr>
+
+    <tr class="grp"><td colspan="10">8 vCPU / 16 GB</td></tr>
+    <tr><td class="l">min</td><td>1,500</td><td>1,500</td><td class="good">0</td><td>109 ms</td><td>13,762 /s</td><td>85 MB</td><td>154</td><td>39,638</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>10,000</td><td>10,000</td><td class="good">0</td><td>1,608 ms</td><td>6,219 /s</td><td>95 MB</td><td>154</td><td>39,638</td><td>0</td></tr>
+    <tr><td class="l">·</td><td>50,000</td><td>50,000</td><td class="good">0</td><td>42,357 ms</td><td>1,180 /s</td><td>144 MB</td><td>154</td><td>39,638</td><td>0</td></tr>
+    <tr><td class="l">max</td><td>150,000</td><td>150,000</td><td class="good">0</td><td>339,261 ms</td><td>442 /s</td><td>222 MB</td><td>154</td><td>39,638</td><td>0</td></tr>
+  </tbody>
+</table>
+<caption>RQ = scheduler run queue. Every cell is a single run; see §9. The certified bar is 1,500 concurrent on 2 vCPU — the first row of the middle group.</caption>
+</div>
+
+<h3>What the table says</h3>
+
+<ul>
+  <li><strong>Nothing was refused, anywhere.</strong> 150,000 concurrent in-flight calls on a 1 vCPU / 1 GB guest, with the admission controller accepting every one.</li>
+  <li><strong>More vCPUs did not help.</strong> The 1 vCPU shape matched or beat the 8 vCPU shape at every load. The workload is wait-bound rather than CPU-bound, so extra schedulers add coordination without adding work. Buying cores for agent concurrency alone is not indicated by this data.</li>
+  <li><strong>Memory tracks agent count, not the VM's RAM.</strong> 79 MB at 1,500 rising to ~215 MB at 150,000, on every shape. Size the guest by how many agents it must hold, not by giving the runtime headroom it will not use.</li>
+  <li><strong>Atom count is flat</strong> — identical across all four loads within each shape. That is the property a 24-hour soak depends on, and the per-destination connection-pool design exists to preserve it.</li>
+  <li><strong>Process count is flat</strong> at 140–154 regardless of load, because in-flight accounting lives in the admission controller rather than in a process per call.</li>
+</ul>
+
+<div class="note">
+  <div class="h">One anomaly, stated rather than smoothed</div>
+  <p>The 4 vCPU shape reports <strong>336 MB</strong> at 150,000 where every other shape reports 212–222 MB — a 50 % outlier with no obvious cause. Single runs cannot distinguish a real effect from garbage-collection timing. It is left in the table rather than dropped, and it is the clearest argument for the repeat runs described in §9.</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§7</span> Deployment <span class="chip cert">Certified</span></h2>
+
+<p class="lede">One image, four ways onto a machine. Each one below was run, not described: the numbers and the refusals come from gates that boot the artifact they are claiming about.</p>
+
+<h3>The three formats, and the one that is not obvious</h3>
+
+<p>The image emits as raw, qcow2 and a fixed VHD. All three are re-encodings of the same 2 GiB disk, so each is compared back against the raw byte for byte, and the qcow2 and the VHD are then <em>booted</em>. What makes that worth doing: converting to VHD without pinning the virtual size rounds it up to the next legacy disk geometry, producing a file that is a slightly different disk from the one it was made from — silently, with the consequence arriving at an image import weeks later.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Artifact</th><th class="l">What is asserted</th></tr></thead>
+  <tbody>
+    <tr><td class="l">raw · qcow2 · vhd</td><td class="l wrap">Same virtual size, byte-identical contents, and the two converted forms boot to the runtime's first liveness line under KVM.</td></tr>
+    <tr><td class="l">signed manifest</td><td class="l wrap">One ed25519 signature binds all three by digest, plus the image version, the pin set and the dm-verity root hash. The signature is checked against the key the shipped installer pins — not against the private key that made it — so an installer carrying a stale key stops a release rather than shipping.</td></tr>
+    <tr><td class="l">the compressed raw</td><td class="l wrap">116 MB rather than 2 GiB. Not an optimisation: it is what lets the takeover installer verify an image in memory before it overwrites the disk it is running from.</td></tr>
+  </tbody>
+</table>
+<caption>A tampered manifest and a tampered image are each required to be refused, with the refusal naming which check caught it.</caption>
+</div>
+
+<h3>Taking over a machine that already has an operating system</h3>
+
+<p>The end-to-end test installs the appliance over a stock, unmodified Debian cloud image in a virtual machine — fetched by digest from Debian's own mirror, driven by cloud-init exactly as an operator's automation would drive it, running the byte-identical installer that ships beside the image. The machine reboots into the appliance, answers for its attestation report from outside the guest, and the previous operating system is gone — read off the partition table, not inferred from a console that anything inside the guest could have written to.</p>
+
+<p><strong>The run that matters is the one that must fail.</strong> The same install is attempted first with one byte of the image changed. It has to be refused with nothing written, and the disk has to still hold Debian afterwards. Without that, this test would pass just as happily against an installer that verified nothing.</p>
+
+<div class="note soft">
+<p><strong>Two defects this found that nothing else could.</strong> An installer overwrites the disk its own tools live on. The first run wrote the image correctly and then hashed it back with a program that had ceased to exist, producing an empty digest that compared as a mismatch. The second wrote the image and exited silently, because the shell was reading the rest of the script off the disk it had just overwritten. Both now have explicit defences — the tools are copied into memory and self-tested against a known answer <em>before</em> the write, and the write does not happen at all if that fails; everything after the point of no return is parsed into memory first.</p>
+</div>
+
+<h3>Four boot paths, three of them alternates</h3>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Path</th><th class="l">Status</th><th class="l">Evidence</th></tr></thead>
+  <tbody>
+    <tr><td class="l">UEFI, Secure Boot, our keys</td><td class="l"><span class="chip cert">Certified</span></td><td class="l wrap">Signed loader runs, unsigned loader refused, keys enrolled into real firmware.</td></tr>
+    <tr><td class="l">microVM, direct kernel</td><td class="l"><span class="chip cert">Certified</span></td><td class="l wrap">Boots under a real Firecracker, over the only device transport it offers, with the integrity root hash on the kernel command line. One wrong digit of that hash and the machine does not come up.</td></tr>
+    <tr><td class="l">Legacy BIOS, hybrid image</td><td class="l"><span class="chip cert">Certified</span></td><td class="l wrap">Boots with no UEFI firmware present at all. The default image is booted the same way as a control and must <em>not</em> come up, or the legacy path would have proven nothing.</td></tr>
+    <tr><td class="l">Microsoft-CA firmware</td><td class="l"><span class="chip none">Not met</span></td><td class="l wrap">Requires a loader Microsoft has signed. That is a submission to an external review board, not a build step. The build refuses to produce this variant without one rather than approximating it.</td></tr>
+  </tbody>
+</table>
+<caption>The integrity guarantees are identical across all four: the same read-only disk, the same hash tree, the same root hash. What differs is who vouches for the first program the firmware runs — and every attestation report states which case it is in, so a degraded deployment is visible rather than silent.</caption>
+</div>
+
+<h3>Ten provider runbooks, generated from the build</h3>
+
+<p>Every digest an operator is asked to check is substituted from the signed manifest of the build being documented, and a gate fails if a committed runbook and the build disagree. A runbook whose digests do not match the artifacts beside it teaches operators to skip the verification step, which is the one step that matters.</p>
+
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§8</span> Method</h2>
+
+<h3>Test article</h3>
+<p>Production image <code>volent 0.1.0-dev</code>, pin digest <code>642d379bdd51</code>, built with a development Secure Boot keyset — stated because it is a property of the article measured, and the attestation report in §3 carries that provenance as a field. Read-only squashfs under dm-verity; only <code>/data</code> writable and mounted <code>noexec</code>. Kernel 6.12.104 hardened with <code>MODULES=n</code>. No shell, no package manager, no init system other than the project's own PID 1. The image states its own version from the pin file, never from version control, so the same source tree always produces the same image.</p>
+
+<h3>Host</h3>
+<p>x86-64 Linux, 8 cores, 31 GB, KVM. Every result is tagged T3-KVM; the harness refuses to run without <code>/dev/kvm</code> and asserts <code>-accel kvm</code> in the command line it actually executed, because emulated results are not admissible.</p>
+
+<h3>Model path (§5)</h3>
+<p><code>llama3.2:1b</code> served by ollama on the host, fronted by TLS and HTTP/2 so the appliance's transport requirements are met without relaxing them. The guest reaches it through the hypervisor's host alias at an address the SSRF guard permits — no gate rule was weakened to make the rig work. Every call traverses the same egress path a production deployment uses: capability check, allowlist, URL inspection, DNS pinning, connection to the judged address, and a journal entry for the decision.</p>
+
+<h3>Stub path (§6)</h3>
+<p>An in-process mock with fixed 5 ms latency replaces the provider. This removes the network and the model deliberately: it is the only way to measure the runtime's own admission and scheduling behaviour rather than a model server's decode capacity.</p>
+
+<h3>Correctness scoring</h3>
+<p>Every corpus task carries the substring a correct answer must contain. Matching is lenient about form and strict about content — case and non-alphanumerics are dropped from both sides, so <code>12:00</code>, <code>"count"</code> and <code>Tokyo.</code> need no special case. A stack returning HTTP 200 with garbage is a different result from one that works, and a completion count cannot tell them apart.</p>
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§9</span> Limits of this report</h2>
+
+<p class="lede">Stated in full. A benchmark that omits these is not a benchmark.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">Limit</th><th class="l">Consequence</th></tr></thead>
+  <tbody>
+    <tr><td class="l wrap"><strong>No real DHCP server has yet offered this node an interface MTU.</strong> Option 26 is requested, decoded and applied, and the path is under test — but the emulated network used for these runs cannot advertise one, so the apply has not been watched happen on a live lease.</td><td class="l wrap">On a bridged or carrier path advertising a smaller MTU the node should narrow its link before it carries traffic. Worth confirming on the first deployment: the MTU in force is printed at link-up and carried in the attestation report.</td></tr>
+    <tr><td class="l wrap"><strong>IPv6 is judged but has not been routed in anger.</strong> The address rules are unit-tested per row, including the forms that embed an IPv4 address.</td><td class="l wrap">No dual-stack fabric has exercised them end to end, and enterprise fabrics routinely are dual-stack.</td></tr>
+    <tr><td class="l wrap"><strong>§6 is single runs.</strong> Project discipline requires three runs and a median, with more than 10 % run-to-run spread counted as a failure in itself.</td><td class="l wrap">Every §6 figure is evidence, not a specification. They must be repeated three times before they are quotable as a bar.</td></tr>
+    <tr><td class="l wrap"><strong>No frontier model has ever been called.</strong> The routing table picks one up the moment a key is configured, but no run has used one.</td><td class="l wrap">The live gate asserts both a frontier and an open-weights class; these runs waive that criterion explicitly.</td></tr>
+    <tr><td class="l wrap"><strong>No real rate limit has been observed.</strong> A local endpoint does not return 429.</td><td class="l wrap">Provider failover is exercised against a stub only.</td></tr>
+    <tr><td class="l wrap"><strong>No attestation report has yet been produced from a Secure Boot machine.</strong> Every attestation boot here is direct-kernel, so the report honestly states <code>verity_only</code>. The Secure Boot chain itself is separately certified — a signed loader runs, an unsigned one is refused — and the two paths have not been joined.</td><td class="l wrap">The field that names the boot chain has been exercised on one of its three values. The other two have unit coverage and a separate gate.</td></tr>
+    <tr><td class="l wrap"><strong>The Microsoft-CA firmware variant does not exist.</strong> It needs a loader signed by Microsoft, which comes from an external review board rather than from a build.</td><td class="l wrap">On firmware that trusts only Microsoft's authority, run without Secure Boot: the disk integrity, the slot rollback and the sealed userland all still hold, and the attestation report says which case it is in. The build refuses to produce the variant rather than approximating it.</td></tr>
+    <tr><td class="l wrap"><strong>No cloud account has ever consumed the pre-enrolled firmware key blob.</strong> Its encoding is checked two ways — parsed back by an independent implementation, and re-encoded byte-identically by the reference tool the provider documents — and its key material is the material a real Secure Boot machine here enforces.</td><td class="l wrap">The far end is unverified. An account for image-import tests is the one outstanding dependency.</td></tr>
+    <tr><td class="l wrap"><strong>Cloud vTPM interfaces are unverified.</strong> The kernel can drive a CRB-interface TPM only.</td><td class="l wrap">Whether each target provider's virtual TPM presents CRB must be checked per provider before it is claimed.</td></tr>
+    <tr><td class="l wrap"><strong>No network has yet offered the node a time server.</strong> It runs on the hypervisor clock and says so on the console and in the attestation report.</td><td class="l wrap">Certificate validity depends on that clock. A node that cannot verify a certificate for clock reasons must not be mistaken for one under attack, which is why the time source is a reported field.</td></tr>
+    <tr><td class="l wrap"><strong>Image reproducibility is gated for the development image only.</strong></td><td class="l wrap">The production image was verified byte-identical across two builds by hand, but that check is not yet automated.</td></tr>
+  </tbody>
+</table>
+</div>
+
+</section>
+
+<!-- ============================================================ -->
+<section>
+<h2><span class="num">§10</span> Where this sits <span class="chip none">Public sources</span></h2>
+
+<p class="lede">Agent execution became funded infrastructure in 2026: $355M into Modal, $24M into Daytona, a billionth sandbox at E2B. This section places VOLENT against that field honestly, including where the field is ahead.</p>
+
+<div class="note soft">
+  <div class="h">What this section is and is not</div>
+  <p>Compiled from vendors' own public material in September 2026. <strong>None of it is independently verified</strong> — unlike every other number in this report, which was measured on the article named at the top. Treat it as positioning, not as measurement.</p>
+</div>
+
+<h3>The category split</h3>
+
+<p>Almost everything funded in this space is a <strong>hosted sandbox</strong>: you send code or an agent to the vendor's cloud, it runs in an isolated microVM, and you are billed for it. VOLENT is the other shape — an image the customer boots in their own VM, on their own hypervisor, which proves its own integrity to whoever asks. The buyer is different, and so is the objection it answers.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">System</th><th class="l">Shape</th><th class="l">Isolation</th><th class="l">Runs where</th><th class="l">Attestable to a third party</th></tr></thead>
+  <tbody>
+    <tr><td class="l">VOLENT</td><td class="l wrap">OS image that <em>is</em> the VM</td><td class="l wrap">hypervisor + WASM per tool</td><td class="l">customer's own VM</td><td class="good">TPM quote, verified off-node</td></tr>
+    <tr><td class="l">E2B</td><td class="l wrap">hosted sandbox API</td><td class="l wrap">Firecracker microVM</td><td class="l">vendor cloud</td><td class="l">not offered</td></tr>
+    <tr><td class="l">Modal</td><td class="l wrap">hosted compute + sandboxes</td><td class="l wrap">gVisor / microVM</td><td class="l">vendor cloud</td><td class="l">not offered</td></tr>
+    <tr><td class="l">Daytona</td><td class="l wrap">hosted sandbox, compliance-first</td><td class="l wrap">containers, Kata optional</td><td class="l">vendor cloud</td><td class="l">compliance attestations, not per-node</td></tr>
+    <tr><td class="l">Talos Linux</td><td class="l wrap">OS image that is the VM</td><td class="l wrap">hypervisor</td><td class="l">customer's own VM</td><td class="l">not the product's purpose</td></tr>
+  </tbody>
+</table>
+<caption>"Attestable to a third party" means a recipient who does not trust the operator can check what the machine is running. Compliance certification is a statement about a vendor's process; a TPM quote is a statement about one machine at one moment.</caption>
+</div>
+
+<h3>The nearest neighbour is not an agent company</h3>
+
+<p><strong>Talos Linux occupies this OS position almost exactly</strong> — no SSH, no shell, no package manager, read-only squashfs under 80 MB, YAML machine configuration applied over an authenticated API. It is a Kubernetes appliance rather than an agent appliance, and it does not set out to prove itself to a third party. But anyone evaluating "a minimal immutable appliance OS" will find it in seconds, and a claim that the shape is novel does not survive that search.</p>
+
+<p>The same applies to the runtime. Running very large numbers of concurrent agents on the BEAM was an active argument through 2025–26, with at least one public claim of millions of agents on a cluster. The §6 figures are good; they are not a category claim, and BEAM process cost is the well-understood reason for them.</p>
+
+<h3>What is actually distinctive</h3>
+
+<p>Not the minimal OS, not the WASM sandbox, not TPM attestation, and not BEAM concurrency — each of those exists elsewhere. What could not be found in public prior art is the <strong>combination in §3 and §4 together</strong>: an attestation report that binds the measured boot chain to the <em>runtime's network posture</em> — which certificate authorities it trusts, in what order it resolves names, where its management API is bound, which destinations it has reached, and whether the cloud-metadata window is sealed — signed by the machine's own identity and verifiable by a tool that shares no code with it.</p>
+
+<p>A hosted sandbox cannot make that statement, because the boundary it would attest to is the vendor's. A minimal OS can attest to its boot chain but has no runtime posture to bind to it. That intersection is the claim worth defending.</p>
+
+<h3>Where the field is ahead</h3>
+
+<div class="tw">
+<table>
+  <thead><tr><th class="l">They have</th><th class="l">This has</th></tr></thead>
+  <tbody>
+    <tr><td class="l wrap">Production customers, including a reported 88% of the Fortune 100 for one vendor</td><td class="l wrap">No production deployment</td></tr>
+    <tr><td class="l wrap">Sub-100 ms warm starts from pooled snapshots</td><td class="l wrap">3.5 s cold boot, no warm pool</td></tr>
+    <tr><td class="l wrap">HIPAA, SOC 2 and GDPR coverage</td><td class="l wrap">None; no audit has been undertaken</td></tr>
+    <tr><td class="l wrap">Managed service, nothing for the customer to operate</td><td class="l wrap">The customer runs it, which is the point and also the cost</td></tr>
+    <tr><td class="l wrap">Shipping, on production keys</td><td class="l wrap">Development Secure Boot keys; release targets fail closed by design</td></tr>
+  </tbody>
+</table>
+<caption>The last row is the honest bottom line: this is a measured pre-release, not a product a customer can deploy today.</caption>
+</div>
+</section>
+
+<footer>
+  VOLENT test report · article volent 0.1.0-dev · pins 642d379bdd51 · kernel 6.12.104 · OTP 27.3.4.16<br>
+  All results T3-KVM. Certified figures are median-of-three gate results; measured figures are single observed runs.<br>
+  Generated 2026-09-23 from live runs on the production image.<br>
+  <a href="../">Project site</a>
+</footer>
+
+</div>
+
+</body>
+</html>

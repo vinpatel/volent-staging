@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; font-src 'self'; script-src 'sha256-ddku31XlVFbJEcqyZiKWwxZMBy2SEVj6DVdUotmis1E=' 'sha256-iecd0Jv2/nVg8fAgj/Fy+ukHUdR8lAX+JYeD2bWtk6k=' 'sha256-Fr9uUPe5r/rYjZbubpe9IRmauKfvSDfu8U/2tzD/weQ='; base-uri 'none'; form-action 'none'">
+<title>VOLENT — AI agents your auditor can check</title>
+<meta name="description" content="VOLENT runs your AI agents in a locked room on your own servers. Data goes only where you allow, every step is written down, and you get proof anyone can check.">
+<link rel="canonical" href="https://vinpatel.github.io/volent/">
+<link rel="icon" href="assets/favicon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VOLENT — AI agents your auditor can check">
+<meta property="og:description" content="Run AI agents in a locked room on your own servers. Data goes only where you allow, every step is written down, and you get proof anyone can check.">
+<meta property="og:image" content="https://vinpatel.github.io/volent/assets/logo-1024.png">
+<meta property="og:url" content="https://vinpatel.github.io/volent/">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+@font-face{font-family:"Display";src:url("assets/fonts/display.woff2") format("woff2");font-weight:500 700;font-display:swap}
+@property --tc{syntax:"<number>";inherits:true;initial-value:6}
+@property --tk{syntax:"<number>";inherits:true;initial-value:8}
+:root{
+  --ink:#0B0E17; --ink-2:#111626; --ink-3:#161D31;
+  --line:#232C44; --line-2:#344060;
+  --text:#EEF2FA; --muted:#B4BED3; --dim:#8F9CB8;
+  --paper:#F3EEE2; --paper-ink:#14171F; --paper-muted:#3E4250; --paper-dim:#5A5E6B; --paper-line:#C9C0AA;
+  --paper-ok:#065348; --paper-bad:#B02E14; --paper-seal:#7A5200;
+  --verify:#3DDCC4; --seal:#F2B138; --warn:#F2803B;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --wrap:1200px; --gutter:24px;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --display:"Display",var(--sans);
+  /* timeline clocks: the final frame is the default, so no-JS and reduced motion show finished states */
+  --te:7; --tr:10; --tb:3.49; --tc:6; --tt:6; --tk:8; --tm:10;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:96px}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;overflow-x:hidden}
+a{color:var(--verify);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--verify);outline-offset:3px;border-radius:4px}
+.skip{position:absolute;left:12px;top:-60px;z-index:50;background:var(--verify);color:#06231F;padding:10px 16px;border-radius:8px;font-weight:600}
+.skip:focus{top:12px;text-decoration:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gutter)}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gutter)}
+.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:1/-1}
+h1,h2,h3{font-family:var(--display);margin:0;font-weight:700}
+h1{font-size:clamp(2.7rem,1.5rem + 4vw,4.6rem);letter-spacing:-.02em;line-height:1.04}
+h2{font-size:clamp(2.25rem,1.4rem + 2.6vw,3.5rem);letter-spacing:-.02em;line-height:1.08;margin:0 0 .4em}
+h3{font-size:1.18rem;line-height:1.25;font-weight:600}
+p{margin:0 0 1em}
+code,.mono{font-family:var(--mono);font-size:.88em}
+.ic{width:1.1em;height:1.1em;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.2em}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--verify);margin:0 0 var(--s4);font-weight:600}
+.eyebrow::before{content:"";width:24px;height:2px;background:currentColor}
+.plain{font-size:clamp(1.1rem,1rem + .5vw,1.3rem);line-height:1.5;color:var(--muted);max-width:36em;margin:0 0 1em}
+.lede{font-size:clamp(1.15rem,1.05rem + .6vw,1.4rem);color:var(--text);max-width:30em;margin:0 0 .8em;line-height:1.4;font-weight:500}
+.fine{font-size:.88rem;color:var(--dim);margin-top:var(--s4);max-width:84ch}
+
+
+/* ==== v6: one colour world, one accent, space ==== */
+section,.hero{position:relative;padding-block:clamp(88px,10vw,148px)}
+.center{text-align:center}
+.center .plain,.center .lede{margin-left:auto;margin-right:auto}
+h2{font-size:clamp(2.2rem,1.3rem + 2.8vw,3.6rem);letter-spacing:-.03em;line-height:1.05;margin:0 0 .45em}
+.plain{color:var(--muted);font-size:clamp(1.08rem,1rem + .4vw,1.25rem);line-height:1.55;max-width:36em;margin:0 0 1em}
+.kicker{display:inline-block;font-size:.82rem;font-weight:600;letter-spacing:.02em;color:var(--verify);margin:0 0 var(--s4)}
+.rule{border-top:1px solid var(--line)}
+
+/* announcement bar and nav */
+.announce{background:var(--ink);color:var(--muted);text-align:center;font-size:.84rem;padding:10px 16px;line-height:1.4;border-bottom:1px solid var(--line)}
+.announce a{color:var(--verify);font-weight:600;margin-left:10px}
+.topnav{position:sticky;top:0;z-index:20;background:rgba(11,14,23,.78);-webkit-backdrop-filter:saturate(1.5) blur(16px);backdrop-filter:saturate(1.5) blur(16px);border-bottom:1px solid var(--line)}
+.topnav .wrap{display:flex;align-items:center;gap:20px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;letter-spacing:.08em;flex:none;color:var(--text)}
+.brand:hover{text-decoration:none}
+.brand img{width:26px;height:26px;display:block}
+.navlinks{margin-left:auto;display:flex;gap:2px;font-size:.92rem;min-width:0;overflow-x:auto;white-space:nowrap;scrollbar-width:none;align-items:center}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{color:var(--muted);padding:8px 12px;border-radius:999px;flex:none}
+.navlinks a:hover{color:var(--text);text-decoration:none;background:rgba(147,160,189,.1)}
+.navlinks a.apply{background:var(--text);color:var(--ink);font-weight:600;margin-left:8px}
+.navlinks a.apply:hover{background:#fff}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;border-radius:999px;font-size:1rem;font-weight:600;border:1px solid var(--line-2);color:var(--text);background:rgba(255,255,255,.02);font-family:inherit;cursor:pointer;transition:transform .15s,background .15s,border-color .15s}
+.btn:hover{text-decoration:none;border-color:var(--muted);transform:translateY(-1px)}
+.btn-primary{background:var(--verify);border-color:var(--verify);color:#06231F;box-shadow:0 8px 30px -8px rgba(61,220,196,.55)}
+.btn-primary:hover{background:#5BE6D0;border-color:#5BE6D0}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.center .cta{justify-content:center}
+.arrow{font-weight:600}
+.arrow::after{content:" \2192"}
+
+/* hero */
+.hero{padding-top:clamp(48px,6vw,88px);padding-bottom:clamp(72px,8vw,120px);overflow:hidden;isolation:isolate}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto;height:900px;z-index:-1;
+  background:radial-gradient(48% 42% at 50% 22%,rgba(61,220,196,.20),transparent 70%),radial-gradient(30% 30% at 78% 40%,rgba(79,110,247,.12),transparent 70%)}
+.hero::after{content:"";position:absolute;inset:0;z-index:-2;opacity:.5;
+  background-image:linear-gradient(rgba(147,160,189,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(147,160,189,.07) 1px,transparent 1px);background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(70% 55% at 50% 20%,#000,transparent 75%);mask-image:radial-gradient(70% 55% at 50% 20%,#000,transparent 75%)}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:6px 14px 6px 8px;border:1px solid var(--line-2);border-radius:999px;font-size:.86rem;color:var(--muted);background:rgba(22,29,49,.6);margin:0 0 var(--s6)}
+.pill b{background:rgba(61,220,196,.14);color:var(--verify);border-radius:999px;padding:2px 10px;font-weight:600;font-size:.78rem}
+.hero h1{font-size:clamp(2.9rem,1.2rem + 5.4vw,5.8rem);letter-spacing:-.045em;line-height:.98;max-width:17ch;margin:0 auto}
+.hero h1 .accent{color:var(--verify)}
+.hero .sub{font-size:clamp(1.12rem,1rem + .55vw,1.4rem);line-height:1.5;color:var(--muted);max-width:34em;margin:var(--s6) auto var(--s7)}
+.hero .cta .btn{padding:15px 28px;font-size:1.04rem}
+
+/* the product window */
+.shot{margin:clamp(56px,7vw,96px) auto 0;max-width:1120px;position:relative}
+.shot::before{content:"";position:absolute;left:8%;right:8%;bottom:-40px;height:120px;z-index:-1;background:radial-gradient(50% 50% at 50% 50%,rgba(61,220,196,.28),transparent 70%);filter:blur(30px)}
+.window{text-align:left;border:1px solid var(--line-2);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#121829,#0C111D);box-shadow:0 50px 120px -30px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.06)}
+.w-bar{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+.w-dots{display:flex;gap:7px;flex:none}
+.w-dots i{width:11px;height:11px;border-radius:50%;background:var(--line-2)}
+.w-title{flex:1;text-align:center;font-family:var(--mono);font-size:.76rem;color:var(--dim);letter-spacing:.02em}
+.w-state{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;color:var(--verify);font-weight:600;flex:none}
+.w-state::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--verify);box-shadow:0 0 0 4px rgba(61,220,196,.18)}
+.w-body{display:grid;grid-template-columns:230px minmax(0,1fr) 280px;min-height:360px}
+.w-pane{padding:18px 18px 20px;min-width:0}
+.w-pane + .w-pane{border-left:1px solid var(--line)}
+.w-h{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;margin:0 0 14px}
+.ag{display:flex;align-items:center;gap:10px;white-space:nowrap;padding:10px 12px;border-radius:10px;font-size:.92rem;color:var(--text);margin-bottom:6px;background:rgba(255,255,255,.025);border:1px solid var(--line)}
+.ag .d{width:8px;height:8px;border-radius:50%;background:var(--verify);flex:none}
+.ag .d.w{background:var(--seal)}
+.ag .st{margin-left:auto;font-size:.76rem;color:var(--dim)}
+.lg{display:grid;grid-template-columns:64px 110px minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 12px;border-radius:10px;font-size:.88rem;color:var(--muted);
+  opacity:clamp(0,calc((var(--tk) - var(--a))*4),1);transform:translateY(calc((1 - clamp(0,calc((var(--tk) - var(--a))*4),1))*6px))}
+.lg + .lg{margin-top:4px}
+.lg .t{font-family:var(--mono);font-size:.76rem;color:var(--dim)}
+.lg .who{color:var(--text);font-weight:500}
+.lg .to{font-family:var(--mono);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lg .ok,.lg .no{font-size:.78rem;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.lg .ok{color:var(--verify);background:rgba(61,220,196,.1)}
+.lg .no{color:var(--warn);background:rgba(242,128,59,.12)}
+.lg.blk{background:rgba(242,128,59,.06);box-shadow:inset 2px 0 0 var(--warn)}
+.lg .why{grid-column:3/-1;font-size:.76rem;color:var(--warn);margin-top:-6px}
+.rc-mini{border:1px solid var(--line-2);border-radius:14px;padding:16px;background:rgba(255,255,255,.025);opacity:clamp(0,calc((var(--tk) - 6.2)*3),1)}
+.rc-mini .r{display:flex;gap:10px;align-items:flex-start;font-size:.86rem;color:var(--text);padding:7px 0;border-bottom:1px solid var(--line)}
+.rc-mini .r:last-of-type{border-bottom:0}
+.rc-mini .r small{display:block;color:var(--dim);font-size:.74rem}
+.rc-mini .ck{width:18px;height:18px;border-radius:50%;background:rgba(61,220,196,.16);color:var(--verify);display:grid;place-items:center;flex:none;margin-top:1px}
+.rc-mini .ck .ic{width:11px;height:11px;stroke-width:2.8}
+.rc-mini .vb{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:10px}
+.rc-mini .vb span{background:var(--verify);color:#06231F;font-weight:600;font-size:.84rem;padding:7px 16px;border-radius:999px}
+.rc-mini .vb b{font-size:.8rem;color:var(--verify);opacity:clamp(0,calc((var(--tk) - 7.3)*4),1)}
+.shot figcaption{text-align:center;margin-top:var(--s5)}
+figcaption,.alt{font-size:.86rem;color:var(--dim);line-height:1.55}
+
+/* facts strip */
+.facts-strip{list-style:none;margin:var(--s7) 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.facts-strip li{padding:var(--s6) var(--s5);border-left:1px solid var(--line);min-width:0}
+.facts-strip li:first-child{border-left:0}
+.fig{display:block;font-family:var(--display);font-weight:700;font-size:clamp(2.3rem,1.6rem + 1.6vw,3.2rem);letter-spacing:-.04em;line-height:1;color:var(--text);margin-bottom:var(--s3)}
+.facts-strip .what{display:block;font-weight:500;line-height:1.4;margin-bottom:var(--s3);color:var(--text)}
+.facts-strip small{display:block;font-size:.8rem;line-height:1.5;color:var(--dim);margin-bottom:var(--s4)}
+.facts-strip a{font-weight:600;font-size:.9rem}
+.how-measured{margin:var(--s5) 0 0;color:var(--dim);font-size:.9rem}
+.how-measured summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.bench-label{margin:var(--s3) 0 0;padding:6px 0 6px 14px;border-left:2px solid var(--seal);font-family:var(--mono);font-size:.78rem;line-height:1.6;color:var(--muted);max-width:80ch}
+
+/* three capabilities */
+.caps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gutter);margin-top:var(--s8)}
+.cap{text-align:left;border:1px solid var(--line);border-radius:22px;padding:var(--s4) var(--s4) var(--s6);background:linear-gradient(180deg,var(--ink-2),var(--ink));transition:border-color .2s,transform .2s}
+.cap:hover{border-color:var(--line-2);transform:translateY(-2px)}
+.cap .vis{border-radius:14px;background:radial-gradient(80% 70% at 50% 0%,rgba(61,220,196,.10),transparent 70%),var(--ink-3);border:1px solid var(--line);margin:0 0 var(--s5);padding:var(--s4)}
+.cap .vis svg{display:block;width:100%;height:auto}
+.cap .vis svg text{font-family:var(--sans);fill:var(--text)}
+.cap h3{font-size:1.4rem;letter-spacing:-.015em;margin:0 var(--s3) .4em}
+.cap p{margin:0 var(--s3);color:var(--muted);line-height:1.55}
+.s-ok{fill:none;stroke:var(--verify);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.s-no{fill:none;stroke:var(--warn);stroke-width:2.5;stroke-linecap:round}
+.s-box{fill:#0F1626;stroke:var(--line-2);stroke-width:1.5}
+.s-ac{fill:rgba(61,220,196,.08);stroke:var(--verify);stroke-width:1.8}
+.s-dim{fill:var(--dim)}
+.s-ver{fill:var(--verify)}
+.s-warn{fill:var(--warn)}
+.s-lane{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:3 6}
+
+/* check it yourself: the interactive receipt */
+.split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(40px,6vw,96px);align-items:center}
+.ticks{list-style:none;margin:var(--s5) 0 0;padding:0;display:grid;gap:12px}
+.ticks li{position:relative;padding-left:30px;color:var(--text)}
+.ticks li::before{content:"";position:absolute;left:3px;top:.5em;width:13px;height:7px;border-left:2.5px solid var(--verify);border-bottom:2.5px solid var(--verify);transform:rotate(-45deg)}
+.receipt-fig{margin:0;min-width:0}
+.slip{position:relative;border:1px solid var(--line-2);border-radius:20px;padding:22px 24px 20px;background:linear-gradient(180deg,#141B2E,#0E1322);box-shadow:0 40px 100px -40px rgba(0,0,0,.8)}
+.sl-head{display:flex;justify-content:space-between;gap:12px;font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.sl-rows{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:0}
+.sl-rows li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px;align-items:start;padding:12px 8px;border-bottom:1px solid var(--line);border-radius:8px;color:var(--text)}
+.sl-rows b{display:block;font-weight:600;font-size:.98rem;line-height:1.3}
+.sl-rows small{display:block;color:var(--dim);font-size:.8rem;margin-top:3px;font-family:var(--mono);overflow-wrap:anywhere}
+.sl-rows li.changed{box-shadow:inset 0 0 0 2px var(--warn);background:rgba(242,128,59,.08)}
+.sl-rows .was{display:block;font-family:var(--mono);font-size:.74rem;color:var(--dim);margin-top:3px}
+.tick{width:22px;height:22px;border-radius:50%;background:rgba(61,220,196,.16);color:var(--verify);display:grid;place-items:center;margin-top:1px}
+.tick .ic{width:12px;height:12px;stroke-width:2.8}
+.sl-foot{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s4);padding-top:var(--s4)}
+.rc-zone{flex:1;min-width:0;min-height:168px}
+.rc-zone .rc-btns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.rc-zone .btn{padding:10px 20px;font-size:.95rem}
+.rc-zone output{display:flex;align-items:center;gap:8px;margin-top:var(--s3);font-weight:600;min-height:1.6em;font-size:.96rem}
+.rc-zone output.ok{color:var(--verify)}
+.rc-zone output.bad{color:var(--warn)}
+.fine{font-size:.86rem;color:var(--dim);margin:var(--s3) 0 0;max-width:84ch}
+.pr{--lp:clamp(0,calc((var(--tc) - var(--s))/.4),1);clip-path:inset(0 calc((1 - var(--lp))*100%) 0 0)}
+.rstamp{--sp:clamp(0,calc((var(--tc) - 4.3)/.35),1);width:92px;height:92px;border-radius:50%;display:grid;place-items:center;text-align:center;flex:none;
+  color:var(--verify);border:2px solid var(--verify);font-family:var(--display);font-weight:700;line-height:1.2;
+  transform:rotate(-8deg) scale(calc(1 + 1.3*(1 - var(--sp))*(1 - var(--sp))));opacity:clamp(0,calc((var(--tc) - 4.3)*12),1)}
+.rstamp i{display:block;font-style:normal;font-size:.8rem;letter-spacing:.06em}
+.rstamp b{display:block;font-family:var(--mono);font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;margin-top:4px;font-weight:700}
+.rstamp.bad{color:var(--warn);border-color:var(--warn)}
+.rstamp.idle{color:var(--dim);border-color:var(--dim)}
+.receipt-fig figcaption{margin-top:var(--s4)}
+
+/* use cases */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gutter);margin-top:var(--s7)}
+.tile{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:18px;padding:var(--s5);background:var(--ink-2);color:var(--text);min-height:200px;transition:border-color .2s,transform .2s}
+.tile:hover{text-decoration:none;border-color:var(--verify);transform:translateY(-2px)}
+.tile .k{font-size:.8rem;font-weight:600;color:var(--verify)}
+.tile h3{font-size:1.22rem;letter-spacing:-.01em}
+.tile span.d{color:var(--muted);font-size:.96rem;line-height:1.5}
+.tile .go{margin-top:auto;font-weight:600;font-size:.9rem;color:var(--verify)}
+.more{margin:var(--s6) 0 0}
+.more a{font-weight:600}
+
+/* ready today / not yet */
+.readys{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gutter);margin-top:var(--s7)}
+.ready{border:1px solid var(--line);border-radius:20px;padding:var(--s6);background:var(--ink-2)}
+.ready h3{font-size:1.15rem;margin-bottom:1em;display:flex;align-items:center;gap:10px}
+.ready h3::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--verify)}
+.ready.no h3::before{background:var(--seal)}
+.ready ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.ready li{color:var(--muted);line-height:1.5}
+.ready li b{color:var(--text);font-weight:600}
+
+/* final call to action */
+.final-card{position:relative;overflow:hidden;text-align:center;border:1px solid var(--line-2);border-radius:28px;padding:clamp(56px,7vw,96px) var(--s6);
+  background:radial-gradient(60% 80% at 50% 0%,rgba(61,220,196,.16),transparent 70%),var(--ink-2)}
+.final-card h2{max-width:14em;margin:0 auto .4em}
+.final-card .plain{margin:0 auto var(--s6)}
+.final-card .center-fine{margin:var(--s5) auto 0}
+
+footer{background:var(--ink);border-top:1px solid var(--line);padding:var(--s7) 0 var(--s8);color:var(--dim);font-size:.9rem}
+footer .wrap{display:grid;gap:14px}
+footer p{margin:0;max-width:86ch}
+footer .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.footnav{display:flex;flex-wrap:wrap;gap:6px 22px}
+.footnav a{color:var(--muted)}
+
+/* responsive */
+@media(max-width:1060px){
+  .w-body{grid-template-columns:minmax(0,1fr) 260px}
+  .w-agents{display:none}
+  .w-pane + .w-pane{border-left:1px solid var(--line)}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facts-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facts-strip li:nth-child(3){border-left:0}
+  .facts-strip li:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media(max-width:900px){
+  .caps,.readys,.split{grid-template-columns:1fr}
+  .w-body{grid-template-columns:1fr}
+  .w-pane + .w-pane{border-left:0;border-top:1px solid var(--line)}
+  .lg{grid-template-columns:52px minmax(0,1fr) auto}
+  .lg .who{display:none}
+  .lg .why{grid-column:2/-1}
+}
+@media(max-width:620px){
+  :root{--gutter:18px}
+  .navlinks a.hm{display:none}
+  .brand span{display:none}
+  .cta .btn{flex:1 1 100%}
+  .tiles,.facts-strip{grid-template-columns:1fr}
+  .facts-strip li{border-left:0;border-top:1px solid var(--line);padding:var(--s5) 0}
+  .facts-strip li:first-child{border-top:0}
+  .sl-foot{flex-direction:column;align-items:stretch}
+  .rstamp{align-self:center}
+  .w-title{display:none}
+  .slip{padding:18px 16px}
+}
+
+/* motion: opt-in. The script adds html.motion only when reduced motion is not requested; without it every
+   visual already shows its finished state (the clocks default to the last frame). */
+@keyframes tl-c{from{--tc:0}to{--tc:6}}
+@keyframes tl-k{from{--tk:0}to{--tk:8}}
+html.motion .fig-console.play{animation:tl-k 8s linear forwards}
+html.motion .receipt-fig.play{animation:tl-c 6s linear forwards}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+@media print{
+  body,.ink{background:#fff;color:#000}
+  .topnav,.skip{display:none}
+  *{animation:none!important;transition:none!important;box-shadow:none!important;filter:none!important}
+  .slip,.window,.cap,.tile{background:#fff!important;color:#000}
+  .slip,.cap,.tile,.ready{background:#fff!important;border-color:#bbb}
+  a{color:#000;text-decoration:underline}
+  section{padding:28px 0;break-inside:avoid-page}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" hidden aria-hidden="true" focusable="false"><symbol id="i-ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol><symbol id="i-no" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h6M10 16h6"/></symbol></svg>
+<div class="announce">Pre-1.0 · accepting a small number of design partners <a href="#partners">Apply</a></div>
+<nav class="topnav" aria-label="Primary">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="assets/logo-256.png" alt=""><span>VOLENT</span></a>
+    <div class="navlinks">
+      <a class="hm" href="how-it-works/">How it works</a>
+      <a class="hm" href="use-cases/">Use cases</a>
+      <a class="hm" href="security/">Security</a>
+      <a class="hm" href="compare/">Compare</a>
+      <a href="pricing/">Pricing</a>
+      <a class="hm" href="benchmarks/">Benchmarks</a>
+      <a class="apply" href="#partners">Book a demo</a>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+<header class="hero" id="top">
+  <div class="wrap center">
+    <p class="pill"><b>Pre-1.0</b>Now taking design partners</p>
+    <h1>AI agents your <span class="accent">auditor can check.</span></h1>
+    <p class="sub">Your agents run in a locked room on your own servers. Data goes only where you allow, every step is written down, and you get proof anyone can check.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#partners" data-contact data-subject="30-minute demo" data-body="Name and role:&#10;What you would like to see:&#10;">Book a demo</a>
+      <a class="btn" href="#how">See how it works</a>
+    </div>
+      <figure class="shot fig-console" data-anim="console">
+        <div class="window">
+          <div class="w-bar"><span class="w-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="w-title">Console · sample, values illustrative</span><span class="w-state">Sealed · started up unchanged</span></div>
+          <div class="w-body">
+            <div class="w-pane w-agents">
+              <div class="w-h">Agents</div>
+              <div class="ag"><span class="d"></span>invoice-agent<span class="st">running</span></div>
+              <div class="ag"><span class="d"></span>kyc-agent<span class="st">running</span></div>
+              <div class="ag"><span class="d w"></span>claims-agent<span class="st">paused</span></div>
+            </div>
+            <div class="w-pane">
+              <div class="w-h">The guarded door</div>
+              <div class="lg" style="--a:0.8"><span class="t">09:41:02</span><span class="who">invoice-agent</span><span class="to">erp.internal</span><span class="ok">allowed</span></div>
+              <div class="lg" style="--a:1.9"><span class="t">09:41:03</span><span class="who">kyc-agent</span><span class="to">models.example</span><span class="ok">allowed</span></div>
+              <div class="lg blk" style="--a:3.0"><span class="t">09:41:05</span><span class="who">claims-agent</span><span class="to">files.example.net</span><span class="no">blocked</span><span class="why">not on the approved list</span></div>
+              <div class="lg" style="--a:4.4"><span class="t">09:41:06</span><span class="who">invoice-agent</span><span class="to">models.example</span><span class="ok">allowed</span></div>
+              <div class="lg" style="--a:5.3"><span class="t">09:41:08</span><span class="who">kyc-agent</span><span class="to">erp.internal</span><span class="ok">allowed</span></div>
+            </div>
+            <div class="w-pane">
+              <div class="w-h">Receipt</div>
+              <div class="rc-mini">
+                <div class="r"><span class="ck"><svg class="ic" aria-hidden="true"><use href="#i-ok"/></svg></span><span>Started up unchanged<small>matches the approved build</small></span></div>
+                <div class="r"><span class="ck"><svg class="ic" aria-hidden="true"><use href="#i-ok"/></svg></span><span>Went only to approved places<small>models.example · erp.internal</small></span></div>
+                <div class="r"><span class="ck"><svg class="ic" aria-hidden="true"><use href="#i-ok"/></svg></span><span>Signed by this machine<small>start-up and places</small></span></div>
+                <div class="vb"><span>Verify</span><b>Receipt ready · verified</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption>An illustrative console with made-up values. Every outbound call meets one guarded door, a blocked call shows its reason, and the receipt is checked on another computer.</figcaption>
+      </figure>
+  </div>
+</header>
+
+<section id="facts">
+  <div class="wrap">
+    <p class="kicker">Measured, not promised</p>
+    <h2>Every number here comes from a test.</h2>
+    <p class="plain">We have no customer logos yet, so here is what we measured instead.</p>
+    <ul class="facts-strip">
+      <li><span class="fig">0</span><span class="what">actions done twice in 5 forced-crash tests</span><small>phase-7 image, median of 3 runs where run three times</small><a href="benchmarks/#baseline">See the crash test</a></li>
+      <li><span class="fig"><span data-count="150,000">150,000</span></span><span class="what">calls held at once on 1 vCPU, mock model</span><small>Benchmark v1, single run, 0 refused, 212 MB</small><a href="benchmarks/#capacity">See the capacity test</a></li>
+      <li><span class="fig">768 of 768</span><span class="what">agent calls delivered with a real open model</span><small>Benchmark v1, single run, llama3.2:1b</small><a href="benchmarks/#per-task">See every task</a></li>
+      <li><span class="fig"><span data-count="3.5">3.5</span> s</span><span class="what">from power-on to ready</span><small>phase-7 image, 3.486 s median of 3</small><a href="benchmarks/#baseline">See the start-up test</a></li>
+    </ul>
+    <details class="how-measured">
+      <summary>How these were measured</summary>
+      <p class="bench-label">Measured 2026-10-14 on the image built from tag phase-7, median of 3 runs where run three times, 2013 Intel i7-4770 under KVM.</p>
+      <p class="bench-label">Capacity figures use a 5 ms mock model, so they measure VOLENT, not a model. Certified three-run results on the final image will follow with our paper.</p>
+      <p class="bench-label">Measured, single run, 2026-09-23, pre-release image cf922365, 2013 Intel i7-4770 under KVM, open-weight model llama3.2:1b on CPU.</p>
+    </details>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap center">
+    <p class="kicker">How it works</p>
+    <h2>Three things it does for you.</h2>
+    <p class="plain">It runs your agents inside one sealed machine, on servers you choose.</p>
+    <div class="caps">
+      <article class="cap"><div class="vis"><svg viewBox="0 0 320 180" aria-hidden="true" focusable="false">
+  <rect class="s-ac" x="10" y="14" width="150" height="152" rx="14"/>
+  <text x="26" y="40" font-size="12" font-weight="600" class="s-ver">YOUR AGENTS</text>
+  <circle cx="44" cy="80" r="13" class="s-box"/><circle cx="44" cy="80" r="4" class="s-ver"/>
+  <circle cx="86" cy="80" r="13" class="s-box"/><circle cx="86" cy="80" r="4" class="s-ver"/>
+  <circle cx="128" cy="80" r="13" class="s-box"/><circle cx="128" cy="80" r="4" class="s-warn"/>
+  <rect x="152" y="96" width="16" height="50" rx="5" fill="#0F1B26" stroke="var(--verify)" stroke-width="2.5"/>
+  <path class="s-lane" d="M168 112H206M168 132H206"/>
+  <rect class="s-box" x="206" y="36" width="104" height="40" rx="10"/><text x="218" y="61" font-size="12">approved</text><path class="s-ok" d="M284 52l5 5 10-12"/>
+  <rect class="s-box" x="206" y="112" width="104" height="40" rx="10"/><text x="218" y="137" font-size="12">unknown site</text><path class="s-no" d="M290 126l10 10M300 126l-10 10"/>
+</svg></div><h3>Nothing leaves unless you said so.</h3><p>Every request goes through one guarded door. A place not on your list is turned back, and the reason is written down.</p></article>
+      <article class="cap"><div class="vis"><svg viewBox="0 0 320 180" aria-hidden="true" focusable="false">
+  <rect class="s-box" x="10" y="14" width="300" height="152" rx="14"/>
+  <text x="28" y="40" font-size="12" font-weight="600" class="s-dim">LOGBOOK · WRITTEN FIRST</text>
+  <path class="s-ok" d="M28 62l5 5 10-12"/><text x="54" y="66" font-size="13">1  Read the invoice</text>
+  <path class="s-ok" d="M28 90l5 5 10-12"/><text x="54" y="94" font-size="13">2  Check the totals</text>
+  <path class="s-ok" d="M28 118l5 5 10-12"/><text x="54" y="122" font-size="13">3  Send the payment, once</text>
+  <rect x="200" y="132" width="96" height="24" rx="12" fill="rgba(242,128,59,.14)"/><text x="214" y="148" font-size="11" class="s-warn">power cut, resumed</text>
+</svg></div><h3>Nothing happens twice.</h3><p>Each step is written down before it runs. After a crash, the agent skips what is done and finishes the rest.</p></article>
+      <article class="cap"><div class="vis"><svg viewBox="0 0 320 180" aria-hidden="true" focusable="false">
+  <rect class="s-box" x="10" y="20" width="150" height="140" rx="14"/>
+  <text x="26" y="46" font-size="12" font-weight="600" class="s-dim">SIGNED RECEIPT</text>
+  <rect x="26" y="62" width="110" height="8" rx="4" fill="#26314B"/><rect x="26" y="82" width="90" height="8" rx="4" fill="#26314B"/><rect x="26" y="102" width="100" height="8" rx="4" fill="#26314B"/>
+  <path class="s-lane" d="M160 90H196"/>
+  <rect class="s-ac" x="196" y="40" width="114" height="100" rx="14"/>
+  <text x="212" y="64" font-size="12" font-weight="600" class="s-ver">YOUR CHECKER</text>
+  <circle cx="253" cy="104" r="20" fill="none" stroke="var(--verify)" stroke-width="2"/><path class="s-ok" d="M243 104l7 7 14-15"/>
+</svg></div><h3>You can prove what ran.</h3><p>The machine signs what it started with and where it connected. Your auditor checks it on their own computer.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="check">
+  <div class="wrap split">
+    <div>
+      <p class="kicker">Check it yourself</p>
+      <h2>Don't trust us. Check the receipt.</h2>
+      <p class="plain">Press Verify. Then change one line and press it again.</p>
+      <ul class="ticks">
+        <li>The check runs away from the machine that signed it.</li>
+        <li>Change one line, and the check fails.</li>
+        <li>Signing every action arrives with the current release.</li>
+      </ul>
+    </div>
+        <figure class="receipt-fig" id="receipt" data-anim="receipt" data-fp="af5e81f4c43c1d11">
+          <div class="slip" role="group" aria-label="A sample receipt from the machine, signed and ready to check">
+            <div class="sl-head"><span>Receipt</span><span>sample · values illustrative</span></div>
+            <ul class="sl-rows">
+                <li class="pr" style="--s:.3"><span class="tick"><svg class="ic" aria-hidden="true"><use href="#i-ok"/></svg></span><span><b>Started up unmodified</b><small data-rc-line>matches the approved build</small></span></li>
+                <li class="pr" style="--s:1.1"><span class="tick"><svg class="ic" aria-hidden="true"><use href="#i-ok"/></svg></span><span><b>Data went only to approved places</b><small data-rc-line>models.example · erp.internal</small></span></li>
+                <li class="pr" style="--s:1.9"><span class="tick"><svg class="ic" aria-hidden="true"><use href="#i-ok"/></svg></span><span><b>Every action written down</b><small data-rc-line>in the logbook; signing it arrives with the current release</small></span></li>
+                <li class="pr" style="--s:2.7"><span class="tick"><svg class="ic" aria-hidden="true"><use href="#i-ok"/></svg></span><span><b>Signed by this machine</b><small data-rc-line>anyone can check the signature</small></span></li>
+            </ul>
+            <div class="sl-foot">
+              <div class="rc-zone">
+                <div id="rc-controls" data-js hidden>
+                  <div class="rc-btns">
+                    <button class="btn btn-primary" id="rc-verify" type="button">Verify</button>
+                    <button class="btn" id="rc-edit" type="button" aria-pressed="false">Change one line</button>
+                  </div>
+                  <output id="rc-status" role="status" aria-live="polite"></output>
+                  <p class="fine">This sample checks a fingerprint of the lines in your browser. The real check also verifies the machine's signature.</p>
+                </div>
+                <noscript><p class="fine">Change any line of a signed receipt and the check fails. Turn on JavaScript to try it here.</p></noscript>
+              </div>
+              <span class="rstamp" data-rc-stamp aria-hidden="true"><span><i>VERIFIED</i><b>outside check</b></span></span>
+            </div>
+          </div>
+          <figcaption>A sample receipt with made-up values. Today the machine signs what started up and where it connected. Signing every action arrives with the current release.</figcaption>
+        </figure>
+  </div>
+</section>
+
+<section id="use-cases">
+  <div class="wrap">
+    <p class="kicker">Who it is for</p>
+    <h2>For teams that answer to an auditor.</h2>
+    <p class="plain">If an agent can move money, read records or send data, someone will ask what it did.</p>
+    <div class="tiles">
+      <a class="tile" href="use-cases/"><span class="k">Banks</span><h3>Payment operations</h3><span class="d">Match payments and queue transfers, with each step written down.</span><span class="go">See the workflow</span></a>
+      <a class="tile" href="use-cases/"><span class="k">Insurance</span><h3>Claims handling</h3><span class="d">Read claim files and draft decisions, with data kept to approved places.</span><span class="go">See the workflow</span></a>
+      <a class="tile" href="use-cases/"><span class="k">Healthcare</span><h3>Patient records</h3><span class="d">Summarise records inside your own network.</span><span class="go">See the workflow</span></a>
+      <a class="tile" href="use-cases/"><span class="k">Public sector</span><h3>Case work</h3><span class="d">Prepare case files on your own hardware, even offline.</span><span class="go">See the workflow</span></a>
+    </div>
+    <p class="more"><a class="arrow" href="use-cases/">See all six workflows</a></p>
+  </div>
+</section>
+
+<section id="today">
+  <div class="wrap">
+    <p class="kicker">Straight answers</p>
+    <h2>What is ready today, and what is not.</h2>
+    <p class="plain">It is pre-1.0. Here is the honest list.</p>
+    <div class="readys">
+      <div class="ready" id="today-yes">
+        <h3>Ready today</h3>
+        <ul>
+          <li><b>A sealed machine</b> that checks itself every time it starts.</li>
+          <li><b>One guarded door</b> for everything that leaves.</li>
+          <li><b>A logbook</b>, so a crash does not repeat an action.</li>
+          <li><b>A signed receipt</b> of what started up and where it connected.</li>
+        </ul>
+      </div>
+      <div class="ready no" id="today-no">
+        <h3>Not built yet</h3>
+        <ul>
+          <li><b>Signing every action</b> arrives with the current release.</li>
+          <li><b>Hiding data from the host operator:</b> Not yet — on our roadmap.</li>
+          <li><b>Certification:</b> There are no certifications yet.</li>
+          <li><b>Signing keys:</b> this version uses development signing keys.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="more"><a class="arrow" href="security/">Read every answer for your security review</a></p>
+  </div>
+</section>
+
+<section id="partners">
+  <div class="wrap">
+    <div class="final-card">
+      <h2>Bring us one real workflow.</h2>
+      <p class="plain">Tell us what an auditor asks you that you cannot answer yet. We will show you what the proof would say.</p>
+      <div class="cta" style="justify-content:center">
+        <a class="btn btn-primary" href="#partners" data-contact data-subject="30-minute demo" data-body="Name and role:&#10;What you would like to see:&#10;">Book a demo</a>
+        <a class="btn" href="#partners" data-contact data-subject="Design partner application" data-body="Sector:&#10;Regulator:&#10;Where it would run:&#10;One agent workflow:&#10;">Become a design partner</a>
+      </div>
+      <p class="fine center-fine">Pre-1.0 · Free for design partners through 1.0 · <a href="pricing/">See pricing</a></p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav class="footnav" aria-label="Site">
+      <a href="./">Home</a><a href="how-it-works/">How it works</a><a href="use-cases/">Use cases</a><a href="security/">Security</a><a href="compare/">Compare</a><a href="pricing/">Pricing</a><a href="benchmarks/">Benchmarks</a><a href="report/">Test report</a>
+    </nav>
+    <p>Every number on this site comes from a test you can rerun. This site loads nothing from anyone else: no outside fonts, scripts, analytics or trackers.</p>
+    <div class="row">
+      <span>VOLENT — pre-1.0, working with a small group of design partners.</span>
+      <span>Runs on the major hypervisors and clouds.</span>
+    </div>
+  </div>
+</footer>
+<noscript><p class="fine wrap">To write to us without JavaScript: bhavin500 [at] yahoo [dot] com</p></noscript>
+
+<script>
+(function(){var p=["bhavin500","yahoo.com"],e=p[0]+"@"+p[1];[].forEach.call(document.querySelectorAll("a[data-contact]"),function(a){var b=a.getAttribute("data-body");a.href="mailto:"+e+"?subject="+encodeURIComponent(a.getAttribute("data-subject"))+(b?"&body="+encodeURIComponent(b):"")});var c=document.getElementById("contact");if(c){c.textContent=e;c.hidden=false}})();
+</script>
+<script>
+(function(){
+var f=document.getElementById("receipt"),c=document.getElementById("rc-controls"),v=document.getElementById("rc-verify"),b=document.getElementById("rc-edit"),s=document.getElementById("rc-status");
+if(!f||!c||!v||!b||!s)return;
+var L=[].slice.call(f.querySelectorAll("[data-rc-line]")),fp=f.getAttribute("data-fp"),st=f.querySelector("[data-rc-stamp]"),
+t=function(e){return e.textContent.replace(/\s+/g," ").trim()},orig=L.map(t),li=L[1].closest("li"),was=null,edited=false;
+c.hidden=false;
+function hex(buf){return[].map.call(new Uint8Array(buf),function(x){return("0"+x.toString(16)).slice(-2)}).join("")}
+function digest(txt){if(window.crypto&&crypto.subtle&&window.TextEncoder){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(txt)).then(function(r){return hex(r).slice(0,16)})}
+return Promise.resolve(txt===orig.join("\n")?fp:"unknown-fingerprint")}
+function stamp(w,l){st.firstChild.firstChild.textContent=w;st.className="rstamp"+(l?" "+l:"")}
+function say(cls,icon,msg){s.className=cls;s.innerHTML='<svg class="ic" aria-hidden="true"><use href="#'+icon+'"/></svg>';s.appendChild(document.createTextNode(" "+msg))}
+v.addEventListener("click",function(){var cur=L.map(t).join("\n");digest(cur).then(function(h){
+if(h===fp){say("ok","i-ok","Signature matches. Fingerprint "+h.slice(0,8)+" is the signed one.");stamp("VERIFIED","")}
+else{say("bad","i-no","Changed after signing. Fingerprint "+h.slice(0,8)+" is not the signed "+fp.slice(0,8)+".");stamp("CHANGED","bad")}})});
+b.addEventListener("click",function(){
+if(!edited){edited=true;L[1].textContent="models.example · files.example.net";li.classList.add("changed");was=document.createElement("span");was.className="was";was.innerHTML="was: <s></s>";was.querySelector("s").textContent=orig[1];L[1].parentNode.appendChild(was);b.textContent="Put it back";b.setAttribute("aria-pressed","true")}
+else{edited=false;L[1].textContent=orig[1];li.classList.remove("changed");if(was&&was.parentNode)was.parentNode.removeChild(was);b.textContent="Change one line";b.setAttribute("aria-pressed","false")}
+s.className="";s.textContent="Line changed. Press Verify.";if(!edited)s.textContent="Line put back. Press Verify.";stamp("UNCHECKED","idle")});
+})();
+</script>
+<script>
+(function(){
+if(!window.matchMedia||matchMedia("(prefers-reduced-motion: reduce)").matches||!window.IntersectionObserver)return;
+var d=document,q=function(s){return[].slice.call(d.querySelectorAll(s))};
+d.documentElement.classList.add("motion");
+function info(e){var t=e.textContent,p=t.split(".");return{t:t,n:(p[1]||"").length,c:t.indexOf(",")>-1,v:parseFloat(t.replace(/,/g,""))}}
+function fmt(v,i){var p=v.toFixed(i.n).split(".");if(i.c)p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,",");return p.join(".")}
+function count(e){var i=e.__i,s=0;e.__s=1;if(!i.v)return;requestAnimationFrame(function f(ts){s=s||ts;var k=Math.min((ts-s)/1200,1);e.textContent=k<1?fmt(i.v*(.9+.1*(1-Math.pow(1-k,3))),i):i.t;if(k<1)requestAnimationFrame(f)})}
+var clocks=q("[data-clock]");
+function tick(){var on=0;clocks.forEach(function(c){var f=c.closest("figure");if(f.__d){c.textContent=c.__t}else if(f.classList.contains("play")){on=1;var v=parseFloat(getComputedStyle(f).getPropertyValue("--"+c.getAttribute("data-clock")));if(v>=0)c.textContent=v.toFixed(2)}});if(on)requestAnimationFrame(tick)}
+function restart(f){f.classList.remove("play");f.style.animation="none";void f.offsetWidth;f.style.animation="";f.__d=0;f.classList.add("play");tick()}
+var io=new IntersectionObserver(function(es){es.forEach(function(e){var t=e.target;
+if(t.tagName=="SECTION"){if(e.isIntersecting)t.classList.add("seen");return}
+var on=e.intersectionRatio>=.35;
+if(t.hasAttribute("data-count")){if(on&&!t.__s)count(t);return}
+if(on){if(t.__d)restart(t);else{t.classList.add("play");tick()}}else t.classList.remove("play")})},{threshold:[0,.35],rootMargin:"0px 0px -8% 0px"});
+q("[data-count]").forEach(function(e){e.__i=info(e);io.observe(e)});
+clocks.forEach(function(c){c.__t=c.textContent});
+q("[data-anim]").forEach(function(f){f.addEventListener("animationend",function(){f.__d=1;tick()});io.observe(f)});
+q("section").forEach(function(s){io.observe(s)});
+d.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".replay");if(b)restart(b.closest("figure"))});
+})();
+</script>
+</body>
+</html>
