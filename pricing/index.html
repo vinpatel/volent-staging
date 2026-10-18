@@ -335,6 +335,40 @@ footer .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-cont
   a{color:#000;text-decoration:underline}
   section{padding:28px 0;break-inside:avoid-page}
 }
+/* v10 subpage skin */
+body{background:#000;color:#EDEDED}
+.paper{--text:#EDEDED;--muted:#A1A1A1;--dim:#A1A1A1;--line:#1F1F1F;--line-2:#2E2E2E;--verify:#3DDCC4;--warn:#F2803B;--seal:#F2B138;--surface:#0A0A0A;--btn-on:#000;
+  background:#000!important;background-image:none!important;color:#EDEDED}
+.paper::before{display:none!important}
+.ink{background:#000!important;--surface:#0A0A0A;--btn-on:#000}
+section,.phero,.hero{border-top:1px solid #1F1F1F}
+.phero,.hero{border-top:0}
+.phero::before,.phero::after,.hero::before,.hero::after{display:none!important}
+.announce{background:#000!important;color:#A1A1A1!important;border-bottom:1px solid #1F1F1F;font-family:var(--sans)}
+.announce a{color:#EDEDED!important}
+.topnav{background:rgba(0,0,0,.72)!important;border-bottom:1px solid #1F1F1F!important}
+.navlinks a{color:#A1A1A1}
+.navlinks a:hover,.navlinks a[aria-current]{color:#EDEDED;background:transparent}
+.navlinks a.apply{background:#EDEDED!important;color:#000!important;border-radius:8px}
+.wrap{position:relative;border-left:1px solid #1F1F1F;border-right:1px solid #1F1F1F}
+.eyebrow,.kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:#A1A1A1!important;font-weight:500}
+h1,h2,h3{font-family:var(--display);font-weight:600;color:#EDEDED}
+h1{letter-spacing:-.045em}
+h2{letter-spacing:-.035em}
+.plain,.lede,p{color:#A1A1A1}
+.btn{border-radius:999px!important;border:1px solid #2E2E2E!important;background:#0A0A0A!important;color:#EDEDED!important;box-shadow:none!important}
+.btn:hover{border-color:#5A5A5A!important;transform:none!important}
+.btn-primary{background:#EDEDED!important;border-color:#EDEDED!important;color:#000!important}
+.card,.bcard,.stat,.fact,.vis,.plan,.offer,.ptile,.ask,.q,details.q,.tablewrap,.tile,.ucard,.step-card,.mono-list li{background:#0A0A0A!important;border-color:#1F1F1F!important;box-shadow:none!important;border-radius:12px}
+table{border-color:#1F1F1F}
+th,td{border-color:#1F1F1F!important;color:#EDEDED}
+thead th{color:#A1A1A1!important;background:#0A0A0A!important}
+a{color:#EDEDED}
+p a,li a,td a{text-decoration:underline;text-underline-offset:3px;text-decoration-color:#3F3F3F}
+.bench-label{border-left-color:#3F3F3F!important;color:#A1A1A1!important}
+.fig{color:#EDEDED!important;letter-spacing:-.04em}
+.price{color:#EDEDED!important}
+footer{background:#000!important;border-top:1px solid #1F1F1F}
 </style>
 </head>
 <body>
@@ -362,10 +396,10 @@ footer .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-cont
     <div class="grid">
       <div class="s6">
         <p class="eyebrow">Pricing</p>
-        <h1>Free for design partners through 1.0.</h1>
-        <p class="lede">We have not set prices yet. Until 1.0, design partners use it free and help shape what it does.</p>
+        <h1>Simple prices. Free for design partners through 1.0.</h1>
+        <p class="lede">Pay for one computer at a time, on dedicated servers we run for you. Prices below apply after 1.0; design partners pay nothing until then.</p>
         <div class="cta">
-          <a class="btn btn-primary" href="../#partners" data-contact data-subject="Design partner application" data-body="Sector:&#10;Regulator:&#10;Where it would run:&#10;One agent workflow:&#10;">Become a design partner</a>
+          <a class="btn btn-primary" href="../#partners" data-contact data-subject="Free trial request" data-body="Name and role:&#10;Company:&#10;What the agent would do:&#10;">Request a free trial</a>
           <a class="btn" href="../#partners" data-contact data-subject="30-minute demo" data-body="Name and role:&#10;What you would like to see:&#10;">Book a demo</a>
         </div>
       </div>
@@ -388,10 +422,20 @@ footer .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-cont
 </header>
 <section id="plan" class="paper">
   <div class="wrap">
-    <p class="eyebrow">The offer</p>
-    <h2>One plan for now.</h2>
-    <p class="plain">It is for a small number of teams who answer to an auditor or a regulator.</p>
+    <p class="eyebrow">Ways to start</p>
+    <h2>Try it free, then pay per computer.</h2>
+    <p class="plain">Each computer runs your agents with the approved list, the step log and the signed record built in.</p>
     <div class="pgrid">
+      <div class="plan">
+        <p class="pname">Free trial</p>
+        <p><span class="price">$0</span><span class="per">for 14 days</span></p>
+        <ul>
+          <li>One S computer: 2 vCPU, 4 GB</li>
+          <li>The console and the signed record</li>
+          <li>Set up with you by our engineers while self-serve sign-up is built</li>
+        </ul>
+        <div class="cta"><a class="btn btn-primary" href="../#partners" data-contact data-subject="Free trial request" data-body="Name and role:&#10;Company:&#10;What the agent would do:&#10;">Request a free trial</a></div>
+      </div>
       <div class="plan">
         <p class="pname">Design partner</p>
         <p><span class="price">$0</span><span class="per">through 1.0</span></p>
@@ -399,43 +443,47 @@ footer .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-cont
           <li>Free use through 1.0</li>
           <li>A named engineer</li>
           <li>A joint pilot on one real workflow</li>
-          <li>A voice in the receipt format and compliance mappings</li>
-          <li>Early access to signed releases</li>
           <li>Founding pricing, a mutual NDA, and an opt-in case study</li>
         </ul>
-        <div class="cta"><a class="btn btn-primary" href="../#partners" data-contact data-subject="Design partner application" data-body="Sector:&#10;Regulator:&#10;Where it would run:&#10;One agent workflow:&#10;">Apply to be a design partner</a></div>
-      </div>
-      <div class="ask">
-        <h3>What we ask</h3>
-        <ul>
-          <li>Monthly feedback</li>
-          <li>Permission to cite findings without your name</li>
-          <li>An honest view of where it falls short, since this is pre-1.0</li>
-        </ul>
-        <h3>To apply, tell us</h3>
-        <ul>
-          <li>Your sector</li>
-          <li>Your regulator</li>
-          <li>Where it would run</li>
-          <li>One agent workflow</li>
-        </ul>
+        <div class="cta"><a class="btn" href="../#partners" data-contact data-subject="Design partner application" data-body="Sector:&#10;Regulator:&#10;Where it would run:&#10;One agent workflow:&#10;">Apply to be a design partner</a></div>
       </div>
     </div>
   </div>
 </section>
-<section id="after" class="ink">
+<section id="sizes" class="ink">
   <div class="wrap">
-    <p class="eyebrow">Later</p>
-    <h2>What happens at 1.0.</h2>
-    <p class="plain">We will say what 1.0 includes, and what it costs, before anyone is asked to buy it.</p>
+    <p class="eyebrow">Managed, after 1.0</p>
+    <h2>One price per computer, per month.</h2>
+    <p class="plain">Prices below apply after 1.0. Each computer runs on a dedicated server we manage, not shared with other customers.</p>
+    <div class="tablewrap" role="region" aria-label="Managed prices" tabindex="0">
+      <table class="prices">
+        <thead><tr><th scope="col">Size</th><th scope="col">Computer</th><th scope="col" class="num">Per month</th><th scope="col" class="num">About per hour</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">S</th><td>2 vCPU, 4 GB</td><td class="num"><span class="price">$79</span></td><td class="num">11 cents</td></tr>
+          <tr><th scope="row">M</th><td>4 vCPU, 8 GB</td><td class="num"><span class="price">$129</span></td><td class="num">18 cents</td></tr>
+          <tr><th scope="row">L</th><td>8 vCPU, 16 GB</td><td class="num"><span class="price">$249</span></td><td class="num">34 cents</td></tr>
+          <tr><th scope="row">XL</th><td>16 vCPU, 32 GB</td><td class="num"><span class="price">$469</span></td><td class="num">64 cents</td></tr>
+          <tr><th scope="row">Private connection</th><td>A private link from your network</td><td class="num">from <span class="price">$790</span></td><td class="num"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="plain">Hosted agent sandboxes charge by the second and stop billing when idle, so for short bursts they can cost less. For agents that run all month, the same 2 vCPU, 4 GB size costs about three times more at their published prices (October 2026).</p>
+    <p class="plain">Self-hosted on your own servers: talk to us. Managed computers are for design partners until our first test in a partner data centre is done.</p>
+  </div>
+</section>
+<section id="after" class="paper">
+  <div class="wrap">
+    <p class="eyebrow">Promises</p>
+    <h2>What we promise on price.</h2>
+    <p class="plain">Prices below apply after 1.0, and they are public before anyone is asked to pay.</p>
     <div class="cards c3">
       <div class="card"><h3>Founding pricing</h3><p>Design partners keep a founding price after 1.0.</p></div>
-      <div class="card"><h3>No surprises</h3><p>Prices are published before anyone is asked to pay. There is no date yet; design partners hear first.</p></div>
-      <div class="card"><h3>Your data stays with you</h3><p>It runs on your own machines. We do not see your data, and this site loads no trackers.</p></div>
+      <div class="card"><h3>No surprises</h3><p>Prices are published before anyone is asked to pay. Design partners hear first about any change.</p></div>
+      <div class="card"><h3>Your data stays with you</h3><p>Your computer is not shared with other customers, and this site loads no trackers.</p></div>
     </div>
   </div>
 </section>
-<section id="proof" class="paper">
+<section id="proof" class="ink">
   <div class="wrap">
     <p class="eyebrow">Proof</p>
     <h2>Check the numbers before you apply.</h2>
