@@ -444,6 +444,83 @@ html.motion .layers.play .ly.hi{animation:ly-in .6s .15s cubic-bezier(.2,.8,.2,1
   a{color:#000;text-decoration:underline}
   section{padding:28px 0;break-inside:avoid-page}
 }
+
+/* ===== v9 skin: Vercel-grade craft. Pure black, hairline grid, white primary, accent only for verified ===== */
+body{background:#000;color:#EDEDED}
+.announce{background:#000;border-bottom:1px solid #1F1F1F;color:#A1A1A1}
+.announce a{color:#EDEDED;text-decoration:underline;text-underline-offset:3px}
+.topnav{background:rgba(0,0,0,.72);border-bottom:1px solid #1F1F1F}
+.navlinks a{color:#A1A1A1}
+.navlinks a:hover{color:#EDEDED;background:transparent}
+.navlinks a.apply{background:#EDEDED;color:#000;border-radius:8px}
+section,.hero{background:#000;border-top:1px solid #1F1F1F;padding-block:clamp(72px,8vw,120px)}
+.hero{border-top:0;padding-top:clamp(40px,4.5vw,64px)}
+.hero::before,.hero::after,.shot::before,.stage::before,.shot-real::before{display:none}
+.wrap{position:relative;border-left:1px solid #1F1F1F;border-right:1px solid #1F1F1F;padding-inline:clamp(20px,3vw,40px)}
+section > .wrap::before,section > .wrap::after{content:"+";position:absolute;top:calc(-1 * clamp(72px,8vw,120px) - 9px);font:300 18px/18px var(--sans);color:#3F3F3F}
+section > .wrap::before{left:-6px}
+section > .wrap::after{right:-6px}
+.center{text-align:left}
+.center .plain,.center .lede{margin-left:0;margin-right:0}
+h2{font-size:clamp(2rem,1.2rem + 2.4vw,3.2rem);letter-spacing:-.04em;line-height:1.05;font-weight:600;max-width:20ch}
+.plain{color:#A1A1A1}
+.kicker{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:#A1A1A1;font-weight:500}
+/* hero: split like vercel.com/enterprise */
+.hero .wrap.center{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:clamp(32px,5vw,80px);align-items:end}
+.hero .pill{grid-column:1/-1;justify-self:start;margin-bottom:var(--s6);background:transparent;border-color:#2E2E2E;color:#A1A1A1}
+.hero .pill b{background:#EDEDED;color:#000}
+.hero h1{grid-column:1;grid-row:2 / span 3;margin:0;max-width:none;font-size:clamp(2.6rem,1rem + 3.6vw,4.4rem);letter-spacing:-.05em;line-height:1;font-weight:600;text-align:left;text-wrap:balance}
+.hero h1 .accent{color:#EDEDED}
+.hero .sub{grid-column:2;grid-row:2;margin:0 0 var(--s6);max-width:30em;font-size:1.12rem;color:#A1A1A1;text-align:left}
+.hero .cta{grid-column:2;grid-row:3;justify-content:flex-start}
+.hero .bare{grid-column:2;grid-row:4;text-align:left;margin:var(--s5) 0 0;font-size:.78rem;color:#A1A1A1}
+.hero .bare b{color:#EDEDED}
+.hero .shot-real{grid-column:1/-1;margin-top:clamp(40px,4.5vw,64px)}
+.btn{border-radius:999px;border:1px solid #2E2E2E;background:#0A0A0A;color:#EDEDED;box-shadow:none}
+.btn:hover{border-color:#5A5A5A;transform:none;background:#111}
+.btn-primary{background:#EDEDED;border-color:#EDEDED;color:#000;box-shadow:none}
+.btn-primary:hover{background:#fff;border-color:#fff}
+/* real screens: crisp, in the grid, no glow */
+.browser{border-color:#1F1F1F;border-radius:12px;box-shadow:none;background:#0A0A0A}
+.b-bar{background:#0A0A0A;border-bottom-color:#1F1F1F}
+.realrec img{border-color:#1F1F1F;border-radius:12px}
+figcaption,.alt,.fine{color:#A1A1A1}
+/* proof strip as a ruled grid */
+.facts-strip{border-color:#1F1F1F}
+.facts-strip li{border-color:#1F1F1F}
+.fig{font-weight:600;letter-spacing:-.05em;color:#EDEDED}
+.facts-strip a,.more a,.tile .go,.arrow{color:#EDEDED;text-decoration:underline;text-underline-offset:4px;text-decoration-color:#3F3F3F}
+.how-measured summary{color:#A1A1A1}
+/* cards: flat, hairline */
+.cap,.harm,.tile,.ready,.lay,.file,.way,.out,.final-card,.server,.slip,.map{background:#0A0A0A!important;border-color:#1F1F1F!important;box-shadow:none!important}
+.cap,.harm,.tile,.ready,.lay,.file,.way{border-radius:12px}
+.cap:hover,.tile:hover{transform:none;border-color:#3F3F3F!important}
+.cap .vis{background:#050505;border-color:#1F1F1F}
+.harm{background:#0A0A0A!important}
+.h-ic{color:#A1A1A1;border-color:#2E2E2E}
+.tile .k,.way .k{color:#A1A1A1;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
+.lay.us{background:#0A0A0A!important;border-color:#2E2E2E!important}
+.lay.us h3{color:#EDEDED}
+.ly{border-color:#1F1F1F}
+.ly.hi{background:#111!important;border-color:#3F3F3F}
+.ly .chips i{color:#EDEDED;border-color:#2E2E2E}
+.ready h3::before{background:var(--verify)}
+.ready.no h3::before{background:#8F8F8F}
+.final-card{text-align:left;border-radius:12px}
+.final-card h2,.final-card .plain{margin-left:0}
+.final-card .cta{justify-content:flex-start!important}
+.final-card .center-fine{margin-left:0}
+.way .tag{color:#A1A1A1;border-color:#2E2E2E}
+.files-h{text-align:left}
+.file pre{background:#050505}
+.file .k{color:#EDEDED}.file .s{color:#A1A1A1}
+footer{background:#000;border-top:1px solid #1F1F1F}
+.logstrip{background:#050505}
+@media(max-width:900px){
+  .hero .wrap.center{grid-template-columns:1fr}
+  .hero h1,.hero .sub,.hero .cta,.hero .bare{grid-column:1;grid-row:auto}
+  .hero h1{margin-bottom:var(--s6)}
+}
 </style>
 </head>
 <body>
