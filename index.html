@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; font-src 'self'; script-src 'sha256-ddku31XlVFbJEcqyZiKWwxZMBy2SEVj6DVdUotmis1E=' 'sha256-J/0BTGzCa+IDm2GnlKQizZ2CiHfmreo2OuWXWvHDFwU=' 'sha256-Fr9uUPe5r/rYjZbubpe9IRmauKfvSDfu8U/2tzD/weQ=' 'sha256-20rGL+QL2/a5HqFEFelZRQZEQjxpnYJq26oTvm/WsQQ='; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; font-src 'self'; script-src 'sha256-ddku31XlVFbJEcqyZiKWwxZMBy2SEVj6DVdUotmis1E=' 'sha256-J/0BTGzCa+IDm2GnlKQizZ2CiHfmreo2OuWXWvHDFwU=' 'sha256-Fr9uUPe5r/rYjZbubpe9IRmauKfvSDfu8U/2tzD/weQ=' 'sha256-20rGL+QL2/a5HqFEFelZRQZEQjxpnYJq26oTvm/WsQQ=' 'sha256-4/d6Hk5NBiv1g4v9sMEP06f3DK4bP+VC4byAjPqeBRE='; base-uri 'none'; form-action 'none'">
 <title>VOLENT — Run AI agents your security team can say yes to.</title>
 <meta name="description" content="VOLENT is an operating system built only for AI agents. Data goes only where you allow, a crash does not repeat a payment, and your auditor gets a record they can check.">
 <link rel="canonical" href="https://vinpatel.github.io/volent/">
@@ -521,6 +521,19 @@ footer{background:#000;border-top:1px solid #1F1F1F}
   .hero h1,.hero .sub,.hero .cta,.hero .bare{grid-column:1;grid-row:auto}
   .hero h1{margin-bottom:var(--s6)}
 }
+
+/* v10: signature field behind the hero; proof right under it */
+.hero{position:relative;padding-bottom:clamp(40px,5vw,72px)}
+.field-bg{position:absolute;left:0;top:0;width:100%;height:760px;z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(#000 30%,transparent 92%);mask-image:linear-gradient(#000 30%,transparent 92%)}
+.hero .wrap{z-index:1}
+#facts{padding-block:clamp(40px,4vw,64px) clamp(64px,7vw,104px)}
+#facts .kicker{margin-bottom:var(--s2)}
+#facts h2{font-size:clamp(1.4rem,1rem + 1vw,1.9rem);max-width:none;margin-bottom:.3em}
+#facts .plain{font-size:1rem;margin-bottom:0}
+#facts .facts-strip{margin-top:var(--s5)}
+.facts-strip li{padding:var(--s5) var(--s5)}
+.fig{font-size:clamp(2rem,1.4rem + 1.4vw,2.8rem)}
 </style>
 </head>
 <body>
@@ -544,6 +557,7 @@ footer{background:#000;border-top:1px solid #1F1F1F}
 
 <main id="main">
 <header class="hero" id="top">
+  <canvas id="field" class="field-bg" aria-hidden="true"></canvas>
   <div class="wrap center">
     <p class="pill"><b>Pre-1.0</b>The operating system for AI agents</p>
     <h1>Run AI agents your security team <span class="accent">can say yes to.</span></h1>
@@ -889,5 +903,6 @@ d.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(
 })();
 </script>
 <script>(function(){var cv=document.getElementById("crowd"),st=document.getElementById("stage");if(!cv||!cv.getContext||!st)return;var ctx=cv.getContext("2d"),still=!window.matchMedia||!window.IntersectionObserver||matchMedia("(prefers-reduced-motion: reduce)").matches,ts=document.getElementById("crowd-toast"),W,H,dots=[],pk=[],nb=12,t0=0,last=0,on=true,pw=1,cut=11000,li=0,nm=["invoice","kyc","claims","report","payments","triage","refund","audit"],ds=["erp.internal","models.example","pay.internal"];function size(){var r=Math.min(window.devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*r;cv.height=H*r;ctx.setTransform(r,0,0,r,0,0);dots=[];var aw=W-56,ah=H-(W<520?150:92),n=W<520?2400:6800,c=Math.max(1,Math.round(Math.sqrt(n*aw/ah))),rw=Math.ceil(n/c),gx=aw/c,gy=ah/rw;for(var i=0;i<n;i++){dots.push({x:14+(i%c)*gx+Math.random()*gx*.6,y:16+((i/c)|0)*gy+Math.random()*gy*.6,p:Math.random()*6.28,s:.5+Math.random()*1.5})}}function spawn(){var d=dots[(Math.random()*dots.length)|0],bad=Math.random()<.13;pk.push({x:d.x,y:d.y,ty:H/2-46+Math.random()*92,t:0,bad:bad})}function draw(t,dt){ctx.clearRect(0,0,W,H);if(!still&&t>cut){pw=0;ts.classList.add("on");cut=t+15000;setTimeout(function(){pw=1},650);setTimeout(function(){ts.classList.remove("on")},3400)}var p=still?1:pw;for(var i=0;i<dots.length;i++){var d=dots[i],a=(.3+.5*(.5+.5*Math.sin(d.p+t*.0017*d.s)))*p;ctx.fillStyle="rgba(61,220,196,"+a.toFixed(3)+")";ctx.fillRect(d.x,d.y,1.7,1.7)}if(!still&&p&&Math.random()<dt/85)spawn();for(var j=pk.length-1;j>=0;j--){var q=pk[j],k,e,x,y,tx=W-10;q.t+=dt/1500;k=Math.min(q.t,1);if(q.bad){var u=k<.6?k/.6:1-(k-.6)/.4;e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;x=q.x+(tx-16-q.x)*e;y=q.y+(q.ty-q.y)*e;ctx.fillStyle=k>.55?"#F2803B":"#EEF2FA"}else{e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;x=q.x+(tx+24-q.x)*e;y=q.y+(q.ty-q.y)*e;ctx.fillStyle="#3DDCC4"}ctx.beginPath();ctx.arc(x,y,2.6,0,6.29);ctx.fill();ctx.globalAlpha=.22;ctx.beginPath();ctx.arc(x,y,7.5,0,6.29);ctx.fill();ctx.globalAlpha=1;if(q.bad&&k>.55&&k<.72){ctx.strokeStyle="#F2803B";ctx.lineWidth=2;ctx.beginPath();ctx.arc(tx-6,q.ty,13,0,6.29);ctx.stroke()}if(q.t>=1)pk.splice(j,1)}}function frame(ts_){if(!on)return;if(!t0)t0=ts_;var dt=Math.min(ts_-(last||ts_),50);last=ts_;draw(ts_-t0,dt);requestAnimationFrame(frame)}size();if(still){draw(1,0);window.addEventListener("resize",function(){size();draw(1,0)});return}window.addEventListener("resize",size);for(var s=0;s<10;s++)spawn();if(window.IntersectionObserver)new IntersectionObserver(function(es){var v=es[0].isIntersecting;if(v&&!on){on=true;last=0;requestAnimationFrame(frame)}on=v}).observe(st);requestAnimationFrame(frame)})();</script>
+<script>(function(){var c=document.getElementById("field");if(!c||!c.getContext)return;var x=c.getContext("2d"),still=!window.matchMedia||!window.IntersectionObserver||matchMedia("(prefers-reduced-motion: reduce)").matches,W,H,d=[],on=true,last=0;function size(){var r=Math.min(window.devicePixelRatio||1,2);W=c.clientWidth;H=c.clientHeight;c.width=W*r;c.height=H*r;x.setTransform(r,0,0,r,0,0);d=[];for(var y=7;y<H;y+=14)for(var i=7;i<W;i+=14){d.push({x:i,y:y,p:Math.random()*6.28,s:.3+Math.random(),a:Math.random()<.012})}}function draw(t){x.clearRect(0,0,W,H);for(var k=0;k<d.length;k++){var o=d[k],v=.5+.5*Math.sin(o.p+t*.0011*o.s);if(o.a){x.fillStyle="rgba(61,220,196,"+(.25+.6*v).toFixed(3)+")";x.fillRect(o.x-1,o.y-1,2.2,2.2)}else{x.fillStyle="rgba(237,237,237,"+(.05+.11*v).toFixed(3)+")";x.fillRect(o.x-.6,o.y-.6,1.2,1.2)}}}function f(ts){if(!on)return;if(ts-last>45){draw(ts);last=ts}requestAnimationFrame(f)}size();if(still){draw(1200);window.addEventListener("resize",function(){size();draw(1200)});return}window.addEventListener("resize",size);new IntersectionObserver(function(e){var v=e[0].isIntersecting;if(v&&!on){on=true;requestAnimationFrame(f)}on=v}).observe(c);requestAnimationFrame(f)})();</script>
 </body>
 </html>
