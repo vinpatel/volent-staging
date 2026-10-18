@@ -6,14 +6,14 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; font-src 'self'; script-src 'sha256-ddku31XlVFbJEcqyZiKWwxZMBy2SEVj6DVdUotmis1E=' 'sha256-J/0BTGzCa+IDm2GnlKQizZ2CiHfmreo2OuWXWvHDFwU=' 'sha256-Fr9uUPe5r/rYjZbubpe9IRmauKfvSDfu8U/2tzD/weQ=' 'sha256-20rGL+QL2/a5HqFEFelZRQZEQjxpnYJq26oTvm/WsQQ=' 'sha256-4/d6Hk5NBiv1g4v9sMEP06f3DK4bP+VC4byAjPqeBRE='; base-uri 'none'; form-action 'none'">
 <title>VOLENT — Run AI agents your security team can say yes to.</title>
 <meta name="description" content="VOLENT is an operating system built only for AI agents. Data goes only where you allow, a crash does not repeat a payment, and your auditor gets a record they can check.">
-<link rel="canonical" href="https://vinpatel.github.io/volent/">
+<link rel="canonical" href="https://volent.dev/">
 <link rel="icon" href="assets/favicon-64.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="VOLENT — Run AI agents your security team can say yes to.">
 <meta property="og:description" content="VOLENT is an operating system built only for AI agents. Data goes only where you allow, a crash does not repeat a payment, and your auditor gets a record they can check.">
-<meta property="og:image" content="https://vinpatel.github.io/volent/assets/logo-1024.png">
-<meta property="og:url" content="https://vinpatel.github.io/volent/">
+<meta property="og:image" content="https://volent.dev/assets/logo-1024.png">
+<meta property="og:url" content="https://volent.dev/">
 <meta name="twitter:card" content="summary_large_image">
 <style>
 @font-face{font-family:"Display";src:url("assets/fonts/display.woff2") format("woff2");font-weight:400 700;font-display:swap}
@@ -142,8 +142,6 @@ h2{font-size:clamp(2.2rem,1.3rem + 2.8vw,3.6rem);letter-spacing:-.03em;line-heig
 .runs .fine{margin:var(--s5) auto 0}
 .cap{margin:0}
 .cap .alt{margin:0 var(--s3);color:var(--muted);line-height:1.55;font-size:1rem}
-.pk,.pop,.lr{transform-box:fill-box;transform-origin:center}
-.draw{stroke-dasharray:40}
 .lg + .lg{margin-top:4px}
 .lg .t{font-family:var(--mono);font-size:.76rem;color:var(--dim)}
 .lg .who{color:var(--text);font-weight:500}
@@ -298,22 +296,6 @@ footer .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-cont
 /* motion: opt-in. The script adds html.motion only when reduced motion is not requested; without it every
    visual already shows its finished state (the clocks default to the last frame). */
 @keyframes tl-c{from{--tc:0}to{--tc:6}}
-@keyframes pk-in{from{transform:translate(-56px,24px);opacity:0}25%{opacity:1}to{transform:none;opacity:1}}
-@keyframes pk-back{0%{transform:translate(0,-42px);opacity:0}15%{opacity:1}50%{transform:translate(60px,0)}100%{transform:none}}
-@keyframes pk-send{from{transform:translateX(-30px);opacity:0}30%{opacity:1}to{transform:none;opacity:1}}
-@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12);opacity:1}100%{transform:none;opacity:1}}
-@keyframes draw{from{stroke-dashoffset:40}to{stroke-dashoffset:0}}
-@keyframes row-in{from{transform:translateX(-8px);opacity:0}to{transform:none;opacity:1}}
-html.motion .cap.play .pk-in{animation:pk-in .9s .3s cubic-bezier(.2,.8,.2,1) both}
-html.motion .cap.play .draw{animation:draw .5s 1.2s ease-out both}
-html.motion .cap.play .pk-back{animation:pk-back 1.4s .9s cubic-bezier(.5,0,.2,1) both}
-html.motion .cap.play .pop{animation:pop .45s 1.6s cubic-bezier(.2,.9,.3,1.3) both}
-html.motion .cap.play .lr1{animation:row-in .5s .3s ease-out both}
-html.motion .cap.play .lr2{animation:row-in .5s .8s ease-out both}
-html.motion .cap.play .lr3{animation:row-in .5s 1.3s ease-out both}
-html.motion .cap.play .pop-late{animation-delay:2s}
-html.motion .cap.play .pk-send{animation:pk-send .8s .4s ease-out both}
-html.motion .cap.play .draw-late{animation-delay:1.4s}
 html.motion .receipt-fig.play{animation:tl-c 6s linear forwards}
 
 /* hero stage: one computer, a crowd of agents */
@@ -431,6 +413,51 @@ html.motion .layers.play .l2{animation-delay:.15s}
 html.motion .layers.play .l3{animation-delay:.3s}
 html.motion .layers.play .l4{animation-delay:.45s}
 html.motion .layers.play .ly.hi{animation:ly-in .6s .15s cubic-bezier(.2,.8,.2,1) both,ly-glow 1.4s .9s ease-out 2}
+
+@keyframes s-gp1{0%,2%{transform:translate(-302px,58px);opacity:0}5%{opacity:1}14%{transform:translate(-72px,98px)}22%,100%{transform:none;opacity:1}}
+@keyframes s-gp2{0%,20%{transform:translate(-302px,20px);opacity:0}23%{opacity:1}32%{transform:translate(-72px,20px)}42%,100%{transform:none;opacity:1}}
+@keyframes s-gp3{0%,46%{transform:translate(-210px,40px);opacity:0}49%{opacity:1}60%{transform:translate(18px,5px)}70%,100%{transform:none;opacity:1}}
+@keyframes s-in-22{0%,21%{opacity:0;transform:scale(.4)}26%,100%{opacity:1;transform:none}}
+@keyframes s-in-42{0%,41%{opacity:0;transform:scale(.4)}46%,100%{opacity:1;transform:none}}
+@keyframes s-in-60{0%,59%{opacity:0;transform:scale(.4)}63%{opacity:1;transform:scale(1.25)}68%,100%{opacity:1;transform:none}}
+@keyframes s-fade-66{0%,65%{opacity:0}72%,100%{opacity:1}}
+@keyframes s-l1a{0%,2%{opacity:0}5%,10%{opacity:1}12%,100%{opacity:0}}
+@keyframes s-l1b{0%,11%{opacity:0}13%,40%{opacity:1}42%,100%{opacity:0}}
+@keyframes s-l2a{0%,15%{opacity:0}18%,23%{opacity:1}25%,100%{opacity:0}}
+@keyframes s-l2b{0%,24%{opacity:0}26%,40%{opacity:1}42%,100%{opacity:0}}
+@keyframes s-l3a{0%,30%{opacity:0}33%,40%{opacity:1}42%,100%{opacity:0}}
+@keyframes s-final-58{0%,57%{opacity:0}61%,100%{opacity:1}}
+@keyframes s-final-66{0%,65%{opacity:0}69%,100%{opacity:1}}
+@keyframes s-final-74{0%,73%{opacity:0}77%,100%{opacity:1}}
+@keyframes s-cut{0%,40%{opacity:0}42%,52%{opacity:.88}56%,100%{opacity:0}}
+@keyframes s-card{0%,4%{transform:translate(-300px,40px) scale(.7);opacity:0}8%{opacity:1}34%,100%{transform:none;opacity:1}}
+@keyframes s-btn{0%,42%{transform:none}45%{transform:scale(.9)}48%,100%{transform:none}}
+@keyframes s-in-52{0%,51%{opacity:0;transform:scale(.4)}56%,100%{opacity:1;transform:none}}
+@keyframes s-in-60b{0%,59%{opacity:0;transform:scale(.4)}64%,100%{opacity:1;transform:none}}
+@keyframes s-in-68{0%,67%{opacity:0;transform:scale(.4)}72%,100%{opacity:1;transform:none}}
+@keyframes s-fade-78{0%,77%{opacity:0}84%,100%{opacity:1}}
+html.motion .cap.play .gp1{animation:s-gp1 9s linear infinite}
+html.motion .cap.play .gp2{animation:s-gp2 9s linear infinite}
+html.motion .cap.play .gp3{animation:s-gp3 9s linear infinite}
+html.motion .cap.play .g1{animation:s-in-22 9s linear infinite}
+html.motion .cap.play .g2{animation:s-in-42 9s linear infinite}
+html.motion .cap.play .gx,html.motion .cap.play .g3{animation:s-in-60 9s linear infinite}
+html.motion .cap.play .gl{animation:s-fade-66 9s linear infinite}
+html.motion .cap.play .l1a{animation:s-l1a 10s linear infinite}
+html.motion .cap.play .l1b{animation:s-l1b 10s linear infinite}
+html.motion .cap.play .l2a{animation:s-l2a 10s linear infinite}
+html.motion .cap.play .l2b{animation:s-l2b 10s linear infinite}
+html.motion .cap.play .l3a{animation:s-l3a 10s linear infinite}
+html.motion .cap.play .l1c,html.motion .cap.play .l2c{animation:s-final-58 10s linear infinite}
+html.motion .cap.play .l3c{animation:s-final-66 10s linear infinite}
+html.motion .cap.play .lcount{animation:s-final-74 10s linear infinite}
+html.motion .cap.play .lcut rect,html.motion .cap.play .lcut text{animation:s-cut 10s linear infinite}
+html.motion .cap.play .rcard{animation:s-card 9s cubic-bezier(.2,.8,.2,1) infinite}
+html.motion .cap.play .rbtn{animation:s-btn 9s linear infinite}
+html.motion .cap.play .r1{animation:s-in-52 9s linear infinite}
+html.motion .cap.play .r2{animation:s-in-60b 9s linear infinite}
+html.motion .cap.play .r3{animation:s-in-68 9s linear infinite}
+html.motion .cap.play .rres{animation:s-fade-78 9s linear infinite}
 @media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
@@ -534,6 +561,103 @@ footer{background:#000;border-top:1px solid #1F1F1F}
 #facts .facts-strip{margin-top:var(--s5)}
 .facts-strip li{padding:var(--s5) var(--s5)}
 .fig{font-size:clamp(2rem,1.4rem + 1.4vw,2.8rem)}
+
+.powers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:var(--s7);border-top:1px solid #1F1F1F;border-bottom:1px solid #1F1F1F}
+.pw{padding:var(--s6) var(--s5);border-left:1px solid #1F1F1F}
+.pw:first-child{border-left:0;padding-left:0}
+.pw h3{font-size:1.25rem;margin:0 0 .5em}
+.pw p{margin:0;color:#A1A1A1;font-size:1rem;line-height:1.6}
+@media(max-width:900px){.powers{grid-template-columns:1fr 1fr}.pw:nth-child(3){border-left:0;padding-left:0}.pw:nth-child(n+3){border-top:1px solid #1F1F1F}}
+@media(max-width:620px){.powers{grid-template-columns:1fr}.pw{border-left:0;padding-left:0}.pw+.pw{border-top:1px solid #1F1F1F}}
+
+/* v11: calmer type system */
+body{font-size:1.0625rem;line-height:1.65;font-variant-numeric:tabular-nums}
+.kicker,.eyebrow,.tile .k,.way .k{font-family:var(--sans)!important;font-size:.9rem!important;letter-spacing:0!important;text-transform:none!important;font-weight:500!important;color:#A1A1A1!important}
+.kicker{margin-bottom:var(--s4)}
+h2{font-size:clamp(2.1rem,1.3rem + 2.4vw,3.3rem);line-height:1.06;letter-spacing:-.04em;font-weight:600;max-width:22ch}
+h3{font-size:1.2rem;letter-spacing:-.012em;font-weight:600;line-height:1.3}
+.plain{font-size:1.125rem;line-height:1.6;max-width:38em}
+.hero .sub{font-size:1.2rem;line-height:1.55}
+.hero .bare{font-family:var(--sans);font-size:.95rem;letter-spacing:0;color:#A1A1A1}
+.hero .bare b{font-weight:600;color:#EDEDED}
+.facts-strip .what{font-size:1.02rem;font-weight:500;color:#EDEDED}
+.facts-strip small{font-size:.85rem}
+.cap .alt,.harm p,.tile span.d,.way p,.ready li{font-size:1rem;line-height:1.6}
+.tile h3,.harm h3,.cap h3{font-size:1.2rem}
+.ly{font-size:1rem}
+.ly small{font-size:.86rem}
+figcaption{font-size:.9rem;line-height:1.55}
+
+.steps{list-style:none;margin:var(--s4) 0 0;padding:0;display:grid;gap:10px;counter-reset:st}
+.steps li{position:relative;padding-left:40px;color:#EDEDED;font-size:1.05rem;line-height:1.5;counter-increment:st}
+.steps li::before{content:counter(st);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;border:1px solid #3F3F3F;display:grid;place-items:center;font-size:.8rem;color:#A1A1A1}
+@keyframes st-a{0%,1%{opacity:.3}3%,20%{opacity:1}24%,100%{opacity:.3}}
+@keyframes st-b{0%,22%{opacity:.3}25%,44%{opacity:1}48%,100%{opacity:.3}}
+@keyframes st-c{0%,46%{opacity:.3}50%,96%{opacity:1}100%{opacity:.3}}
+@keyframes st-la{0%,1%{opacity:.3}3%,38%{opacity:1}41%,100%{opacity:.3}}
+@keyframes st-lb{0%,40%{opacity:.3}42%,54%{opacity:1}57%,100%{opacity:.3}}
+@keyframes st-lc{0%,56%{opacity:.3}59%,96%{opacity:1}100%{opacity:.3}}
+@keyframes st-ra{0%,1%{opacity:.3}3%,32%{opacity:1}36%,100%{opacity:.3}}
+@keyframes st-rb{0%,34%{opacity:.3}37%,48%{opacity:1}52%,100%{opacity:.3}}
+@keyframes st-rc{0%,50%{opacity:.3}54%,96%{opacity:1}100%{opacity:.3}}
+html.motion .cap.play[data-anim="door"] .st1{animation:st-a 9s linear infinite}
+html.motion .cap.play[data-anim="door"] .st2{animation:st-b 9s linear infinite}
+html.motion .cap.play[data-anim="door"] .st3{animation:st-c 9s linear infinite}
+html.motion .cap.play[data-anim="logbook"] .st1{animation:st-la 10s linear infinite}
+html.motion .cap.play[data-anim="logbook"] .st2{animation:st-lb 10s linear infinite}
+html.motion .cap.play[data-anim="logbook"] .st3{animation:st-lc 10s linear infinite}
+html.motion .cap.play[data-anim="record"] .st1{animation:st-ra 9s linear infinite}
+html.motion .cap.play[data-anim="record"] .st2{animation:st-rb 9s linear infinite}
+html.motion .cap.play[data-anim="record"] .st3{animation:st-rc 9s linear infinite}
+
+/* signature scenes */
+.caps{grid-template-columns:1fr!important;gap:var(--s7)!important}
+.cap.wide{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:center;padding:var(--s4)!important}
+.cap.wide:nth-child(2){grid-template-columns:minmax(0,1fr) minmax(0,1.35fr)}
+.cap.wide:nth-child(2) .vis{order:2}
+.cap.wide .vis{margin:0!important;padding:var(--s4)!important;background:#050505!important}
+.cap.wide h3{font-size:clamp(1.4rem,1.1rem + .8vw,1.9rem)!important;letter-spacing:-.025em;margin:0 0 .5em!important}
+.cap.wide .alt{font-size:1.05rem!important;margin:0!important;max-width:28em}
+.cap.wide .stepnote{display:block;margin-top:var(--s4);font-size:.9rem;color:#A1A1A1}
+.cap svg text{font-family:var(--sans)}
+.cap.wide .vis svg text.sc-k{fill:#A1A1A1}
+.cap.wide .vis svg text.sc-t{fill:#EDEDED}
+.cap.wide .vis svg text.sc-s{fill:#A1A1A1}
+.cap.wide .vis svg text.sc-chip{fill:#A1A1A1}
+.cap.wide .vis svg text.ok{fill:#3DDCC4}
+.cap.wide .vis svg text.warn{fill:#F2803B}
+.cap.wide .vis svg text.sc-btnt{fill:#000}
+.sc-frame{fill:#0A0A0A;stroke:#EDEDED;stroke-width:1.5}
+.sc-frame.dim{stroke:#3F3F3F}
+.sc-k{font-size:11px;font-weight:600;letter-spacing:.12em;fill:#A1A1A1}
+.sc-k.mid,.sc-t.mid,.sc-s.mid,.sc-btnt.mid{text-anchor:middle}
+.sc-t{font-size:15px;fill:#EDEDED;font-weight:500}
+.sc-t.b{font-weight:600}
+.sc-s{font-size:13px;fill:#A1A1A1}
+.sc-t.ok,.sc-chip.ok{fill:#3DDCC4}
+.sc-t.warn,.sc-s.warn{fill:#F2803B}
+.sc-agent circle{fill:none;stroke:#EDEDED;stroke-width:1.5}
+.sc-agent .in{fill:#EDEDED;stroke:none}
+.sc-lane{fill:none;stroke:#2E2E2E;stroke-width:1.5;stroke-dasharray:4 6}
+.sc-gate{fill:#000;stroke:#EDEDED;stroke-width:2}
+.sc-dest{fill:#0A0A0A;stroke:#3F3F3F;stroke-width:1.2}
+.sc-dest.bad{stroke:#F2803B;stroke-dasharray:5 4}
+.tk{fill:none;stroke:#3DDCC4;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.x{fill:none;stroke:#F2803B;stroke-width:2.4;stroke-linecap:round}
+.pk.ok{fill:#3DDCC4}.pk.no{fill:#F2803B}
+.gx circle{fill:#1A0F0A;stroke:#F2803B;stroke-width:1.8}
+.gx path{fill:none;stroke:#F2803B;stroke-width:2.4;stroke-linecap:round}
+.sc-row{fill:#050505;stroke:#1F1F1F}
+.sc-chip{font-size:13px;fill:#A1A1A1;text-anchor:end;font-weight:500}
+.mid-chip{opacity:0}
+.lcut rect{fill:#000;opacity:0}
+.lcut text{opacity:0}
+.sc-seal{fill:none;stroke:#EDEDED;stroke-width:1.5;stroke-dasharray:3 4}
+.sc-card{fill:#050505;stroke:#EDEDED;stroke-width:1.2}
+.sc-btn{fill:#EDEDED}
+.sc-btnt{font-size:12px;font-weight:600;fill:#000}
+.gp1,.gp2,.gp3,.gx,.g1,.g2,.g3,.r1,.r2,.r3,.rres,.rbtn,.rcard,.lcount,.gl{transform-box:fill-box;transform-origin:center}
+@media(max-width:900px){.cap.wide{grid-template-columns:1fr}.cap.wide:nth-child(2) .vis{order:0}}
 </style>
 </head>
 <body>
@@ -559,20 +683,20 @@ footer{background:#000;border-top:1px solid #1F1F1F}
 <header class="hero" id="top">
   <canvas id="field" class="field-bg" aria-hidden="true"></canvas>
   <div class="wrap center">
-    <p class="pill"><b>Pre-1.0</b>The operating system for AI agents</p>
+    <p class="pill"><b>Pre-1.0</b>The secure computer for AI agents</p>
     <h1>Run AI agents your security team <span class="accent">can say yes to.</span></h1>
-    <p class="sub">VOLENT is the operating system built only for AI agents. It runs on your servers or ours. Data goes only where you allow, a crash does not repeat a payment, and your auditor gets a record they can check.</p>
+    <p class="sub">You bring the agents. VOLENT keeps your data where you allow, runs every job once, and signs a record your auditor can check. Your servers or ours.</p>
     <div class="cta">
       <a class="btn btn-primary" href="#partners" data-contact data-subject="30-minute demo" data-body="Name and role:&#10;What you would like to see:&#10;">Book a demo</a>
       <a class="btn" href="#how">See how it works</a>
     </div>
-    <p class="bare"><b>No shell. No remote login. No package manager.</b> Nothing extra to break into.</p>
+    <p class="bare"><b>Nothing extra inside:</b> no way to log in, nothing to install, nothing to break into.</p>
       <figure class="shot-real" id="hero-shot">
         <div class="browser">
           <div class="b-bar"><span class="w-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="b-url">Console · a VOLENT computer on our test server</span></div>
           <img src="assets/console-hero.webp" width="1200" height="833" alt="The console: two agents, one of them planning, its step log written to the journal, and the approved-list activity, live from a real computer.">
         </div>
-        <figcaption>Real screen, not a mock-up: the console connected to a VOLENT computer on our test server, 17 October 2026.</figcaption>
+        <figcaption>Real screen, not a mock-up: the control screen of a VOLENT computer on our test server, 17 October 2026.</figcaption>
       </figure>
   </div>
 </header>
@@ -580,18 +704,18 @@ footer{background:#000;border-top:1px solid #1F1F1F}
 <section id="facts">
   <div class="wrap">
     <p class="kicker">Measured, not promised</p>
-    <h2>Every number here comes from a test.</h2>
-    <p class="plain">We have no customer logos yet, so here is what we measured instead.</p>
+    <h2>150,000 agents. One small computer.</h2>
+    <p class="plain">Every number comes from a test you can rerun.</p>
     <ul class="facts-strip">
-      <li><span class="fig">0</span><span class="what">actions done twice in 5 forced-crash tests</span><small>phase-7 image, median of 3 runs where run three times</small><a href="benchmarks/#baseline">See the crash test</a></li>
-      <li><span class="fig"><span data-count="100,000">100,000</span></span><span class="what">idle agents in 446 MB, in one 4 GB computer</span><small>phase-7 image, median of 3 runs, 2026-10-17</small><a href="benchmarks/#idle-100k">See the scale test</a></li>
-      <li><span class="fig">1,000 of 1,000</span><span class="what">hostile tools held in the locked tool box</span><small>phase-7 image, 0 crashed</small><a href="benchmarks/#baseline">See the sandbox test</a></li>
-      <li><span class="fig"><span data-count="3.5">3.5</span> s</span><span class="what">from power-on to ready</span><small>phase-7 image, 3.486 s median of 3</small><a href="benchmarks/#baseline">See the start-up test</a></li>
+      <li><span class="fig">0</span><span class="what">jobs done twice after 5 power cuts.</span><small>phase-7 image, median of 3 runs where run three times</small><a href="benchmarks/#baseline">See the crash test</a></li>
+      <li><span class="fig"><span data-count="150,000">150,000</span></span><span class="what">agents working at once, on every size we tested.</span><small>Benchmark v1, single run, test model that answers in 5 ms</small><a href="benchmarks/#capacity">See the scale test</a></li>
+      <li><span class="fig">1,000 of 1,000</span><span class="what">harmful tools stopped. None escaped.</span><small>phase-7 image, 0 crashed</small><a href="benchmarks/#baseline">See the sandbox test</a></li>
+      <li><span class="fig"><span data-count="3.5">3.5</span> s</span><span class="what">to start up.</span><small>phase-7 image, 3.486 s median of 3</small><a href="benchmarks/#baseline">See the start-up test</a></li>
     </ul>
     <details class="how-measured">
       <summary>How these were measured</summary>
       <p class="bench-label">Measured 2026-10-14 on the image built from tag phase-7, median of 3 runs where run three times, 2013 Intel i7-4770 under KVM.</p>
-      <p class="bench-label">Measured 2026-10-17 on the image built from tag phase-7, median of 3 runs, 4 GB / 2 vCPU guest, 2013 Intel i7-4770 under KVM.</p>
+      <p class="bench-label">Capacity figures use a 5 ms mock model, so they measure VOLENT, not a model. Certified three-run results on the final image will follow with our paper.</p>
     </details>
       <figure class="stage" id="stage" data-anim="crowd">
         <div class="server">
@@ -603,7 +727,7 @@ footer{background:#000;border-top:1px solid #1F1F1F}
               <span class="door" aria-hidden="true"></span><span class="door-l" aria-hidden="true">APPROVED LIST</span>
               <div class="toast" id="crowd-toast" aria-hidden="true">Power cut. Restarted. Finished work skipped, nothing repeated.</div>
               <div class="counter">
-                <span><b>100,000</b>agents waiting in one 4 GB computer</span>
+                <span><b>150,000</b>agents calling an AI model at once</span>
                 <span><b>1</b>approved list for every call</span>
                 <span class="zero"><b>0</b>actions done twice</span>
               </div>
@@ -616,83 +740,85 @@ footer{background:#000;border-top:1px solid #1F1F1F}
           <div class="out no"><b>Anywhere else</b><small>blocked, reason logged</small></div>
           <div class="out aud"><b>Your auditor's laptop</b><small>checks the signed record</small></div>
         </div>
-        <figcaption>Illustration: each dot stands for many agents, data leaves only through the approved list, and a power cut repeats nothing. Measured: 100,000 idle agents in 446 MB in a 4 GB, 2 vCPU computer (median of 3 runs, 2026-10-17, image built from tag phase-7).</figcaption>
+        <figcaption>Illustration: each dot stands for many agents. Measured: 150,000 agents working at once with a test AI model, on every computer size we tried (single run, 2026-09-23).</figcaption>
       </figure>
-  </div>
-</section>
-
-<section id="problem">
-  <div class="wrap center">
-    <p class="kicker">The problem</p>
-    <h2>An agent that can act can also do damage.</h2>
-    <p class="plain">So security teams say no, and agent projects stall.</p>
-    <div class="harms">
-      <article class="harm"><span class="h-ic" aria-hidden="true">01</span><h3>Data leaks out.</h3><p>A web page tricks the agent into sending customer records to a stranger's server.</p></article>
-      <article class="harm"><span class="h-ic" aria-hidden="true">02</span><h3>Work happens twice.</h3><p>The computer crashes mid-payment, restarts, and pays the invoice again.</p></article>
-      <article class="harm"><span class="h-ic" aria-hidden="true">03</span><h3>Nobody can explain it.</h3><p>Months later the auditor asks what the agent did, and no one can prove it.</p></article>
-    </div>
-    <p class="plain gap">Most tools put the agent in a box on an ordinary system built to run anything. The box helps, but nothing proves what happened inside.</p>
   </div>
 </section>
 
 <section id="how">
   <div class="wrap center">
     <p class="kicker">How it works</p>
-    <h2>Not a sandbox. The whole operating system.</h2>
-    <p class="plain">The safety is part of the computer, not added on top.</p>
+    <h2>Everything your security team asks for.</h2>
+    <p class="plain">Not a box on an ordinary computer. The computer itself, built only for agents.</p>
     <figure class="layers" data-anim="layers">
       <div class="lay">
-        <h3>A typical agent sandbox</h3>
+        <h3>Most agent tools</h3>
         <div class="ly l1">Your agent</div>
         <div class="ly l2">A sandbox<small>a box on someone's server</small></div>
-        <div class="ly l3">A standard Linux<small>built to run anything</small></div>
+        <div class="ly l3">An ordinary computer system<small>built to run anything</small></div>
         <div class="ly l4">Their cloud</div>
       </div>
       <div class="lay us">
         <h3>VOLENT</h3>
         <div class="ly l1">Your agents</div>
-        <div class="ly hi l2">An operating system built only for agents<span class="chips"><i>approved list</i><i>step log</i><i>signed record</i><i>no shell</i></span></div>
+        <div class="ly hi l2">An operating system built only for agents<span class="chips"><i>approved list</i><i>step log</i><i>signed record</i><i>no way in</i></span></div>
         <div class="ly l3">Your own servers<small>or dedicated servers we run for you</small></div>
       </div>
-      <figcaption>VOLENT replaces the standard Linux under your agents, so the controls are part of the computer itself.</figcaption>
+      <figcaption>VOLENT replaces the ordinary computer system under your agents, so the safety is part of the computer itself.</figcaption>
     </figure>
     <div class="caps">
-      <figure class="cap" data-anim="door"><div class="vis"><svg viewBox="0 0 320 180" aria-hidden="true" focusable="false">
-  <rect class="s-ac" x="10" y="14" width="150" height="152" rx="14"/>
-  <text x="26" y="40" font-size="12" font-weight="600" class="s-ver">YOUR AGENTS</text>
-  <circle cx="44" cy="80" r="13" class="s-box"/><circle cx="44" cy="80" r="4" class="s-ver"/>
-  <circle cx="86" cy="80" r="13" class="s-box"/><circle cx="86" cy="80" r="4" class="s-ver"/>
-  <circle cx="128" cy="80" r="13" class="s-box"/><circle cx="128" cy="80" r="4" class="s-warn"/>
-  <rect x="152" y="96" width="16" height="50" rx="5" fill="#0F1B26" stroke="var(--verify)" stroke-width="2.5"/>
-  <path class="s-lane" d="M168 112H206M168 132H206"/>
-  <rect class="s-box" x="206" y="36" width="104" height="40" rx="10"/><text x="218" y="61" font-size="12">approved</text><path class="s-ok draw" d="M284 52l5 5 10-12"/>
-  <rect class="s-box" x="206" y="112" width="104" height="40" rx="10"/><text x="218" y="137" font-size="12">unknown site</text><path class="s-no pop" d="M290 126l10 10M300 126l-10 10"/>
-  <circle class="pk pk-in s-ver" cx="196" cy="56" r="5"/>
-  <circle class="pk pk-back s-warn" cx="140" cy="122" r="5"/>
-</svg></div><h3>Data only goes where you allow.</h3><p class="alt">Agents reach only the places on your approved list. Anything else is blocked, with the reason logged.</p></figure>
-      <figure class="cap" data-anim="logbook"><div class="vis"><svg viewBox="0 0 320 180" aria-hidden="true" focusable="false">
-  <rect class="s-box" x="10" y="14" width="300" height="152" rx="14"/>
-  <text x="28" y="40" font-size="12" font-weight="600" class="s-dim">LOG · WRITTEN FIRST</text>
-  <g class="lr lr1"><path class="s-ok" d="M28 62l5 5 10-12"/><text x="54" y="66" font-size="13">1  Read the invoice</text></g>
-  <g class="lr lr2"><path class="s-ok" d="M28 90l5 5 10-12"/><text x="54" y="94" font-size="13">2  Check the totals</text></g>
-  <g class="lr lr3"><path class="s-ok" d="M28 118l5 5 10-12"/><text x="54" y="122" font-size="13">3  Send the payment, once</text></g>
-  <g class="pop pop-late"><rect x="200" y="132" width="96" height="24" rx="12" fill="rgba(242,128,59,.14)"/><text x="214" y="148" font-size="11" class="s-warn">power cut, resumed</text></g>
-</svg></div><h3>Nothing happens twice.</h3><p class="alt">Each step is logged before it runs. After a crash, finished steps are skipped, not repeated.</p></figure>
-      <figure class="cap" data-anim="record"><div class="vis"><svg viewBox="0 0 320 180" aria-hidden="true" focusable="false">
-  <rect class="s-box" x="10" y="20" width="150" height="140" rx="14"/>
-  <text x="26" y="46" font-size="12" font-weight="600" class="s-dim">SIGNED RECORD</text>
-  <rect x="26" y="62" width="110" height="8" rx="4" fill="#26314B"/><rect x="26" y="82" width="90" height="8" rx="4" fill="#26314B"/><rect x="26" y="102" width="100" height="8" rx="4" fill="#26314B"/>
-  <path class="s-lane" d="M160 90H196"/>
-  <rect class="s-ac" x="196" y="40" width="114" height="100" rx="14"/>
-  <text x="212" y="64" font-size="12" font-weight="600" class="s-ver">AUDITOR</text>
-  <circle class="pop" cx="253" cy="104" r="20" fill="none" stroke="var(--verify)" stroke-width="2"/><path class="s-ok draw draw-late" d="M243 104l7 7 14-15"/>
-  <circle class="pk pk-send s-ver" cx="188" cy="90" r="5"/>
-</svg></div><h3>A record no one can quietly change.</h3><p class="alt">The computer signs what it started with and where it connected. Your auditor checks it on their own laptop.</p></figure>
+      <figure class="cap wide" data-anim="door"><div class="vis"><svg viewBox="0 0 600 340" aria-hidden="true" focusable="false">
+  <rect class="sc-frame" x="20" y="30" width="300" height="280" rx="16"/>
+  <text x="40" y="58" class="sc-k">VOLENT COMPUTER</text>
+  <g class="sc-agent"><circle cx="80" cy="140" r="11"/><circle class="in" cx="80" cy="140" r="3.5"/></g>
+  <g class="sc-agent"><circle cx="80" cy="190" r="11"/><circle class="in" cx="80" cy="190" r="3.5"/></g>
+  <g class="sc-agent"><circle cx="80" cy="240" r="11"/><circle class="in" cx="80" cy="240" r="3.5"/></g>
+  <text x="104" y="144" class="sc-s">agent</text><text x="104" y="194" class="sc-s">agent</text><text x="104" y="244" class="sc-s">agent</text>
+  <path class="sc-lane" d="M328 180 L400 82 M328 190 L400 170 M328 200 L400 258"/>
+  <rect class="sc-gate" x="312" y="145" width="16" height="90" rx="5"/>
+  <text x="320" y="132" class="sc-k mid">APPROVED LIST</text>
+  <g><rect class="sc-dest" x="400" y="60" width="180" height="44" rx="10"/><text x="416" y="87" class="sc-t">Your systems</text><path class="tk g1" d="M552 78l5 5 10-11"/></g>
+  <g><rect class="sc-dest" x="400" y="148" width="180" height="44" rx="10"/><text x="416" y="175" class="sc-t">Your AI model</text><path class="tk g2" d="M552 166l5 5 10-11"/></g>
+  <g><rect class="sc-dest bad" x="400" y="236" width="180" height="44" rx="10"/><text x="416" y="263" class="sc-t">unknown-site.com</text><path class="x g3" d="M552 252 l10 10 M562 252 l-10 10"/></g>
+  <circle class="pk ok gp1" cx="392" cy="82" r="5.5"/>
+  <circle class="pk ok gp2" cx="392" cy="170" r="5.5"/>
+  <circle class="pk no gp3" cx="298" cy="200" r="5.5"/>
+  <g class="gx"><circle cx="320" cy="200" r="15"/><path d="M314 194 l12 12 M326 194 l-12 12"/></g>
+  <text x="40" y="292" class="sc-s warn gl">blocked: unknown-site.com, not on your list</text>
+</svg></div><div class="txt"><h3>Data only goes where you allow.</h3><ol class="steps"><li class="st1">Your agents send data out.</li><li class="st2">Approved places get through.</li><li class="st3">An unknown site is blocked, and the reason is written down.</li></ol></div></figure>
+      <figure class="cap wide" data-anim="logbook"><div class="vis"><svg viewBox="0 0 600 340" aria-hidden="true" focusable="false">
+  <rect class="sc-frame" x="20" y="30" width="560" height="280" rx="16"/>
+  <text x="44" y="60" class="sc-k">VOLENT COMPUTER · STEP LOG, WRITTEN BEFORE EACH STEP</text>
+  <g><rect class="sc-row" x="44" y="80" width="512" height="48" rx="10"/><text x="64" y="110" class="sc-t">1   Read the invoice</text></g>
+  <g><rect class="sc-row" x="44" y="140" width="512" height="48" rx="10"/><text x="64" y="170" class="sc-t">2   Check the total</text></g>
+  <g><rect class="sc-row" x="44" y="200" width="512" height="48" rx="10"/><text x="64" y="230" class="sc-t">3   Pay $4,200</text></g>
+  <text x="536" y="110" class="sc-chip mid-chip l1a">written</text><text x="536" y="110" class="sc-chip ok mid-chip l1b">done</text><text x="536" y="110" class="sc-chip ok l1c">done, skipped</text>
+  <text x="536" y="170" class="sc-chip mid-chip l2a">written</text><text x="536" y="170" class="sc-chip ok mid-chip l2b">done</text><text x="536" y="170" class="sc-chip ok l2c">done, skipped</text>
+  <text x="536" y="230" class="sc-chip mid-chip l3a">written</text><text x="536" y="230" class="sc-chip ok l3c">paid once</text>
+  <text x="44" y="288" class="sc-t ok lcount">Payments made: 1</text>
+  <g class="lcut"><rect x="21" y="31" width="558" height="278" rx="15"/><text x="300" y="176" class="sc-t warn mid">Power cut. Restarting...</text></g>
+</svg></div><div class="txt"><h3>Nothing happens twice.</h3><ol class="steps"><li class="st1">Each step is written down, then done.</li><li class="st2">The power cuts out mid-payment.</li><li class="st3">On restart, finished steps are skipped. The payment is made once.</li></ol></div></figure>
+      <figure class="cap wide" data-anim="record"><div class="vis"><svg viewBox="0 0 600 340" aria-hidden="true" focusable="false">
+  <rect class="sc-frame" x="20" y="70" width="200" height="200" rx="16"/>
+  <text x="40" y="98" class="sc-k">VOLENT COMPUTER</text>
+  <circle class="sc-seal" cx="120" cy="180" r="34"/><text x="120" y="185" class="sc-s mid">signs</text>
+  <rect class="sc-frame dim" x="340" y="30" width="240" height="290" rx="16"/>
+  <text x="360" y="58" class="sc-k">AUDITOR'S LAPTOP</text>
+  <g class="rcard">
+    <rect class="sc-card" x="360" y="74" width="200" height="176" rx="12"/>
+    <text x="376" y="100" class="sc-t b">Signed record</text>
+    <text x="376" y="132" class="sc-s">Started unchanged</text><path class="tk r1" d="M532 122l5 5 10-11"/>
+    <text x="376" y="164" class="sc-s">Data went: ERP, AI model</text><path class="tk r2" d="M532 154l5 5 10-11"/>
+    <text x="376" y="196" class="sc-s">Signed by this computer</text><path class="tk r3" d="M532 186l5 5 10-11"/>
+    <rect class="sc-btn rbtn" x="376" y="212" width="64" height="26" rx="13"/><text x="408" y="229" class="sc-btnt mid">Check</text>
+  </g>
+  <text x="360" y="290" class="sc-t ok rres">Matches. Nothing changed.</text>
+</svg></div><div class="txt"><h3>A record no one can quietly change.</h3><ol class="steps"><li class="st1">The computer signs what it started and where data went.</li><li class="st2">Your auditor presses Check on their own laptop.</li><li class="st3">Every line matches. Nothing was changed.</li></ol></div></figure>
     </div>
     <div class="files">
       <h3 class="files-h">See it in the real files.</h3>
       <div class="filegrid">
-        <figure class="file"><figcaption><b>1. Describe the agent.</b> One short file per agent. Fields the system does not know are refused.</figcaption>
+        <figure class="file"><figcaption><b>1. Describe the agent.</b> One short file per agent. Anything unexpected is refused.</figcaption>
 <pre aria-label="An agent file"><code><span class="k">apiVersion:</span> volent/v1
 <span class="k">kind:</span> Agent
 <span class="k">metadata:</span>
@@ -736,8 +862,8 @@ footer{background:#000;border-top:1px solid #1F1F1F}
   <div class="wrap split">
     <div>
       <p class="kicker">Check it yourself</p>
-      <h2>Don't take our word for it. Check the record.</h2>
-      <p class="plain">Press Check. Then change one line and press it again.</p>
+      <h2>Don't trust us. Check the record.</h2>
+      <p class="plain">Press Check. Change a line. Press it again.</p>
     </div>
         <figure class="receipt-fig" id="receipt" data-anim="receipt" data-fp="1203b3df8ede0f41">
           <div class="slip" role="group" aria-label="A sample record from the computer, signed and ready to check">
@@ -776,9 +902,9 @@ footer{background:#000;border-top:1px solid #1F1F1F}
 
 <section id="use-cases">
   <div class="wrap">
-    <p class="kicker">Who signs off</p>
-    <h2>Built for the people who say yes.</h2>
-    <p class="plain">Agent projects often stall at the security review. Here is an answer for each person in the room.</p>
+    <p class="kicker">Who it is for</p>
+    <h2>Built for teams that answer to an auditor.</h2>
+    <p class="plain">One answer for each person who signs off.</p>
     <div class="tiles">
       <a class="tile" href="use-cases/"><span class="k">Head of security</span><h3>Where can our data go?</h3><span class="d">Only to places on your approved list. The rest is blocked and logged.</span><span class="go">See how</span></a>
       <a class="tile" href="use-cases/"><span class="k">CTO and platform team</span><h3>How hard is it to run?</h3><span class="d">One installer on servers you already run. You keep the keys.</span><span class="go">See how</span></a>
@@ -792,27 +918,27 @@ footer{background:#000;border-top:1px solid #1F1F1F}
 <section id="today">
   <div class="wrap">
     <p class="kicker">Straight answers</p>
-    <h2>What is ready today, and what is not.</h2>
-    <p class="plain">It is pre-1.0. Here is the honest list.</p>
+    <h2>Ready today. Coming next.</h2>
+    <p class="plain">An early version (pre-1.0). The honest list.</p>
     <div class="readys">
       <div class="ready" id="today-yes">
         <h3>Ready today</h3>
         <ul>
-          <li><b>The operating system</b>, with no shell, checking itself at every start.</li>
+          <li><b>The computer itself</b>, which checks itself every time it starts.</li>
           <li><b>An approved list</b> for everything that leaves.</li>
           <li><b>A step log</b>, so a crash repeats nothing.</li>
           <li><b>A tamper-proof record</b> of what started up and where it connected.</li>
-          <li><b>A locked sandbox</b> for the tools agents use.</li>
+          <li><b>A locked box</b> for the tools agents use.</li>
         </ul>
       </div>
       <div class="ready no" id="today-no">
         <h3>Not built yet</h3>
         <ul>
-          <li><b>Running agents end to end:</b> the built-in agent loop arrives with the current release.</li>
+          <li><b>Agents doing a whole job on their own:</b> the built-in agent loop arrives with the current release.</li>
           <li><b>Signing every action</b> arrives with the current release.</li>
           <li><b>Cloud installs:</b> guides are written; tested so far on our own servers only.</li>
-          <li><b>Hosted AI models:</b> not tested yet; open models run today.</li>
-          <li><b>Hiding data from the host operator:</b> Not yet — on our roadmap.</li>
+          <li><b>Paid AI models</b> (like the big chat services): not tested yet; free open models run today.</li>
+          <li><b>Hiding data from whoever runs the server:</b> Not yet — on our roadmap.</li>
           <li><b>Certification:</b> There are no certifications yet.</li>
           <li><b>Signing keys:</b> this version uses development signing keys.</li>
         </ul>
@@ -825,8 +951,8 @@ footer{background:#000;border-top:1px solid #1F1F1F}
 <section id="partners">
   <div class="wrap">
     <div class="final-card">
-      <h2>Two ways to start.</h2>
-      <p class="plain">Bring one real workflow. We run it with you and show you the record.</p>
+      <h2>Your servers or ours. Same safety.</h2>
+      <p class="plain">Free to start. Bring one real job and we run it with you.</p>
       <div class="ways">
         <div class="way"><span class="k">Managed</span><h3>We run it for you.</h3><p>Dedicated servers, privately linked to your network.</p><span class="tag">For design partners</span></div>
         <div class="way"><span class="k">Self-hosted</span><h3>You run it.</h3><p>Your own servers or cloud account, with one installer and a guide.</p><span class="tag">Tested so far on our own servers</span></div>
@@ -844,7 +970,7 @@ footer{background:#000;border-top:1px solid #1F1F1F}
 <footer>
   <div class="wrap">
     <nav class="footnav" aria-label="Site">
-      <a href="./">Home</a><a href="how-it-works/">How it works</a><a href="use-cases/">Use cases</a><a href="security/">Security</a><a href="compare/">Compare</a><a href="pricing/">Pricing</a><a href="benchmarks/">Benchmarks</a><a href="report/">Test report</a>
+      <a href="./">Home</a><a href="how-it-works/">How it works</a><a href="use-cases/">Use cases</a><a href="security/">Security</a><a href="compare/">Compare</a><a href="pricing/">Pricing</a><a href="benchmarks/">Benchmarks</a><a href="report/">Test report</a><a href="legal/">Privacy and terms</a>
     </nav>
     <p>Every number on this site comes from a test you can rerun. This site loads nothing from anyone else: no outside fonts, scripts, analytics or trackers.</p>
     <div class="row">

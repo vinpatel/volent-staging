@@ -1,0 +1,5 @@
+Contact: https://volent.dev/#partners
+Expires: 2027-10-18T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://volent.dev/.well-known/security.txt
+Policy: https://volent.dev/security/

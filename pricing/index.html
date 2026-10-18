@@ -6,14 +6,14 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; font-src 'self'; script-src 'sha256-ddku31XlVFbJEcqyZiKWwxZMBy2SEVj6DVdUotmis1E='; base-uri 'none'; form-action 'none'">
 <title>VOLENT pricing — free for design partners through 1.0</title>
 <meta name="description" content="Pre-1.0 pricing: design partners use it free through 1.0, get a named engineer and a joint pilot, and keep founding pricing. Prices are published before anyone is asked to buy.">
-<link rel="canonical" href="https://vinpatel.github.io/volent/pricing/">
+<link rel="canonical" href="https://volent.dev/pricing/">
 <link rel="icon" href="../assets/favicon-64.png" type="image/png">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="VOLENT pricing — free for design partners through 1.0">
 <meta property="og:description" content="Pre-1.0 pricing: design partners use it free through 1.0, get a named engineer and a joint pilot, and keep founding pricing. Prices are published before anyone is asked to buy.">
-<meta property="og:image" content="https://vinpatel.github.io/volent/assets/logo-1024.png">
-<meta property="og:url" content="https://vinpatel.github.io/volent/pricing/">
+<meta property="og:image" content="https://volent.dev/assets/logo-1024.png">
+<meta property="og:url" content="https://volent.dev/pricing/">
 <meta name="twitter:card" content="summary_large_image">
 <style>
 @font-face{font-family:"Display";src:url("../assets/fonts/display.woff2") format("woff2");font-weight:400 700;font-display:swap}
@@ -457,16 +457,17 @@ footer{background:#000!important;border-top:1px solid #1F1F1F}
     <p class="plain">Prices below apply after 1.0. Each computer runs on a dedicated server we manage, not shared with other customers.</p>
     <div class="tablewrap" role="region" aria-label="Managed prices" tabindex="0">
       <table class="prices">
-        <thead><tr><th scope="col">Size</th><th scope="col">Computer</th><th scope="col" class="num">Per month</th><th scope="col" class="num">About per hour</th></tr></thead>
+        <thead><tr><th scope="col">Size</th><th scope="col">Computer</th><th scope="col">Agents working at once</th><th scope="col" class="num">Per month</th><th scope="col" class="num">About per hour</th></tr></thead>
         <tbody>
-          <tr><th scope="row">S</th><td>2 vCPU, 4 GB</td><td class="num"><span class="price">$79</span></td><td class="num">11 cents</td></tr>
-          <tr><th scope="row">M</th><td>4 vCPU, 8 GB</td><td class="num"><span class="price">$129</span></td><td class="num">18 cents</td></tr>
-          <tr><th scope="row">L</th><td>8 vCPU, 16 GB</td><td class="num"><span class="price">$249</span></td><td class="num">34 cents</td></tr>
-          <tr><th scope="row">XL</th><td>16 vCPU, 32 GB</td><td class="num"><span class="price">$469</span></td><td class="num">64 cents</td></tr>
-          <tr><th scope="row">Private connection</th><td>A private link from your network</td><td class="num">from <span class="price">$790</span></td><td class="num"></td></tr>
+          <tr><th scope="row">S</th><td>2 vCPU, 4 GB</td><td>150,000 tested</td><td class="num"><span class="price">$79</span></td><td class="num">11 cents</td></tr>
+          <tr><th scope="row">M</th><td>4 vCPU, 8 GB</td><td>150,000 tested</td><td class="num"><span class="price">$129</span></td><td class="num">18 cents</td></tr>
+          <tr><th scope="row">L</th><td>8 vCPU, 16 GB</td><td>150,000 tested</td><td class="num"><span class="price">$249</span></td><td class="num">34 cents</td></tr>
+          <tr><th scope="row">XL</th><td>16 vCPU, 32 GB</td><td>not tested yet</td><td class="num"><span class="price">$469</span></td><td class="num">64 cents</td></tr>
+          <tr><th scope="row">Private connection</th><td>A private link from your network</td><td></td><td class="num">from <span class="price">$790</span></td><td class="num"></td></tr>
         </tbody>
       </table>
     </div>
+    <p class="plain">Agents working at once: measured with a test AI model that answers in 5 ms (Benchmark v1, single run). 150,000 is the most we tested, not a limit we hit; in real use, your AI model's speed sets the limit.</p>
     <p class="plain">Hosted agent sandboxes charge by the second and stop billing when idle, so for short bursts they can cost less. For agents that run all month, the same 2 vCPU, 4 GB size costs about three times more at their published prices (October 2026).</p>
     <p class="plain">Self-hosted on your own servers: talk to us. Managed computers are for design partners until our first test in a partner data centre is done.</p>
   </div>
@@ -507,7 +508,7 @@ footer{background:#000!important;border-top:1px solid #1F1F1F}
 <footer>
   <div class="wrap">
     <nav class="footnav" aria-label="Site">
-      <a href="../">Home</a><a href="../how-it-works/">How it works</a><a href="../use-cases/">Use cases</a><a href="../security/">Security</a><a href="../compare/">Compare</a><a href="./">Pricing</a><a href="../benchmarks/">Benchmarks</a><a href="../report/">Test report</a>
+      <a href="../">Home</a><a href="../how-it-works/">How it works</a><a href="../use-cases/">Use cases</a><a href="../security/">Security</a><a href="../compare/">Compare</a><a href="./">Pricing</a><a href="../benchmarks/">Benchmarks</a><a href="../report/">Test report</a><a href="../legal/">Privacy and terms</a>
     </nav>
     <p>This site loads nothing from anyone else: no outside fonts, scripts, analytics or trackers. Its Content-Security-Policy enforces that; view source.</p>
     <div class="row">
